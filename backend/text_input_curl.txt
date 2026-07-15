@@ -1,0 +1,9 @@
+# Test cURL command to trigger the autonomous travel reasoning engine.
+# Ensure the Flask application is running on http://localhost:5000 before executing this command.
+
+curl -X POST http://localhost:5000/api/plan-trip \
+     -H "Content-Type: application/json" \
+     -d '{
+       "user_text": "I have $500 to spend on a trip to Japan",
+       "session_id": "test-session-123"
+     }'

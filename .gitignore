@@ -1,0 +1,32 @@
+# Environments
+backend/.env
+.env
+.env.local
+.env.*.local
+
+# Python caches and virtual environments
+**/__pycache__/
+*.pyc
+venv/
+.venv/
+env/
+
+# Node dependencies and builds
+node_modules/
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/build/
+
+# Logs and databases
+*.log
+backend/*.log
+backend/sessions_db.json
+backend/websocket_emitter_log.json
+resp.json
+
+# IDEs and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
