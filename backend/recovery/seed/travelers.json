@@ -1,0 +1,170 @@
+{
+  "_readme": [
+    "Seed traveler histories and abandoned carts for the Windfall recovery demo.",
+    "",
+    "Synthetic by choice, for the two reasons in paper section 3.2.3: real booking",
+    "records are personally identifiable, and the penyisihan rules require static",
+    "parameters. Distribution shape is calibrated against Hotel Booking Demand",
+    "(Antonio, de Almeida & Nunes, 2019).",
+    "",
+    "WHAT IS NOT IN HERE: prices. No cart total, no rung price, no saving. Those",
+    "come from live Duffel and hotel re-query at request time, because paper",
+    "section 3.1 promises bookable prices rather than a simulation. That is also",
+    "why no outcome is stored on a traveler -- the outcome is computed, and a",
+    "seed that pre-assigned it would make the demo a slideshow.",
+    "",
+    "calibration_target is a seed-DESIGN goal, not a pipeline input. Nothing reads",
+    "it at runtime. It records which path each traveler was constructed to",
+    "exercise so that calibrate_seed.py can check live prices actually produce it,",
+    "and fail loudly when they do not."
+  ],
+
+  "reference_distribution_field": "usual_spend",
+
+  "travelers": [
+    {
+      "traveler_id": "wf-01",
+      "name": "Prasetyo Wibowo",
+      "booking_count": 8,
+      "usual_spend": 62000000,
+      "campaign_share": 0.09,
+      "avg_hotel_stars": 5.0,
+      "premium_cabin_share": 0.75,
+      "calibration_target": "reminder",
+      "calibration_note": "Premium, low campaign share. Pays full fare. The gate must close on the campaign-share axis even when the cart runs slightly over usual spend.",
+      "cart": {
+        "cart_id": "cart-wf-01",
+        "abandoned_hours_ago": 3,
+        "flight": {
+          "carrier": "Emirates", "origin": "CGK", "destination": "LHR",
+          "depart_date": "2027-01-18", "return_date": "2027-01-24",
+          "cabin": "business", "passengers": 2
+        },
+        "hotel": {
+          "name": "The Savoy", "stars": 5, "city": "London", "area": "Covent Garden",
+          "check_in": "2027-01-18", "check_out": "2027-01-23"
+        }
+      }
+    },
+    {
+      "traveler_id": "wf-02",
+      "name": "Ayu Kartika",
+      "booking_count": 7,
+      "usual_spend": 58000000,
+      "campaign_share": 0.46,
+      "avg_hotel_stars": 5.0,
+      "premium_cabin_share": 0.60,
+      "calibration_target": "rebuild",
+      "calibration_note": "Premium, HIGH campaign share -- the contrast against wf-01. Same tier, opposite outcome, purely because campaign share differs. Hotel must be a large enough share of the cart that one star down genuinely clears tau=15%; verify against live prices, never back-fit.",
+      "cart": {
+        "cart_id": "cart-wf-02",
+        "abandoned_hours_ago": 9,
+        "flight": {
+          "carrier": "Singapore Airlines", "origin": "CGK", "destination": "HND",
+          "depart_date": "2027-02-06", "return_date": "2027-02-13",
+          "cabin": "economy", "passengers": 2
+        },
+        "hotel": {
+          "name": "Aman Tokyo", "stars": 5, "city": "Tokyo", "area": "Otemachi",
+          "check_in": "2027-02-06", "check_out": "2027-02-12"
+        }
+      }
+    },
+    {
+      "traveler_id": "wf-03",
+      "name": "Bagus Hartono",
+      "booking_count": 5,
+      "usual_spend": 26000000,
+      "campaign_share": 0.44,
+      "avg_hotel_stars": 4.0,
+      "premium_cabin_share": 0.10,
+      "calibration_target": "lateral",
+      "calibration_note": "Comfort tier, tau=10%. A same-star property in the same area must clear on rung 02, so the ladder stops before any downgrade is proposed. This is the outcome the product is least apologetic about.",
+      "cart": {
+        "cart_id": "cart-wf-03",
+        "abandoned_hours_ago": 26,
+        "flight": {
+          "carrier": "Garuda Indonesia", "origin": "CGK", "destination": "SIN",
+          "depart_date": "2026-11-08", "return_date": "2026-11-12",
+          "cabin": "economy", "passengers": 2
+        },
+        "hotel": {
+          "name": "Fullerton Bay", "stars": 4, "city": "Singapore", "area": "Marina Bay",
+          "check_in": "2026-11-08", "check_out": "2026-11-11"
+        }
+      }
+    },
+    {
+      "traveler_id": "wf-04",
+      "name": "Intan Maharani",
+      "booking_count": 4,
+      "usual_spend": 9000000,
+      "campaign_share": 0.45,
+      "avg_hotel_stars": 3.0,
+      "premium_cabin_share": 0.0,
+      "calibration_target": "alternative",
+      "calibration_note": "Value tier, tau=5%. Gate opens, but no rung clears -- thin inventory on the route means even a star down saves little. Falls through to a different trip within the same budget.",
+      "cart": {
+        "cart_id": "cart-wf-04",
+        "abandoned_hours_ago": 52,
+        "flight": {
+          "carrier": "IndiGo", "origin": "CGK", "destination": "DXB",
+          "depart_date": "2027-02-14", "return_date": "2027-02-17",
+          "cabin": "economy", "passengers": 1
+        },
+        "hotel": {
+          "name": "Rove Downtown", "stars": 3, "city": "Dubai", "area": "Downtown",
+          "check_in": "2027-02-14", "check_out": "2027-02-16"
+        }
+      }
+    },
+    {
+      "traveler_id": "wf-05",
+      "name": "Rizky Firmansyah",
+      "booking_count": 1,
+      "usual_spend": 15000000,
+      "campaign_share": null,
+      "avg_hotel_stars": null,
+      "premium_cabin_share": null,
+      "calibration_target": "cold_start",
+      "calibration_note": "One booking, so campaign share is unmeasurable and MUST stay null -- a fabricated share here would fake the price-sensitivity signal outright. Tier comes from cart signals (paper section 3.2.5). The ladder still runs, because a rebuild concedes no margin.",
+      "cart": {
+        "cart_id": "cart-wf-05",
+        "abandoned_hours_ago": 18,
+        "flight": {
+          "carrier": "Vietnam Airlines", "origin": "CGK", "destination": "SGN",
+          "depart_date": "2027-03-01", "return_date": "2027-03-06",
+          "cabin": "economy", "passengers": 1
+        },
+        "hotel": {
+          "name": "Hotel des Arts Saigon", "stars": 4, "city": "Ho Chi Minh City",
+          "area": "District 3", "check_in": "2027-03-01", "check_out": "2027-03-05"
+        }
+      }
+    },
+    {
+      "traveler_id": "wf-06",
+      "name": "Dewi Anggraini",
+      "booking_count": 6,
+      "usual_spend": 21000000,
+      "campaign_share": 0.31,
+      "avg_hotel_stars": 4.0,
+      "premium_cabin_share": 0.15,
+      "calibration_target": "error",
+      "calibration_note": "Exercises the upstream-failure path. Not in the paper; a pipeline over live carrier inventory will fail sometimes and a demo that cannot show it is dishonest. Needs one sentence added to the paper.",
+      "cart": {
+        "cart_id": "cart-wf-06",
+        "abandoned_hours_ago": 2,
+        "flight": {
+          "carrier": "China Eastern", "origin": "CGK", "destination": "PVG",
+          "depart_date": "2027-04-09", "return_date": "2027-04-13",
+          "cabin": "economy", "passengers": 2
+        },
+        "hotel": {
+          "name": "Les Suites Orient", "stars": 4, "city": "Shanghai", "area": "Bund",
+          "check_in": "2027-04-09", "check_out": "2027-04-12"
+        }
+      }
+    }
+  ]
+}

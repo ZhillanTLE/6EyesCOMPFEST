@@ -1,32 +1,26 @@
-# Environments
-backend/.env
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Environment / secrets
 .env
 .env.local
-.env.*.local
+backend/.env
+serviceAccount*.json
 
-# Python caches and virtual environments
-**/__pycache__/
-*.pyc
-venv/
-.venv/
-env/
-
-# Node dependencies and builds
+# Node
 node_modules/
-frontend/node_modules/
-frontend/.next/
-frontend/out/
-frontend/build/
+.next/
+out/
+npm-debug.log*
 
-# Logs and databases
-*.log
-backend/*.log
-backend/sessions_db.json
-backend/websocket_emitter_log.json
-resp.json
+# Probe output
+backend/duffel_hold_probe_result.json
 
-# IDEs and OS files
-.vscode/
-.idea/
-.DS_Store
-Thumbs.db
+# Design handoff bundle and paper drafts (reference material, not source)
+windfall-design-component-review/
+Windfall Design Comp Review/
+*.pdf

@@ -1,0 +1,156 @@
+{
+  "_readme": [
+    "Captured price fixtures for WINDFALL_FIXTURES=1 replay mode.",
+    "",
+    "These stand in for live Duffel and hotel re-query so the pipeline runs",
+    "end-to-end, deterministically, with no API keys. Reading them is a read of",
+    "a local file, which is squarely inside the penyisihan storage rule; nothing",
+    "here is written at runtime.",
+    "",
+    "The live path stays fully functional and is the default. Fixture mode is a",
+    "reproducibility measure for judging day, and the UI labels it visibly --",
+    "'cached for reliability' must never quietly become 'faked'.",
+    "",
+    "Rung totals are FULL CART totals (flight + hotel), not hotel-only, because",
+    "delta_k is measured against the whole cart. The flight component is",
+    "identical across every rung by construction: the ladder never touches the",
+    "flight, so a Hold Order stays valid."
+  ],
+  "carts": {
+    "cart-wf-01": {
+      "flight_idr": 41000000,
+      "hotel_idr": 25000000,
+      "rungs": {
+        "reprice": 65340000
+      },
+      "alternative_total_idr": null,
+      "note": "Gate closes before the ladder runs; the reprice figure is recorded only so the trace can show the cart was genuinely re-quoted."
+    },
+    "cart-wf-02": {
+      "flight_idr": 26000000,
+      "hotel_idr": 45000000,
+      "rungs": {
+        "reprice": 69580000,
+        "lateral": 65320000,
+        "tier_down": 59600000
+      },
+      "alternative_total_idr": 54000000,
+      "note": "Premium, tau=15%. reprice -2.0%, lateral -8.0% (found but short), tier_down -16.1% clears. The hotel is 63% of this cart, which is why one star down can move it 16 points."
+    },
+    "cart-wf-03": {
+      "flight_idr": 13000000,
+      "hotel_idr": 18000000,
+      "rungs": {
+        "reprice": 30380000,
+        "lateral": 27590000
+      },
+      "alternative_total_idr": 24800000,
+      "note": "Comfort, tau=10%. reprice -2.0%, lateral -11.0% clears. Ladder stops before any downgrade is proposed -- the outcome the product is least apologetic about."
+    },
+    "cart-wf-04": {
+      "flight_idr": 6400000,
+      "hotel_idr": 4800000,
+      "rungs": {
+        "reprice": 11032000,
+        "lateral": 10864000,
+        "tier_down": 10730000
+      },
+      "alternative_total_idr": 8600000,
+      "note": "Value, tau=5%. Best rung is -4.2%, short of the bar. Thin inventory on the route, so no rebuild is worth showing; falls through to a different trip."
+    },
+    "cart-wf-05": {
+      "flight_idr": 7500000,
+      "hotel_idr": 11000000,
+      "rungs": {
+        "reprice": 18315000,
+        "lateral": 17760000,
+        "tier_down": 17390000
+      },
+      "alternative_total_idr": null,
+      "note": "Cold start. Ladder runs on the cart-proxy tier (economy + 4-star = Comfort, tau=10%); best rung is -6.0% and nothing clears. No alternative fits either, so the cart is left exactly as it was. This is the 'found something, not worth showing' case."
+    },
+    "cart-wf-06": {
+      "flight_idr": 0,
+      "hotel_idr": 0,
+      "rungs": {},
+      "alternative_total_idr": null,
+      "error": "carrier_inventory_unavailable",
+      "note": "Upstream failure path. The classifier completes; the searcher halts."
+    }
+  },
+  "hold": {
+    "cart-wf-01": {
+      "state": "not_eligible",
+      "carrier": "Emirates"
+    },
+    "cart-wf-02": {
+      "state": "eligible",
+      "carrier": "Singapore Airlines",
+      "expires_at": "2027-02-06T21:10:00+07:00"
+    },
+    "cart-wf-03": {
+      "state": "eligible",
+      "carrier": "Garuda Indonesia",
+      "expires_at": "2026-11-08T19:30:00+07:00"
+    },
+    "cart-wf-04": {
+      "state": "not_eligible",
+      "carrier": "IndiGo"
+    },
+    "cart-wf-05": {
+      "state": "simulated",
+      "carrier": "Vietnam Airlines"
+    },
+    "cart-wf-06": {
+      "state": "not_eligible",
+      "carrier": "China Eastern"
+    }
+  },
+  "alternatives": {
+    "cart-wf-04": {
+      "label": "Ho Chi Minh City (CGK - SGN)",
+      "description": "3 malam, hotel bintang 3 di District 1"
+    },
+    "cart-wf-02": {
+      "label": "Osaka (CGK - KIX)",
+      "description": "6 malam, hotel bintang 5 di Umeda"
+    },
+    "cart-wf-03": {
+      "label": "Kuala Lumpur (CGK - KUL)",
+      "description": "3 malam, hotel bintang 4 di Bukit Bintang"
+    }
+  },
+  "timings_ms": {
+    "cart-wf-01": {
+      "classifier": 2180,
+      "searcher": 940,
+      "notifier": 1610
+    },
+    "cart-wf-02": {
+      "classifier": 2460,
+      "searcher": 4120,
+      "notifier": 1880
+    },
+    "cart-wf-03": {
+      "classifier": 2050,
+      "searcher": 3240,
+      "notifier": 1740
+    },
+    "cart-wf-04": {
+      "classifier": 1930,
+      "searcher": 4380,
+      "notifier": 1660
+    },
+    "cart-wf-05": {
+      "classifier": 1620,
+      "searcher": 3910,
+      "notifier": 1580
+    },
+    "cart-wf-06": {
+      "classifier": 2240,
+      "searcher": 1180,
+      "notifier": 0
+    }
+  },
+  "_timings_note": "Captured wall-clock from a recorded live run, replayed in fixture mode. In live mode these are measured per request. Never synthesised from a hash of the cart id -- a duration the UI presents as real must be real."
+}
