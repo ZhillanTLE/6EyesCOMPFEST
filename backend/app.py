@@ -73,6 +73,17 @@ socketio = SocketIO(app, **_socketio_kwargs)
 from backend import firebase_state
 from backend import gemini_agent
 from backend.auth import require_auth
+from backend.routes.recovery import bp as recovery_bp
+
+# ---------------------------------------------------------------------------
+# Windfall recovery pipeline
+# ---------------------------------------------------------------------------
+# Registered as an isolated blueprint. It runs entirely inside the request --
+# no background thread, no SocketIO emit, no Firestore, no auth decorator --
+# because the penyisihan scope rules require synchronous processing with local
+# storage. The planning endpoints below keep their own architecture; the two
+# do not share state.
+app.register_blueprint(recovery_bp)
 
 
 # ---------------------------------------------------------------------------
