@@ -61,6 +61,41 @@ def search_hotels(destination: str, currency: str, total_budget: float = 1000.0,
     return json.dumps(options)
 
 @mcp.tool()
+def read_traveler_history(traveler_id: str) -> str:
+    """Read one traveler's booking history and their abandoned cart.
+
+    Args:
+        traveler_id: seed id, e.g. wf-02
+    """
+    logger.info(f"[MCP Tool] read_traveler_history for {traveler_id}")
+    import json
+    from .recovery import mcp_tools
+    return json.dumps(mcp_tools.read_traveler_history(traveler_id))
+
+
+@mcp.tool()
+def check_hold_eligibility(cart_id: str, carrier: str, offer_id: str = "") -> str:
+    """Check whether a flight fare can be held, and until when. READ-ONLY.
+
+    Reads payment_requirements off the Duffel offer. Covers the FLIGHT only --
+    the hotel has no equivalent primitive and re-prices at conversion.
+
+    There is deliberately no create_hold tool: placing a hold is a real write
+    against airline inventory and must not fire during a demo.
+
+    Args:
+        cart_id: cart identifier, e.g. cart-wf-02
+        carrier: operating carrier name
+        offer_id: optional Duffel offer id
+    """
+    logger.info(f"[MCP Tool] check_hold_eligibility for {cart_id}")
+    import json
+    from .recovery import mcp_tools
+    return json.dumps(mcp_tools.check_hold_eligibility(
+        cart_id, carrier, offer_id or None))
+
+
+@mcp.tool()
 def get_destination_weather(destination: str) -> str:
     """Fetch live weather metrics and packing advice for target destination.
     

@@ -91,7 +91,7 @@ export function PipelineView({
       <section aria-label="Agent reasoning" style={{ display: "flex", flexDirection: "column" }}>
         <AgentStage
           title="Classifier Agent"
-          model="gemini"
+          model={classification.reasonedBy.startsWith("gemini") ? "gemini" : "fallback"}
           status={stageStatus(phase, "classifier")}
           duration={phase >= 2 ? seconds(stageMs(result, "classifier")) : undefined}
           reasons={phase >= 2 ? classification.reasoning : []}
@@ -101,6 +101,14 @@ export function PipelineView({
               <Skeleton width="88%" height={12} />
               <Skeleton width="70%" height={12} />
             </div>
+          )}
+          {phase >= 2 && !classification.reasonedBy.startsWith("gemini") && (
+            <p
+              className="wf-mono"
+              style={{ margin: "0 0 10px", fontSize: 10.5, color: "var(--wf-ink-3)" }}
+            >
+              Reasoning from deterministic templates &mdash; {classification.reasonedBy.replace(/^deterministic \(|\)$/g, "")}
+            </p>
           )}
           {phase >= 2 && (
             <TierBadge
@@ -190,8 +198,12 @@ export function PipelineView({
         </AgentStage>
 
         <AgentStage
-          title="Notifier Agent"
-          model="gemini"
+          title="Notification Curator Agent"
+          model={
+            notification && notification.writtenBy.startsWith("gemini")
+              ? "gemini"
+              : "fallback"
+          }
           status={halted ? "waiting" : stageStatus(phase, "notifier")}
           duration={phase >= 4 && !halted ? seconds(stageMs(result, "notifier")) : undefined}
           reasons={

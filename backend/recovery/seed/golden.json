@@ -148,7 +148,8 @@
         ],
         "overrideReason": null,
         "isColdStart": false,
-        "tierSource": "history"
+        "tierSource": "history",
+        "reasonedBy": "deterministic (replaying a captured run)"
       },
       "gate": {
         "opened": false,
@@ -184,7 +185,8 @@
         ],
         "whatsapp": "Halo Prasetyo, perjalanan Anda ke London masih tersimpan - CGK - LHR bersama Emirates, menginap di The Savoy. Tidak ada yang berubah dan tidak ada yang perlu diklaim; siap kapan pun Anda siap.",
         "ctaLabel": "Lihat kembali perjalanan Anda",
-        "channelNote": "Tidak ada diskon diberikan. Margin mitra utuh."
+        "channelNote": "Tidak ada diskon diberikan. Margin mitra utuh.",
+        "writtenBy": "deterministic (replaying a captured run)"
       },
       "timings": [
         {
@@ -217,7 +219,8 @@
         ],
         "overrideReason": null,
         "isColdStart": false,
-        "tierSource": "history"
+        "tierSource": "history",
+        "reasonedBy": "deterministic (replaying a captured run)"
       },
       "gate": {
         "opened": true,
@@ -312,7 +315,8 @@
         ],
         "whatsapp": "Halo Ayu, perjalanan Tokyo Anda masih tersimpan. Kami menemukan cara menjaganya nyaris sama persis dengan total IDR 11.400.000 lebih ringan - tanggal dan kawasan tetap, penginapannya berubah ke Hotel Ryumeikan Tokyo (4 bintang).",
         "ctaLabel": "Lihat perjalanan yang disusun ulang",
-        "channelNote": null
+        "channelNote": null,
+        "writtenBy": "deterministic (replaying a captured run)"
       },
       "timings": [
         {
@@ -345,7 +349,8 @@
         ],
         "overrideReason": null,
         "isColdStart": false,
-        "tierSource": "history"
+        "tierSource": "history",
+        "reasonedBy": "deterministic (replaying a captured run)"
       },
       "gate": {
         "opened": true,
@@ -421,7 +426,8 @@
         ],
         "whatsapp": "Halo Bagus, untuk perjalanan Singapore Anda kami menemukan penginapan kelas bintang yang sama di kawasan dan tanggal yang sama, IDR 3.410.000 lebih ringan. Tidak ada yang diturunkan kelasnya.",
         "ctaLabel": "Lihat pilihan yang kami temukan",
-        "channelNote": null
+        "channelNote": null,
+        "writtenBy": "deterministic (replaying a captured run)"
       },
       "timings": [
         {
@@ -454,7 +460,8 @@
         ],
         "overrideReason": null,
         "isColdStart": false,
-        "tierSource": "history"
+        "tierSource": "history",
+        "reasonedBy": "deterministic (replaying a captured run)"
       },
       "gate": {
         "opened": true,
@@ -548,7 +555,8 @@
         ],
         "whatsapp": "Halo Intan, kami belum menemukan versi perjalanan Dubai yang terasa sepadan untuk Anda. Untuk tanggal yang sama ada Ho Chi Minh City (CGK - SGN) - 3 malam, hotel bintang 3 di District 1. Keranjang semula tetap tersimpan.",
         "ctaLabel": "Lihat perjalanan ke Ho Chi Minh City (CGK - SGN)",
-        "channelNote": null
+        "channelNote": null,
+        "writtenBy": "deterministic (replaying a captured run)"
       },
       "timings": [
         {
@@ -581,7 +589,8 @@
         ],
         "overrideReason": null,
         "isColdStart": true,
-        "tierSource": "cart_proxy"
+        "tierSource": "cart_proxy",
+        "reasonedBy": "deterministic (replaying a captured run)"
       },
       "gate": {
         "opened": true,
@@ -675,7 +684,8 @@
         ],
         "whatsapp": "Halo Rizky, perjalanan Anda ke Ho Chi Minh City masih tersimpan - CGK - SGN bersama Vietnam Airlines, menginap di Hotel des Arts Saigon. Tidak ada yang berubah dan tidak ada yang perlu diklaim; siap kapan pun Anda siap.",
         "ctaLabel": "Lihat kembali perjalanan Anda",
-        "channelNote": "Tidak ada diskon diberikan. Margin mitra utuh."
+        "channelNote": "Tidak ada diskon diberikan. Margin mitra utuh.",
+        "writtenBy": "deterministic (replaying a captured run)"
       },
       "timings": [
         {
@@ -708,7 +718,8 @@
         ],
         "overrideReason": null,
         "isColdStart": false,
-        "tierSource": "history"
+        "tierSource": "history",
+        "reasonedBy": "deterministic"
       },
       "gate": {
         "opened": false,

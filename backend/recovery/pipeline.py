@@ -14,9 +14,11 @@ worth claiming.
 from __future__ import annotations
 
 import time
+from dataclasses import replace
 from typing import Callable, List, Optional, Tuple
 
-from . import config, gate, ladder, notifications, outcomes, providers, repository, tiers
+from . import (classifier_agent, gate, ladder, mcp_tools, notification_curator,
+               outcomes, providers, repository, searcher_agent, tiers)
 from .schemas import (
     Classification, HoldState, HoldStatus, RecoveryResult, StageTiming,
 )
@@ -35,55 +37,6 @@ class _Clock:
         measured = int((time.perf_counter() - start) * 1000)
         self.timings.append(StageTiming(name, self.captured.get(name, measured)))
         return result
-
-
-def _classifier_reasoning(history, cart, tier, tier_source, gate_result):
-    """
-    Evidence lines behind the tier and the gate. English -- this is the analyst
-    trace, not traveler-facing copy.
-
-    LINE COUNT IS DELIBERATE AND ASYMMETRIC. A price intervention has to justify
-    itself on two axes, so it gets two lines. A reminder is settled by whichever
-    single axis closed the gate, so it gets one. Padding the reminder out to
-    match would imply the system deliberated equally in both cases, when the
-    honest position is that one signal was enough.
-
-    Deterministic by design. classifier_agent.py substitutes Gemini for the live
-    path against this same shape and falls back here when no key is configured
-    -- the demo must not depend on a network call to be legible.
-    """
-    from .formatting import plain_pct
-
-    lines = []
-
-    if tier_source == "cart_proxy":
-        lines.append(
-            "No booking history; tier estimated from the cart itself "
-            "({} cabin, {}-star stay)".format(cart.flight.cabin, cart.hotel.stars))
-        if gate_result is not None:
-            lines.append(
-                "Campaign share unmeasurable, so the ladder runs on the proxy "
-                "tier -- a rebuild concedes no margin")
-        return lines
-
-    if gate_result is None:
-        lines.append("Read {} historical bookings via read_traveler_history".format(
-            history.booking_count))
-        lines.append("Cart total unavailable -- carrier inventory did not respond")
-        return lines
-
-    share = plain_pct(history.campaign_share)
-    gap = plain_pct(gate_result.budget_gap)
-
-    if gate_result.opened:
-        lines.append("Campaign share {} -- price-sensitive".format(share))
-        lines.append("Cart {} above usual spend".format(gap))
-    elif not gate_result.price_sensitive:
-        lines.append("Campaign share {} -- historically pays full price".format(share))
-    else:
-        lines.append("Cart sits within usual spend; price is not the barrier")
-
-    return lines
 
 
 def run(traveler_id: str) -> RecoveryResult:
@@ -122,8 +75,8 @@ def run(traveler_id: str) -> RecoveryResult:
         clock.timings.append(StageTiming("searcher", (captured or {}).get("searcher", 0)))
         classification = Classification(
             tier=tier, tier_prior=tier, threshold=tiers.threshold_for(tier),
-            reasoning=tuple(_classifier_reasoning(
-                history, cart, tier, tier_source, gate_result)),
+            reasoning=tuple(classifier_agent._fallback_reasoning(
+                history, cart, tier_source, gate_result)),
             is_cold_start=history.is_cold_start, tier_source=tier_source,
         )
         from .schemas import Decision, GateResult, Outcome
@@ -147,13 +100,12 @@ def run(traveler_id: str) -> RecoveryResult:
             source="fixture" if fixture_mode else "live",
         )
 
-    threshold = tiers.threshold_for(tier)
-    classification = Classification(
-        tier=tier, tier_prior=tier, threshold=threshold,
-        reasoning=tuple(_classifier_reasoning(
-            history, cart, tier, tier_source, gate_result)),
-        is_cold_start=history.is_cold_start, tier_source=tier_source,
-    )
+    # The Classifier may move the tier one step off the percentile prior with a
+    # stated reason; the prior is recorded either way so the move is arguable.
+    classification = classifier_agent.classify(
+        history, cart, tier_prior=tier, tier_source=tier_source,
+        gate_result=gate_result, reference_spend=repository.reference_spend())
+    threshold = classification.threshold
 
     # ── Stage 2: Searcher ───────────────────────────────────────────────────
     def _search():
@@ -162,15 +114,28 @@ def run(traveler_id: str) -> RecoveryResult:
         return ladder.run(cart, threshold, provider)
 
     attempts = clock.stage("searcher", _search)
+
+    # Comparability is the model's job here; the threshold arithmetic already
+    # happened in ladder.py and is not up for revision.
+    notes = searcher_agent.assess(cart, classification.tier, threshold, attempts)
+    if notes:
+        attempts = tuple(
+            replace(a, note=notes[a.index]["note"]) if a.index in notes else a
+            for a in attempts)
+
     decision = outcomes.decide(gate_result, original_total, attempts, alternative_total)
+
+    # Hold eligibility through the MCP tool. Read-only; there is no create_hold.
+    hold_row = mcp_tools.call_tool(
+        "check_hold_eligibility", cart_id=cart_id, carrier=cart.flight.carrier)
     hold = providers.hold_status(cart_id, cart.flight.carrier)
 
     # ── Stage 3: Notification Curator ───────────────────────────────────────
     alt = (providers.fixtures().get("alternatives") or {}).get(cart_id) or {}
 
     def _draft():
-        return notifications.draft(
-            cart, history.name, decision, hold,
+        return notification_curator.curate(
+            cart, history.name, decision, hold, classification.tier,
             alternative_label=alt.get("label"),
             alternative_desc=alt.get("description"))
 

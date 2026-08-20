@@ -136,6 +136,55 @@ class LiveProvider:
         return RungCandidate(self.flight_idr + hotel.price_idr, hotel=hotel)
 
 
+# ── Fixture-backed tool data ─────────────────────────────────────────────────
+
+def fixture_hotels(city, area, stars, exclude=None):
+    """Hotel inventory for the search_hotels tool in replay mode.
+
+    Derived from the captured rung candidates rather than a second invented
+    dataset, so the tool and the ladder can never disagree about what was
+    available."""
+    out = []
+    for cid, data in (fixtures().get("carts") or {}).items():
+        rungs = data.get("rungs") or {}
+        flight = int(data.get("flight_idr", 0))
+        for rung, name_map in ((config.RUNG_LATERAL, _LATERAL_NAMES),
+                               (config.RUNG_TIER_DOWN, _TIER_DOWN_NAMES)):
+            total = rungs.get(rung)
+            name = name_map.get(cid)
+            if total is None or not name:
+                continue
+            if exclude and name.strip().lower() == exclude.strip().lower():
+                continue
+            out.append({
+                "name": name,
+                "stars": stars,
+                "area": area,
+                "priceIdr": int(total) - flight,
+            })
+    return out
+
+
+def fixture_flights(origin, destination):
+    """Flight offers for the search_flights tool in replay mode."""
+    out = []
+    for cid, data in (fixtures().get("carts") or {}).items():
+        price = int(data.get("flight_idr", 0))
+        if not price:
+            continue
+        hold = (fixtures().get("hold") or {}).get(cid) or {}
+        out.append({
+            "carrier": hold.get("carrier", ""),
+            "priceIdr": price,
+            "offerId": "fixture-" + cid,
+            "paymentRequirements": {
+                "requires_instant_payment": hold.get("state") != HoldState.ELIGIBLE,
+                "payment_required_by": hold.get("expires_at"),
+            },
+        })
+    return out
+
+
 # ── Hold ─────────────────────────────────────────────────────────────────────
 
 def hold_status(cart_id: str, carrier: str) -> HoldStatus:

@@ -97,6 +97,10 @@ class Classification:
     override_reason: Optional[str] = None
     is_cold_start: bool = False
     tier_source: str = "history"         # "history" | "cart_proxy"
+    # Which engine produced `reasoning`. Surfaced in the UI so a template is
+    # never mistaken for inference -- the demo's credibility depends on the
+    # difference being visible rather than assumed.
+    reasoned_by: str = "deterministic"
 
 
 # ── Ladder ───────────────────────────────────────────────────────────────────
@@ -217,6 +221,7 @@ class NotificationDraft:
     whatsapp: str
     cta_label: str
     channel_note: Optional[str] = None
+    written_by: str = "deterministic"
 
 
 @dataclass(frozen=True)

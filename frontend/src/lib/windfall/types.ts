@@ -51,6 +51,13 @@ export interface Classification {
   isColdStart: boolean;
   /** "history" | "cart_proxy" — cart_proxy must be labelled as such in the UI. */
   tierSource: string;
+  /**
+   * Which engine produced `reasoning`: "gemini", or "deterministic (reason)".
+   * Surfaced in the UI on purpose — a template must never be mistaken for
+   * inference, and the demo's credibility depends on the difference being
+   * visible rather than assumed.
+   */
+  reasonedBy: string;
 }
 
 export interface GateResult {
@@ -109,6 +116,8 @@ export interface NotificationDraft {
   whatsapp: string;
   ctaLabel: string;
   channelNote: string | null;
+  /** "gemini", or "deterministic (reason)". Same rule as reasonedBy. */
+  writtenBy: string;
 }
 
 export interface RecoveryResult {
