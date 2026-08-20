@@ -18,7 +18,7 @@
  * the Classifier before it has run.
  */
 import type { QueueEntry } from "@/lib/windfall/types";
-import { abandonedLabel, dateRange, plainPct, stars } from "@/lib/windfall/format";
+import { abandonedLabel, dateRange, idr, plainPct, stars } from "@/lib/windfall/format";
 
 const TIER_TINT: Record<string, { bg: string; ink: string }> = {
   Value: { bg: "var(--wf-tier-value-bg)", ink: "var(--wf-tier-value-ink)" },
@@ -112,11 +112,27 @@ export function TravelerCard({
         </div>
 
         <div style={{ textAlign: "right", flexShrink: 0 }}>
-          <div className="wf-eyebrow">Abandoned</div>
-          <div className="wf-mono" style={{ marginTop: 4, fontSize: 13, color: "var(--wf-ink)", whiteSpace: "nowrap" }}>
-            {abandonedLabel(entry.abandonedHoursAgo)}
+          {/* The price at abandonment, not a live quote. It is what the
+              traveler walked away from, and the figure every saving is
+              measured against. */}
+          <div className="wf-eyebrow">Cart</div>
+          <div
+            className="wf-mono"
+            style={{
+              marginTop: 4,
+              fontSize: 16,
+              fontWeight: 500,
+              letterSpacing: "0.01em",
+              color: "var(--wf-ink)",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {idr(entry.cartValueIdr)}
           </div>
           <div className="wf-mono" style={{ marginTop: 6, fontSize: 11, color: "var(--wf-ink-3)" }}>
+            {abandonedLabel(entry.abandonedHoursAgo)}
+          </div>
+          <div className="wf-mono" style={{ marginTop: 3, fontSize: 11, color: "var(--wf-ink-3)" }}>
             {entry.bookings === 0 ? "no bookings" : `${entry.bookings} bookings`}
           </div>
         </div>

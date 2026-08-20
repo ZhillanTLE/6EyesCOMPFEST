@@ -166,6 +166,12 @@ export interface QueueEntry {
   checkIn: string;
   checkOut: string;
   abandonedHoursAgo: number;
+  /**
+   * p_0 — what the cart cost at the moment it was abandoned. Historical fact,
+   * not a live quote: the ladder re-queries to find p_k, and p_0 must not move
+   * underneath it or the re-price rung would compare today's price to itself.
+   */
+  cartValueIdr: number;
 }
 
 export interface QueueResponse {

@@ -250,11 +250,19 @@ class TestDewiUpstreamFailure(GoldenCartCase):
     def test_no_notification_is_drafted(self):
         self.assertIsNone(self.stored()["notification"])
 
-    def test_gate_reports_itself_unevaluated_rather_than_zeroed(self):
-        """With no prices there is no cart total, so the budget gap is
-        undefined. Reporting a zero would read as a real measurement."""
-        self.assertFalse(self.stored()["gate"]["opened"])
-        self.assertIn("tidak dievaluasi", self.stored()["gate"]["reason"])
+    def test_gate_still_evaluates_because_p0_is_known(self):
+        """p_0 is the abandonment price and does not depend on today's
+        inventory, so losing the carrier feed does not cost us the gate. Both
+        signals are still measurable; only the rebuild search is impossible.
+        That matches the paper's error narrative -- the classifier completed,
+        the searcher halted -- rather than blanking the whole trace."""
+        gate = self.stored()["gate"]
+        self.assertTrue(gate["opened"])
+        self.assertTrue(gate["priceSensitive"])
+        self.assertGreater(gate["budgetGap"], 0)
+
+    def test_no_rebuild_was_attempted(self):
+        self.assertEqual(self.stored()["decision"]["attempts"], [])
 
     def test_no_deadline_is_shown(self):
         self.assertDeadlineOnlyIfGuaranteed()

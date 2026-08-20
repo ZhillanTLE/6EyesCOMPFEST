@@ -59,7 +59,7 @@ class TestClassifierAuthority(unittest.TestCase):
 
     def test_falls_back_to_the_prior_when_inference_is_unavailable(self):
         history, row = repository.get("wf-02")
-        cart = repository.build_cart(row, 26000000, 45000000)
+        cart = repository.build_cart(row)
         g = gate.evaluate(history, cart.total_idr)
         result = classifier_agent.classify(
             history, cart, tier_prior="Premium", tier_source="history",
@@ -71,7 +71,7 @@ class TestClassifierAuthority(unittest.TestCase):
     def test_provenance_is_reported_not_hidden(self):
         """A template must never be mistaken for inference in the trace."""
         history, row = repository.get("wf-01")
-        cart = repository.build_cart(row, 41000000, 25000000)
+        cart = repository.build_cart(row)
         result = classifier_agent.classify(
             history, cart, "Premium", "history",
             gate.evaluate(history, cart.total_idr), repository.reference_spend())
@@ -91,7 +91,7 @@ class TestSearcherAuthority(unittest.TestCase):
         """With no model there is no comparability opinion to give. A template
         pretending to be judgement would be worse than silence."""
         history, row = repository.get("wf-02")
-        cart = repository.build_cart(row, 26000000, 45000000)
+        cart = repository.build_cart(row)
         result = pipeline.run("wf-02")
         self.assertEqual(
             searcher_agent.assess(cart, "Premium", 0.15, result.decision.attempts),
@@ -109,7 +109,7 @@ class TestCuratorBoundary(unittest.TestCase):
     def test_receives_a_decided_outcome_and_cannot_change_it(self):
         result = pipeline.run("wf-03")
         draft = notification_curator.curate(
-            repository.build_cart(repository.get("wf-03")[1], 13000000, 18000000),
+            repository.build_cart(repository.get("wf-03")[1]),
             "Bagus Hartono", result.decision, result.hold, "Comfort")
         self.assertIsNotNone(draft.subject)
         # The draft describes; the outcome is unchanged by describing it.

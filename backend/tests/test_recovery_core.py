@@ -264,11 +264,13 @@ class TestSeed(unittest.TestCase):
             if t["bookings"] <= config.COLD_START_MAX_BOOKINGS:
                 self.assertIsNone(t["campaignShare"], t["name"])
 
-    def test_seed_carries_no_prices_and_no_outcomes(self):
-        """Prices come from live re-query; outcomes are computed. A seed holding
-        either would make the demo a slideshow."""
-        banned = {"value", "price", "total", "save", "saving", "nw", "r1", "r2",
-                  "alt_price", "type", "outcome", "decision"}
+    def test_seed_carries_no_rung_results_and_no_outcomes(self):
+        """The seed records what the cart cost when it was abandoned -- history,
+        and legitimately seed data. What it must never hold is a RUNG RESULT or
+        a pre-assigned outcome: those are computed, and storing them would make
+        the demo a slideshow."""
+        banned = {"save", "saving", "nw", "r1", "r2", "alt_price", "altprice",
+                  "type", "outcome", "decision", "rungs", "cleared"}
         for t in self.seed["travelers"]:
             keys = (list(t) + list(t["cart"]) + list(t["cart"]["flight"])
                     + list(t["cart"]["hotel"]))

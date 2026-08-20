@@ -53,6 +53,8 @@ class FixtureProvider:
             raise CarrierInventoryUnavailable(self.data["error"])
 
     def prices(self):
+        """Captured component prices. NOT p_0 -- that is the abandonment price
+        in the seed. Retained for composing candidate totals."""
         return int(self.data.get("flight_idr", 0)), int(self.data.get("hotel_idr", 0))
 
     def alternative(self) -> Optional[int]:

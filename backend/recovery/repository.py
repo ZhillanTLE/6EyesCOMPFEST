@@ -66,9 +66,22 @@ def get(traveler_id: str) -> Tuple[TravelerHistory, dict]:
     raise KeyError("unknown traveler " + repr(traveler_id))
 
 
-def build_cart(row: dict, flight_idr: int, hotel_idr: int) -> AbandonedCart:
-    """Cart with prices attached. Prices always come from outside the seed."""
+def cart_value(row: dict) -> int:
+    """p_0: what the cart cost at the moment it was abandoned."""
+    c = row["cart"]
+    return int(c["flight"]["valueIdr"]) + int(c["hotel"]["valueIdr"])
+
+
+def build_cart(row: dict) -> AbandonedCart:
+    """
+    The abandoned cart, priced as the traveler left it.
+
+    These are abandonment prices, not a live quote. Re-quoting to find p_k is
+    the Searcher's job; p_0 is history and does not move underneath it.
+    """
     c, f, h = row["cart"], row["cart"]["flight"], row["cart"]["hotel"]
+    flight_idr = int(f["valueIdr"])
+    hotel_idr = int(h["valueIdr"])
     return AbandonedCart(
         cart_id=c["cartId"],
         traveler_id=row["travelerId"],
@@ -134,5 +147,6 @@ def queue() -> List[Dict]:
             "checkIn": h["checkIn"],
             "checkOut": h["checkOut"],
             "abandonedHoursAgo": c["abandonedHoursAgo"],
+            "cartValueIdr": cart_value(row),
         })
     return out

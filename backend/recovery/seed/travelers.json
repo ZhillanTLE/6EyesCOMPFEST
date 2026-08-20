@@ -7,16 +7,23 @@
     "parameters. Distribution shape is calibrated against Hotel Booking Demand",
     "(Antonio, de Almeida & Nunes, 2019).",
     "",
-    "WHAT IS NOT IN HERE: prices. No cart total, no rung price, no saving. Those",
-    "come from live Duffel and hotel re-query at request time, because paper",
-    "section 3.1 promises bookable prices rather than a simulation. That is also",
-    "why no outcome is stored on a traveler -- the outcome is computed, and a",
-    "seed that pre-assigned it would make the demo a slideshow.",
+    "ABOUT valueIdr. These are the prices AT ABANDONMENT -- what the traveler was",
+    "looking at when they walked away. They are historical fact about the cart, not",
+    "a live quote, which is why they belong here.",
     "",
-    "calibration_target is a seed-DESIGN goal, not a pipeline input. Nothing reads",
-    "it at runtime. It records which path each traveler was constructed to",
-    "exercise so that calibrate_seed.py can check live prices actually produce it,",
-    "and fail loudly when they do not."
+    "That distinction is load-bearing. p_0 in delta_k = (p_0 - p_k)/p_0 is the",
+    "abandonment price. If p_0 were a fresh re-quote, rung 01 (re-price the same",
+    "cart) would compare the current price to itself and could only ever return 0%,",
+    "which would silently disable the cheapest rung on the ladder.",
+    "",
+    "WHAT IS STILL NOT IN HERE: rung prices and outcomes. Those come from live",
+    "re-query and from the decision core respectively. A seed that pre-assigned an",
+    "outcome would make the demo a slideshow.",
+    "",
+    "calibrationTarget is a seed-DESIGN goal, not a pipeline input. Nothing reads it",
+    "at runtime. It records which path each traveler was constructed to exercise so",
+    "that capture can check live prices actually produce it, and fail loudly when",
+    "they do not."
   ],
   "travelers": [
     {
@@ -39,7 +46,8 @@
           "departDate": "2027-01-18",
           "returnDate": "2027-01-24",
           "cabin": "business",
-          "passengers": 2
+          "passengers": 2,
+          "valueIdr": 41000000
         },
         "hotel": {
           "name": "The Savoy",
@@ -47,7 +55,8 @@
           "city": "London",
           "area": "Covent Garden",
           "checkIn": "2027-01-18",
-          "checkOut": "2027-01-23"
+          "checkOut": "2027-01-23",
+          "valueIdr": 25000000
         }
       }
     },
@@ -71,7 +80,8 @@
           "departDate": "2027-02-06",
           "returnDate": "2027-02-13",
           "cabin": "economy",
-          "passengers": 2
+          "passengers": 2,
+          "valueIdr": 26000000
         },
         "hotel": {
           "name": "Aman Tokyo",
@@ -79,7 +89,8 @@
           "city": "Tokyo",
           "area": "Otemachi",
           "checkIn": "2027-02-06",
-          "checkOut": "2027-02-12"
+          "checkOut": "2027-02-12",
+          "valueIdr": 45000000
         }
       }
     },
@@ -103,7 +114,8 @@
           "departDate": "2026-11-08",
           "returnDate": "2026-11-12",
           "cabin": "economy",
-          "passengers": 2
+          "passengers": 2,
+          "valueIdr": 13000000
         },
         "hotel": {
           "name": "Fullerton Bay",
@@ -111,7 +123,8 @@
           "city": "Singapore",
           "area": "Marina Bay",
           "checkIn": "2026-11-08",
-          "checkOut": "2026-11-11"
+          "checkOut": "2026-11-11",
+          "valueIdr": 18000000
         }
       }
     },
@@ -135,7 +148,8 @@
           "departDate": "2027-02-14",
           "returnDate": "2027-02-17",
           "cabin": "economy",
-          "passengers": 1
+          "passengers": 1,
+          "valueIdr": 6400000
         },
         "hotel": {
           "name": "Rove Downtown",
@@ -143,7 +157,8 @@
           "city": "Dubai",
           "area": "Downtown",
           "checkIn": "2027-02-14",
-          "checkOut": "2027-02-16"
+          "checkOut": "2027-02-16",
+          "valueIdr": 4800000
         }
       }
     },
@@ -167,7 +182,8 @@
           "departDate": "2027-03-01",
           "returnDate": "2027-03-06",
           "cabin": "economy",
-          "passengers": 1
+          "passengers": 1,
+          "valueIdr": 7500000
         },
         "hotel": {
           "name": "Hotel des Arts Saigon",
@@ -175,7 +191,8 @@
           "city": "Ho Chi Minh City",
           "area": "District 3",
           "checkIn": "2027-03-01",
-          "checkOut": "2027-03-05"
+          "checkOut": "2027-03-05",
+          "valueIdr": 11000000
         }
       }
     },
@@ -199,7 +216,8 @@
           "departDate": "2027-04-09",
           "returnDate": "2027-04-13",
           "cabin": "economy",
-          "passengers": 2
+          "passengers": 2,
+          "valueIdr": 14000000
         },
         "hotel": {
           "name": "Les Suites Orient",
@@ -207,7 +225,8 @@
           "city": "Shanghai",
           "area": "Bund",
           "checkIn": "2027-04-09",
-          "checkOut": "2027-04-12"
+          "checkOut": "2027-04-12",
+          "valueIdr": 10000000
         }
       }
     }
