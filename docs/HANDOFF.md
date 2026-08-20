@@ -213,7 +213,11 @@ cheapest way to find layout breakage.
 **Agent avatars unused.** Nine SVGs (`sleep`/`awake`/`finished` × 3 agents) are
 vendored and copied to `public/windfall/agents/` but `AgentStage` never renders
 them. The design crossfades them by opacity with all three stacked — never swap
-`src`, which flashes a broken image.
+`src`, which flashes a broken image. Purely cosmetic; nothing depends on it.
+
+**Accessibility done.** Live region announcing each phase, table semantics on
+the fare ledger, spoken status on agent stages, `:focus-visible` rings,
+keyboard-activated cards, one breakpoint at 720px.
 
 **Gemini agents exist but have never made a real call.** All three are wired
 (`classifier_agent.py`, `searcher_agent.py`, `notification_curator.py`) behind
@@ -225,10 +229,18 @@ one-step tier cap and the emoji stripper have only been tested against their
 fallbacks. Set `GEMINI_API_KEY`, run with `WINDFALL_FIXTURES=0`, and check that
 `reasonedBy`/`writtenBy` report `gemini` rather than `deterministic`.
 
-**MCP tools complete.** All four from paper section 5.1 are registered with
-FastMCP and dispatchable in-process. `create_hold` is absent and a test keeps
-it absent. `WINDFALL_MCP=stdio` is declared in `mcp_tools.py` but the stdio
-routing itself is **not implemented** — the flag currently does nothing.
+**MCP tools complete, and the contract is proven across the process
+boundary.** All four from paper section 5.1 are registered with FastMCP and
+dispatchable in-process. `WINDFALL_MCP=stdio` now genuinely routes through a
+real MCP client session, and a test asserts both paths return identical
+results — including that a null `campaignShare` survives serialisation rather
+than quietly becoming zero. `create_hold` is absent and a test keeps it absent.
+
+**Hold states render.** `hold_manager.py` exists (paper section 5.2.2 names it)
+and all three states appear on screen: eligible with a real expiry, not
+eligible with no deadline at all, simulated explicitly labelled. Scope is
+declared as flight-only everywhere, because Duffel holds a flight offer and
+the hotel re-prices at conversion.
 
 **`LiveProvider` wired but never run against a real API.** `WINDFALL_FIXTURES=0`
 now genuinely takes the live path (an earlier revision always used fixtures and

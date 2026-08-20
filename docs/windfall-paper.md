@@ -525,7 +525,7 @@ oleh satu *endpoint*:
 - `classifier_agent` — klasifikasi tingkatan traveler
 - `searcher_agent` — eksekusi *rebuild ladder* dan perhitungan selisih harga
 - `notification_curator` — penyusunan pratinjau notifikasi
-- `hold_manager` — pemeriksaan kelayakan *price-freeze*
+- `hold_manager` — pemeriksaan kelayakan *price-freeze* (tiga keadaan: *eligible*, *not eligible*, *simulated* yang dilabeli eksplisit)
 - `mcp_tools` — definisi skema *tool* dan pembungkus klien API
 
 #### 5.2.3 Penyimpanan
