@@ -148,6 +148,12 @@ Ladder: `01 reprice → 02 lateral → 03 tier_down`, stop at first `δ_k ≥ τ
 τ = Value 0.05 · Comfort 0.10 · Premium 0.15. Percentile cuts 0.30 / 0.80.
 c\* = 0.25. All are calibration constants, frozen, not derived.
 
+**`p_0` is the ABANDONMENT price**, carried in the seed as `valueIdr` on the
+flight and the hotel. It is history and must not move underneath the search:
+if `p_0` were a fresh re-quote, rung 01 would compare today's price to itself
+and could only ever return 0%, silently disabling the cheapest rung. `p_k`
+comes from re-query; `p_0` does not.
+
 **Lateral is hotel-only and the flight is pinned across every rung** — a Duffel
 Hold Order is held against one flight offer, so swapping the flight voids the
 guarantee the freeze exists to provide.
@@ -165,7 +171,7 @@ collides with Hold Order.
 | wf-03 | Bagus Hartono | Comfort | 0.44 | lateral | same-star swap clears; ladder stops before any downgrade |
 | wf-04 | Intan Maharani | Value | 0.45 | alternative | gate opens, nothing clears, different trip proposed |
 | wf-05 | Rizky Firmansyah | proxy | null | reminder | cold start; ladder runs, nothing worth showing |
-| wf-06 | Dewi Anggraini | Comfort | 0.31 | error | carrier inventory unavailable |
+| wf-06 | Dewi Anggraini | Comfort | 0.31 | error | carrier inventory unavailable; classifier and gate still complete because p_0 is known |
 
 wf-01 beside wf-02 is the demo's strongest moment. Do not weaken it.
 
