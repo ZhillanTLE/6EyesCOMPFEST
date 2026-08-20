@@ -30,6 +30,13 @@ Competition entry (COMPFEST 18 AIC, penyisihan). Stack: **Flask + Next.js
 
 ---
 
+## Start here
+
+New session? Read `docs/HANDOFF.md` first. It carries current state, the
+decisions already settled (so they are not re-litigated), what is left, and the
+blockers. Then read this file. Do not re-read the design bundle or the paper
+PDF — everything load-bearing from both is already in the repo.
+
 ## Authority order
 
 1. `docs/windfall-paper.md` — the specification. Wins over everything.
