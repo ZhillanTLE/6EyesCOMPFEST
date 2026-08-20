@@ -1,0 +1,53 @@
+# Windfall — one command from clean:
+#
+#   cp backend/.env.example backend/.env    # optional; fixtures need no keys
+#   docker compose up --build
+#
+# Then open http://localhost:3000/recovery
+#
+# Two services and nothing else. No database, no cache, no queue, no worker --
+# the recovery pipeline is synchronous and reads its seed from a local file, so
+# there is nothing for a fourth container to do.
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    # env_file is optional: the whole demo runs on fixtures with no keys at
+    # all. Supply backend/.env to exercise live Duffel/hotel search and real
+    # email delivery. `required: false` keeps `docker compose up` working on a
+    # clean clone that has never created one.
+    env_file:
+      - path: ./backend/.env
+        required: false
+    environment:
+      # Replay a captured run instead of calling live APIs. Default ON so a
+      # judge gets a working demo with no credentials; flip to 0 (and supply
+      # keys) to prove live inference. The console labels replay mode visibly.
+      WINDFALL_FIXTURES: "${WINDFALL_FIXTURES:-1}"
+      # Delivery is independent of fixtures: fixtures replace inference, not
+      # sending. Off by default because a clean clone has no SMTP credentials
+      # and a silent failure is worse than an explicit suppression.
+      SEND_ENABLED: "${SEND_ENABLED:-false}"
+      PORT: "8000"
+      SOCKETIO_ASYNC_MODE: threading
+      AUTH_DISABLED: "true"
+      ALLOWED_ORIGINS: "*"
+    ports:
+      - "8000:8000"
+
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+      args:
+        # Baked into the build: next.config.ts resolves rewrites() at build
+        # time. Putting this under `environment:` instead would silently do
+        # nothing. `backend` is the compose service name.
+        WINDFALL_API_ORIGIN: http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "3000:3000"

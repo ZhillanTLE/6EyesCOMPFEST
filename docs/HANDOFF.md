@@ -173,25 +173,42 @@ wf-01 beside wf-02 is the demo's strongest moment. Do not weaken it.
 
 ## Not done
 
-**Step 6 — `docker compose`. The only remaining numbered step.**
+**Step 6 — `docker compose` is WRITTEN but NEVER RUN.**
 
-- No `Dockerfile` or `docker-compose.yml` exists yet. Nothing at all.
-- Frontend already sets `output: "standalone"`.
-- **Gotcha straight from the Next docs:** the standalone server does **not**
-  copy `public/` or `.next/static`. Both must be copied manually in the
-  Dockerfile or the console renders unstyled with no agent avatars.
-- `WINDFALL_API_ORIGIN` must point at the Flask service name.
-- **Unverified:** whether the `rewrites()` destination is baked at build time or
-  read at runtime. `routes-manifest.json` showed an empty `beforeFiles`, which
-  was inconclusive. Check before assuming compose env vars reach it.
-- Backend entrypoint: `python -m backend.app` (dev) or gunicorn per
-  `backend/gunicorn.conf.py`. Note `app.py` monkey-patches gevent when
-  `SOCKETIO_ASYNC_MODE=gevent`.
+`backend/Dockerfile`, `frontend/Dockerfile`, `docker-compose.yml`, both
+`.dockerignore`s and `README.md` all exist. **Docker is not installed on the
+development machine**, so `docker compose up` has never executed. This is the
+one remaining item in *Done means* that cannot be ticked from here.
 
-**Never seen in a browser.** Both servers were started once and the API answered
-correctly through the Next proxy, but the run was interrupted before the page
-was loaded. Nobody has actually *looked* at the console. Do this early — it is
-the cheapest way to find layout breakage.
+What WAS verified, by assembling the runtime layout by hand and running it:
+
+- the build arg bakes correctly — `routes-manifest.json` contains
+  `http://backend:8000/api/recovery/:path*`
+- `.next/standalone/server.js` is emitted
+- `public/` and `.next/static` are genuinely **absent** from standalone, so the
+  Dockerfile's manual copy is load-bearing, not defensive
+- the assembled layout serves `/recovery` (HTTP 200), proxies
+  `/api/recovery/queue` through to Flask, and serves
+  `/windfall/agents/classifier-awake.svg` (HTTP 200)
+- all six carts run through the Next proxy with correct outcomes, real
+  per-stage timings and `marginConcededIdr: 0`
+
+**ANSWERED — the rewrite destination IS baked at build time.** It is written
+into `.next/routes-manifest.json` during `next build`. Setting
+`WINDFALL_API_ORIGIN` under compose `environment:` would silently do nothing;
+it is passed as a **build arg**. Changing the backend host requires a rebuild.
+
+What is still unproven: whether the images actually build, whether
+`node:22-alpine` and `python:3.12-slim` pull cleanly, whether the healthchecks
+pass, and whether `depends_on: service_healthy` sequences correctly. **Run
+`docker compose up --build` first thing.**
+
+**Still never seen in a browser.** The page returns HTTP 200 and every UI
+string is present in the client bundle, but the browse cards are fetched
+client-side (a direct consequence of CLAUDE.md forbidding Server Component data
+fetching), so server-rendered HTML contains the shell and no cards. Nobody has
+*looked* at the console. Do this immediately after compose works — it is the
+cheapest way to find layout breakage.
 
 **Agent avatars unused.** Nine SVGs (`sleep`/`awake`/`finished` × 3 agents) are
 vendored and copied to `public/windfall/agents/` but `AgentStage` never renders
@@ -279,7 +296,7 @@ the boundary.
 
 ## Definition of done (from CLAUDE.md)
 
-- [ ] `docker compose up` works from clean per README
+- [~] `docker compose up` — written, never run (no Docker on the dev machine)
 - [x] All four outcomes render, `reminder` at equal weight to `rebuild`
 - [x] Reasoning trace visible: tier + rationale, each ladder attempt + result,
       final decision, notification preview
@@ -290,6 +307,6 @@ the boundary.
 - [x] No unmeasured claims in any copy
 - [x] Pre-commit scope check passes on every commit
 
-**Suggested next move:** step 6 (docker compose), then load `/recovery` in a
-browser and fix whatever that reveals, then wire Gemini behind the two agent
+**Suggested next move:** run `docker compose up --build` and fix whatever it
+reveals, load `/recovery` in a browser, then wire Gemini behind the two agent
 modules.
