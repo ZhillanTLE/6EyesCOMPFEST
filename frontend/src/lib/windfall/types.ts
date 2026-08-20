@@ -113,6 +113,7 @@ export interface NotificationDraft {
 
 export interface RecoveryResult {
   cartId: string;
+  travelerId: string;
   travelerName: string;
   classification: Classification;
   gate: GateResult;
@@ -166,4 +167,23 @@ export interface QueueResponse {
 /** A deadline may render only when a carrier genuinely guaranteed the fare. */
 export function mayRenderDeadline(hold: HoldStatus): boolean {
   return hold.state === "eligible" && Boolean(hold.expiresAt);
+}
+
+/** Result of an explicit approval. Never produced by a pipeline run. */
+export type SendState = "sent" | "suppressed" | "failed";
+
+export interface SendReceipt {
+  state: SendState;
+  channel: string;
+  recipient: string | null;
+  subject: string | null;
+  detail: string | null;
+  travelerName: string;
+  outcome: Outcome;
+  /**
+   * WhatsApp is preview-only for penyisihan and always reports so. The
+   * Business API needs verified business status and pre-approved templates.
+   * The UI must show this as a stated decision, not a silent no-op.
+   */
+  whatsapp: { state: string; detail: string };
 }

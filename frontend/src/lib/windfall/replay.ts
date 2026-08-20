@@ -33,11 +33,18 @@ function durations(result: RecoveryResult): Record<StageName, number> {
   return out;
 }
 
-export function useReplay(result: RecoveryResult | null, enabled = true): ReplayState {
+export function useReplay(
+  result: RecoveryResult | null,
+  enabled = true,
+  /** Bump to replay the same result from the top. */
+  nonce = 0,
+): ReplayState {
   const [state, setState] = useState<ReplayState>({ phase: 0, revealed: 0, done: false });
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  const key = result ? `${result.cartId}:${result.timings.map((t) => t.durationMs).join("-")}` : "";
+  const key = result
+    ? `${result.cartId}:${result.timings.map((t) => t.durationMs).join("-")}:${nonce}`
+    : "";
 
   const plan = useMemo(() => (result ? durations(result) : null), [result]);
 

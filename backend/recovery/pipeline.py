@@ -134,7 +134,7 @@ def run(traveler_id: str) -> RecoveryResult:
                     "karena inventaris maskapai tidak tersedia."),
         )
         return RecoveryResult(
-            cart_id=cart_id, traveler_name=history.name,
+            cart_id=cart_id, traveler_id=traveler_id, traveler_name=history.name,
             classification=classification, gate=unevaluated,
             decision=Decision(outcome=Outcome.ERROR, cleared_rung=None,
                               rationale=("Inventaris maskapai sedang tidak "
@@ -177,7 +177,7 @@ def run(traveler_id: str) -> RecoveryResult:
     notification = clock.stage("notifier", _draft)
 
     return RecoveryResult(
-        cart_id=cart_id, traveler_name=history.name,
+        cart_id=cart_id, traveler_id=traveler_id, traveler_name=history.name,
         classification=classification, gate=gate_result, decision=decision,
         hold=hold, notification=notification, timings=tuple(clock.timings),
         original_total_idr=original_total,

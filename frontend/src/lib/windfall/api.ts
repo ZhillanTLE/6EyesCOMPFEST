@@ -5,7 +5,7 @@
  * nothing here needs a backend hostname and no API origin ends up in the
  * client bundle.
  */
-import type { QueueResponse, RecoveryResult } from "./types";
+import type { QueueResponse, RecoveryResult, SendReceipt } from "./types";
 
 async function json<T>(res: Response): Promise<T> {
   if (!res.ok) {
@@ -31,6 +31,26 @@ export async function runRecovery(
 ): Promise<RecoveryResult> {
   return json<RecoveryResult>(
     await fetch("/api/recovery/run", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ travelerId }),
+      signal,
+    }),
+  );
+}
+
+/**
+ * Deliver the approved notification.
+ *
+ * Deliberately a separate call from runRecovery. Reading a trace must never
+ * send anything; delivery needs its own explicit click.
+ */
+export async function approveAndSend(
+  travelerId: string,
+  signal?: AbortSignal,
+): Promise<SendReceipt> {
+  return json<SendReceipt>(
+    await fetch("/api/recovery/send", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ travelerId }),

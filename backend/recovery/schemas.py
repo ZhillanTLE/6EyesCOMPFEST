@@ -222,6 +222,7 @@ class NotificationDraft:
 @dataclass(frozen=True)
 class RecoveryResult:
     cart_id: str
+    traveler_id: str
     traveler_name: str
     classification: Classification
     gate: GateResult

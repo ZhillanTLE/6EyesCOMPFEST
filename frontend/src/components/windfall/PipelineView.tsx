@@ -9,9 +9,10 @@
  * drafted copy. Giving them a shared layout would flatten three different
  * kinds of work into one shape.
  */
-import type { RecoveryResult } from "@/lib/windfall/types";
+import type { RecoveryResult, SendReceipt } from "@/lib/windfall/types";
 import { plainPct, seconds } from "@/lib/windfall/format";
 import { stageStatus, useReplay } from "@/lib/windfall/replay";
+import { ApprovalBar } from "./ApprovalBar";
 import { AgentStage } from "./AgentStage";
 import { FareLedger } from "./FareLedger";
 import { OutcomeCard, OutcomeNote } from "./OutcomeCard";
@@ -25,12 +26,22 @@ function stageMs(result: RecoveryResult, stage: string): number {
 export function PipelineView({
   result,
   onBack,
+  receipt,
+  sending,
+  onApprove,
+  replayNonce,
+  onReplay,
 }: {
   result: RecoveryResult;
   onBack: () => void;
+  receipt: SendReceipt | null;
+  sending: boolean;
+  onApprove: () => void;
+  replayNonce: number;
+  onReplay: () => void;
 }) {
   const halted = result.decision.outcome === "error";
-  const { phase, revealed } = useReplay(result);
+  const { phase, revealed } = useReplay(result, true, replayNonce);
   const { classification, gate, decision, hold, notification } = result;
 
   const shown = phase >= 3 ? decision.attempts.length : revealed;
@@ -208,6 +219,20 @@ export function PipelineView({
           gate={gate}
           originalTotal={result.originalTotalIdr}
           threshold={classification.threshold}
+        />
+      )}
+
+      {phase >= 4 && (
+        <ApprovalBar
+          receipt={receipt}
+          sending={sending}
+          disabled={!notification}
+          disabledReason={
+            "This cart produced no notification, so there is nothing to approve. " +
+            "Carrier inventory was unavailable and the pipeline halted."
+          }
+          onApprove={onApprove}
+          onReplay={onReplay}
         />
       )}
 

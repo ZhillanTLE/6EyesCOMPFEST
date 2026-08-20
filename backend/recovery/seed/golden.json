@@ -137,6 +137,7 @@
   "results": {
     "wf-01": {
       "cartId": "cart-wf-01",
+      "travelerId": "wf-01",
       "travelerName": "Prasetyo Wibowo",
       "classification": {
         "tier": "Premium",
@@ -204,6 +205,7 @@
     },
     "wf-02": {
       "cartId": "cart-wf-02",
+      "travelerId": "wf-02",
       "travelerName": "Ayu Kartika",
       "classification": {
         "tier": "Premium",
@@ -331,6 +333,7 @@
     },
     "wf-03": {
       "cartId": "cart-wf-03",
+      "travelerId": "wf-03",
       "travelerName": "Bagus Hartono",
       "classification": {
         "tier": "Comfort",
@@ -439,6 +442,7 @@
     },
     "wf-04": {
       "cartId": "cart-wf-04",
+      "travelerId": "wf-04",
       "travelerName": "Intan Maharani",
       "classification": {
         "tier": "Value",
@@ -565,6 +569,7 @@
     },
     "wf-05": {
       "cartId": "cart-wf-05",
+      "travelerId": "wf-05",
       "travelerName": "Rizky Firmansyah",
       "classification": {
         "tier": "Comfort",
@@ -691,6 +696,7 @@
     },
     "wf-06": {
       "cartId": "cart-wf-06",
+      "travelerId": "wf-06",
       "travelerName": "Dewi Anggraini",
       "classification": {
         "tier": "Comfort",

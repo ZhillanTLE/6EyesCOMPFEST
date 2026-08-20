@@ -10,8 +10,8 @@
  */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BrowseView, PipelineView } from "@/components/windfall";
-import { fetchQueue, runRecovery } from "@/lib/windfall/api";
-import type { QueueEntry, RecoveryResult } from "@/lib/windfall/types";
+import { approveAndSend, fetchQueue, runRecovery } from "@/lib/windfall/api";
+import type { QueueEntry, RecoveryResult, SendReceipt } from "@/lib/windfall/types";
 
 export default function RecoveryConsole() {
   const [queue, setQueue] = useState<QueueEntry[]>([]);
@@ -19,6 +19,9 @@ export default function RecoveryConsole() {
   const [result, setResult] = useState<RecoveryResult | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [receipt, setReceipt] = useState<SendReceipt | null>(null);
+  const [sending, setSending] = useState(false);
+  const [replayNonce, setReplayNonce] = useState(0);
   const [theme, setTheme] = useState<"light" | "dark">("light");
   const abort = useRef<AbortController | null>(null);
 
@@ -62,6 +65,9 @@ export default function RecoveryConsole() {
     abort.current = ctrl;
     setBusyId(travelerId);
     setError(null);
+    // A fresh run has not been approved. Never carry a receipt across carts.
+    setReceipt(null);
+    setReplayNonce(0);
     try {
       setResult(await runRecovery(travelerId, ctrl.signal));
     } catch (e) {
@@ -75,7 +81,27 @@ export default function RecoveryConsole() {
   const back = useCallback(() => {
     abort.current?.abort();
     setResult(null);
+    setReceipt(null);
   }, []);
+
+  /**
+   * Approval is its own action. Running the pipeline drafts a message; this is
+   * the only path that delivers one.
+   */
+  const approve = useCallback(async () => {
+    if (!result) return;
+    setSending(true);
+    setError(null);
+    try {
+      setReceipt(await approveAndSend(result.travelerId));
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setSending(false);
+    }
+  }, [result]);
+
+  const replay = useCallback(() => setReplayNonce((n) => n + 1), []);
 
   return (
     <div data-wf-theme={theme} className="wf-root">
@@ -156,7 +182,15 @@ export default function RecoveryConsole() {
         )}
 
         {result ? (
-          <PipelineView result={result} onBack={back} />
+          <PipelineView
+            result={result}
+            onBack={back}
+            receipt={receipt}
+            sending={sending}
+            onApprove={approve}
+            replayNonce={replayNonce}
+            onReplay={replay}
+          />
         ) : (
           <BrowseView queue={queue} busyId={busyId} onSelect={select} />
         )}

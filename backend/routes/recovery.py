@@ -19,7 +19,7 @@ import logging
 
 from flask import Blueprint, jsonify, request
 
-from backend.recovery import pipeline, providers, repository
+from backend.recovery import pipeline, providers, repository, sender
 
 logger = logging.getLogger(__name__)
 
@@ -67,6 +67,58 @@ def run():
         return jsonify({"error": "Pipeline failed: {}".format(exc)}), 500
 
     return jsonify(result.to_dict()), 200
+
+
+@bp.post("/send")
+def send():
+    """
+    Deliver the approved notification. Reachable ONLY from an explicit approval
+    action -- never from the pipeline run.
+
+    That separation is the point: an analyst clicking through six travelers to
+    read their reasoning must not put six emails in anyone's inbox. Running the
+    pipeline drafts; a second, deliberate click delivers.
+
+    Delivery is synchronous inside this request. No queue, no worker, no
+    scheduler, so it stays inside the backend scope rule -- the approval click
+    is a confirmation on a side-effecting action, not a second input that
+    triggers the AI.
+
+    Every send routes to DEMO_RECIPIENT. Seeded travelers are synthetic and
+    their addresses are invented; delivering to them would bounce.
+    """
+    data = request.get_json(silent=True) or {}
+    traveler_id = data.get("travelerId") or data.get("traveler_id")
+    if not traveler_id:
+        return jsonify({"error": "Missing 'travelerId' in request body"}), 400
+
+    try:
+        result = pipeline.run(traveler_id)
+    except KeyError:
+        return jsonify({"error": "Unknown traveler: {}".format(traveler_id)}), 404
+
+    if result.notification is None:
+        return jsonify({
+            "error": "Nothing to send: the pipeline produced no notification.",
+            "outcome": result.decision.outcome,
+        }), 409
+
+    receipt = sender.send_email(
+        result.notification, result.traveler_name, result.cart_id)
+    status = 200 if receipt.state != sender.SendState.FAILED else 502
+    return jsonify({
+        "state": receipt.state,
+        "channel": receipt.channel,
+        "recipient": receipt.recipient,
+        "subject": receipt.subject,
+        "detail": receipt.detail,
+        "travelerName": result.traveler_name,
+        "outcome": result.decision.outcome,
+        # WhatsApp is preview-only for penyisihan: the Business API needs
+        # verified business status and pre-approved templates.
+        "whatsapp": {"state": "preview_only",
+                     "detail": "WhatsApp Business API is out of scope for this stage."},
+    }), status
 
 
 @bp.get("/health")
