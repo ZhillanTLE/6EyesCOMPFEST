@@ -1,0 +1,165 @@
+/*
+ * Windfall design tokens.
+ *
+ * THE ONLY FILE IN THE CONSOLE THAT CONTAINS A HEX LITERAL. Components
+ * reference var(--wf-*) exclusively, so a theme change happens here and
+ * nowhere else.
+ *
+ * Values transcribed from the design-system bundle
+ * (design_system/tokens/*.css) and the dark palette from the console
+ * prototype. Radii are deliberately not snapped to a 4px grid; they are
+ * copied from the source.
+ */
+
+:root {
+  /* Ink ramp — text and solid marks */
+  --wf-ink: #14161a;
+  --wf-ink-2: #4a5058;
+  --wf-ink-3: #878e98;
+
+  /* Surfaces */
+  --wf-paper: #fbfaf8;
+  --wf-white: #ffffff;
+  --wf-surface: #f6f5f2;
+  --wf-surface-2: #fafaf8;
+
+  /* Lines */
+  --wf-rule: #e3e1dd;
+  --wf-border: #cfccc6;
+
+  /* Semantic — rationed to ledger status and price markers only */
+  --wf-signal: #5f7d4e;
+  --wf-signal-ink: #1b4d3e;
+  --wf-signal-tint: #e8f0ec;
+  --wf-halt: #8a2b2b;
+  --wf-halt-tint: #f6eaea;
+  --wf-amber: #8a5a12;
+  --wf-amber-tint: #faf0dc;
+  --wf-amber-border: rgba(138, 90, 18, 0.28);
+
+  /* WhatsApp mock shell */
+  --wf-wa-bg: #161717;
+  --wf-wa-hd: #242525;
+
+  /* Tier tints — browse chips and filters */
+  --wf-tier-value-bg: #e3edf9;
+  --wf-tier-value-ink: #2c5ce0;
+  --wf-tier-comfort-bg: #f6ecd8;
+  --wf-tier-comfort-ink: #8a5a12;
+  --wf-tier-premium-bg: #eee6f6;
+  --wf-tier-premium-ink: #5b3e8e;
+  --wf-tier-cold-bg: #eef0ec;
+  --wf-tier-cold-ink: #5c625c;
+
+  /* Actions */
+  --wf-cta: #2c5ce0;
+  --wf-cta-ink: #ffffff;
+  --wf-approve: #5f7d4e;
+
+  --wf-shadow-card: 0 1px 2px 0 rgba(20, 22, 26, 0.04);
+  --wf-shadow-bubble: 0 1px 1px 0 rgba(20, 22, 26, 0.07);
+
+  /* Radii */
+  --wf-radius-sm: 3px;
+  --wf-radius-md: 6px;
+  --wf-radius-lg: 10px;
+  --wf-radius-avatar: 11px;
+
+  /* Rings and hairlines */
+  --wf-border-hair: 1px solid var(--wf-rule);
+  --wf-border-frame: 1px solid var(--wf-border);
+  --wf-ring-ink: inset 0 0 0 1px var(--wf-ink);
+  --wf-ring-rule: inset 0 0 0 1px var(--wf-rule);
+  --wf-ring-border: inset 0 0 0 1px var(--wf-border);
+
+  /* Spacing steps, as transcribed */
+  --wf-space-1: 4px;
+  --wf-space-2: 7px;
+  --wf-space-3: 12px;
+  --wf-space-4: 16px;
+  --wf-space-5: 17px;
+  --wf-space-6: 23px;
+  --wf-space-7: 29px;
+
+  --wf-track-eyebrow: 0.09em;
+}
+
+/*
+ * Dark theme. Explicit opt-in via data-theme so the console does not flip
+ * under the analyst mid-review because the OS changed at sunset.
+ */
+[data-wf-theme="dark"] {
+  --wf-ink: #edeae5;
+  --wf-ink-2: #b0b5bc;
+  --wf-ink-3: #7b838d;
+  --wf-paper: #0f1114;
+  --wf-white: #171a1e;
+  --wf-surface: #1d2126;
+  --wf-surface-2: #191c21;
+  --wf-rule: #272c33;
+  --wf-border: #39404a;
+  --wf-signal: #7fa766;
+  --wf-signal-ink: #8fbf74;
+  --wf-signal-tint: #18221a;
+  --wf-halt: #c2615e;
+  --wf-halt-tint: #251719;
+  --wf-amber: #d6a94e;
+  --wf-amber-tint: #241d10;
+  --wf-amber-border: rgba(214, 169, 78, 0.32);
+  --wf-wa-bg: #0d0e0e;
+  --wf-wa-hd: #1b1c1c;
+  --wf-tier-value-bg: #16233a;
+  --wf-tier-value-ink: #8fb0f5;
+  --wf-tier-comfort-bg: #2a2213;
+  --wf-tier-comfort-ink: #ddb05c;
+  --wf-tier-premium-bg: #241b36;
+  --wf-tier-premium-ink: #bc9aec;
+  --wf-tier-cold-bg: #1d211f;
+  --wf-tier-cold-ink: #9ca69c;
+  --wf-shadow-card: 0 1px 2px 0 rgba(0, 0, 0, 0.45);
+  --wf-shadow-bubble: 0 1px 1px 0 rgba(0, 0, 0, 0.5);
+}
+
+.wf-root {
+  background: var(--wf-paper);
+  color: var(--wf-ink);
+  font-family: var(--font-archivo), system-ui, sans-serif;
+  min-height: 100vh;
+}
+
+.wf-mono {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+}
+.wf-serif {
+  font-family: var(--font-instrument-serif), ui-serif, Georgia, serif;
+}
+
+/* Uppercase tracked mono is reserved for column headers and status pills. */
+.wf-eyebrow {
+  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-size: 10px;
+  line-height: 1.6;
+  letter-spacing: var(--wf-track-eyebrow);
+  text-transform: uppercase;
+  color: var(--wf-ink-3);
+}
+
+@keyframes wf-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 0.85; }
+}
+@keyframes wf-fade {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes wf-spin {
+  to { transform: rotate(360deg); }
+}
+
+.wf-skeleton { animation: wf-pulse 1.4s ease-in-out infinite; }
+.wf-fade { animation: wf-fade 0.4s ease both; }
+.wf-spin { animation: wf-spin 0.7s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .wf-skeleton, .wf-fade, .wf-spin { animation: none; }
+}
