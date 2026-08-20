@@ -125,3 +125,42 @@ class TestCuratorBoundary(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestFixtureAndLiveActuallyDiffer(unittest.TestCase):
+    """
+    The two modes must take different code paths.
+
+    An earlier revision always used the fixture provider and only changed the
+    `source` label, so WINDFALL_FIXTURES=0 dropped the "replaying capture"
+    badge while still replaying the capture. That is exactly the failure the
+    flag exists to prevent -- "cached for reliability" quietly becoming
+    "faked" -- so it gets a test.
+    """
+
+    def setUp(self):
+        self._env = dict(os.environ)
+
+    def tearDown(self):
+        os.environ.clear()
+        os.environ.update(self._env)
+        from backend.recovery import providers
+        providers._fixtures = None
+
+    def test_fixture_mode_replays_the_capture(self):
+        os.environ["WINDFALL_FIXTURES"] = "1"
+        result = pipeline.run("wf-02")
+        self.assertEqual(result.source, "fixture")
+        self.assertEqual(result.decision.outcome, "rebuild")
+
+    def test_live_mode_without_credentials_fails_rather_than_replaying(self):
+        """With no keys the honest result is an upstream failure. Falling back
+        to fixtures here would make live mode indistinguishable from replay."""
+        os.environ["WINDFALL_FIXTURES"] = "0"
+        os.environ["DUFFEL_API_KEY"] = ""
+        os.environ["RAPIDAPI_KEY"] = ""
+        result = pipeline.run("wf-02")
+        self.assertEqual(result.source, "live")
+        self.assertEqual(result.decision.outcome, "error")
+        # Crucially NOT the captured rebuild: no fixture leaked through.
+        self.assertEqual(result.decision.saving_idr, 0)

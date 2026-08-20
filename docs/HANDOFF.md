@@ -215,21 +215,27 @@ vendored and copied to `public/windfall/agents/` but `AgentStage` never renders
 them. The design crossfades them by opacity with all three stacked — never swap
 `src`, which flashes a broken image.
 
-**Gemini is not wired.** `classifier_agent.py` / `notification_curator.py` do
-not exist. Reasoning lines and notification copy come from deterministic
-templates in `pipeline.py` and `notifications.py`, shaped so a Gemini call can
-substitute against the same contract with a fallback. The paper claims three
-Gemini agents; there are currently zero. **This is the largest gap between the
-paper and the code.**
+**Gemini agents exist but have never made a real call.** All three are wired
+(`classifier_agent.py`, `searcher_agent.py`, `notification_curator.py`) behind
+`llm.py`, with deterministic fallbacks. Inference is skipped for three reasons,
+each survivable and each reported in the trace: `MOCK_LLM=true`,
+`WINDFALL_FIXTURES=1`, or no `GEMINI_API_KEY`. **No key has ever been
+configured, so the live prompts are unexercised** — the JSON contracts, the
+one-step tier cap and the emoji stripper have only been tested against their
+fallbacks. Set `GEMINI_API_KEY`, run with `WINDFALL_FIXTURES=0`, and check that
+`reasonedBy`/`writtenBy` report `gemini` rather than `deterministic`.
 
-**MCP tools not extended.** `backend/mcp_server.py` already exposes
-`search_flights` and `search_hotels` over real FastMCP + stdio, and
-`gemini_agent.py` genuinely spawns it. Still needed: `read_traveler_history`
-and `check_hold_eligibility`. `create_hold` must **never** be added — it is a
-real write against airline inventory.
+**MCP tools complete.** All four from paper section 5.1 are registered with
+FastMCP and dispatchable in-process. `create_hold` is absent and a test keeps
+it absent. `WINDFALL_MCP=stdio` is declared in `mcp_tools.py` but the stdio
+routing itself is **not implemented** — the flag currently does nothing.
 
-**`LiveProvider` untested.** Written, never run against a real API. Only
-`FixtureProvider` has been exercised.
+**`LiveProvider` wired but never run against a real API.** `WINDFALL_FIXTURES=0`
+now genuinely takes the live path (an earlier revision always used fixtures and
+only changed the label). Without keys it fails honestly with an `error`
+outcome. With keys, nothing is known: the ladder may not clear, and the seed
+was calibrated against fixtures, so **wf-02 clearing tau=15% on live prices is
+unverified**.
 
 Smaller: `MOCK_LLM` documented but unimplemented; no `README.md` run
 instructions; `docs/windfall-paper.md` errata are applied in the markdown but

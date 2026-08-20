@@ -122,17 +122,15 @@ class LiveProvider:
         candidates = self.search_hotels(
             city=h.city, area=h.area, stars=target_stars,
             check_in=h.check_in, check_out=h.check_out,
+            exclude=h.name if exclude_current else None,
         ) or []
-        if exclude_current:
-            candidates = [c for c in candidates
-                          if c.get("name", "").strip().lower() != h.name.strip().lower()]
         if not candidates:
             return None
 
-        best = min(candidates, key=lambda c: c.get("price_idr", 1 << 62))
+        best = min(candidates, key=lambda c: c.get("priceIdr", 1 << 62))
         hotel = HotelSpec(best.get("name", "?"), target_stars, h.city,
                           best.get("area", h.area), h.check_in, h.check_out,
-                          int(best.get("price_idr", 0)))
+                          int(best.get("priceIdr", 0)))
         return RungCandidate(self.flight_idr + hotel.price_idr, hotel=hotel)
 
 

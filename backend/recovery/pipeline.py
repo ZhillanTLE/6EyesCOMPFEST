@@ -39,6 +39,29 @@ class _Clock:
         return result
 
 
+def _live_prices(row: dict):
+    """Price the abandoned cart from live inventory, through the MCP tools."""
+    f, h = row["cart"]["flight"], row["cart"]["hotel"]
+
+    flights = mcp_tools.call_tool(
+        "search_flights", origin=f["origin"], destination=f["destination"],
+        depart_date=f["departDate"], cabin=f["cabin"])
+    if not flights:
+        raise providers.CarrierInventoryUnavailable("no flight offers returned")
+    flight_idr = min(int(o.get("priceIdr", 0) or 0) for o in flights)
+
+    hotels = mcp_tools.call_tool(
+        "search_hotels", city=h["city"], area=h["area"], stars=h["stars"],
+        check_in=h["checkIn"], check_out=h["checkOut"])
+    if not hotels:
+        raise providers.CarrierInventoryUnavailable("no hotel inventory returned")
+    hotel_idr = min(int(o.get("priceIdr", 0) or 0) for o in hotels)
+
+    if flight_idr <= 0 or hotel_idr <= 0:
+        raise providers.CarrierInventoryUnavailable("inventory returned no usable price")
+    return flight_idr, hotel_idr
+
+
 def run(traveler_id: str) -> RecoveryResult:
     history, row = repository.get(traveler_id)
     cart_id = row["cart"]["cartId"]
@@ -46,17 +69,42 @@ def run(traveler_id: str) -> RecoveryResult:
     captured = providers.fixtures().get("timings_ms", {}).get(cart_id) if fixture_mode else None
     clock = _Clock(captured)
 
-    # ── Prices. Live re-query, or captured totals in fixture mode. ───────────
+    # ── Prices ──────────────────────────────────────────────────────────────
+    # Fixture mode replays captured totals; live mode re-queries through the
+    # MCP tools. The two must genuinely differ: an earlier revision always used
+    # the fixture provider and only changed the `source` label, which meant
+    # WINDFALL_FIXTURES=0 dropped the "replaying capture" badge while still
+    # replaying the capture. That is precisely the "cached for reliability
+    # quietly becoming faked" failure the flag exists to prevent.
     error: Optional[str] = None
     provider = None
     flight_idr = hotel_idr = 0
     alternative_total = None
-    try:
-        provider = providers.FixtureProvider(cart_id)
-        flight_idr, hotel_idr = provider.prices()
-        alternative_total = provider.alternative()
-    except providers.CarrierInventoryUnavailable as exc:
-        error = str(exc)
+
+    if fixture_mode:
+        try:
+            provider = providers.FixtureProvider(cart_id)
+            flight_idr, hotel_idr = provider.prices()
+            alternative_total = provider.alternative()
+        except providers.CarrierInventoryUnavailable as exc:
+            error = str(exc)
+    else:
+        try:
+            flight_idr, hotel_idr = _live_prices(row)
+            provider = providers.LiveProvider(
+                cart_id, flight_idr,
+                lambda **kw: mcp_tools.call_tool("search_hotels", **kw))
+            # No live source proposes an alternative destination; that rung is
+            # fixture-only until the roadmap work in section 5.3 lands.
+            alternative_total = None
+        except providers.CarrierInventoryUnavailable as exc:
+            error = str(exc)
+        except Exception as exc:
+            # A live search that cannot price the cart is an upstream failure,
+            # reported as one rather than silently falling back to fixtures --
+            # a fallback here would make live mode indistinguishable from
+            # replay, which is the whole thing being guarded against.
+            error = "carrier_inventory_unavailable: {}".format(exc)
 
     cart = repository.build_cart(row, flight_idr, hotel_idr)
     original_total = cart.total_idr
