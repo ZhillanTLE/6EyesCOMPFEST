@@ -60,6 +60,14 @@ def all_travelers() -> List[dict]:
     return list(_load()["travelers"])
 
 
+def traveler_ids() -> List[str]:
+    # Just the ids, for validating a --cart argument. Exists so callers that
+    # only need to check an id never write `for ... in all_travelers()` --
+    # that is the shape the scope check flags as a bulk runner, and the right
+    # response is to not write it rather than to exempt it.
+    return [t["traveler_id"] for t in _load()["travelers"]]
+
+
 def reference_spend() -> List[float]:
     """The distribution the percentile tier is taken against."""
     field = _load().get("reference_distribution_field", "usual_spend")

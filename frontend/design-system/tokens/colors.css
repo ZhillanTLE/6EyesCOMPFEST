@@ -1,0 +1,37 @@
+/* Windfall — color tokens.
+   Warm–cool neutral base. Semantic colors are rationed: they appear only on
+   ledger status (Signal/Halt) and preview/price-deadline markers (Hold). */
+:root {
+  /* Ink ramp — text & solid marks */
+  --wf-ink: #14161A;        /* primary text, solid buttons, mark */
+  --wf-ink-2: #4A5058;      /* secondary text, message body */
+  --wf-ink-3: #878E98;      /* labels, meta, timestamps */
+
+  /* Surfaces */
+  --wf-paper: #FBFAF8;      /* page background */
+  --wf-white: #FFFFFF;      /* card / frame surface */
+  --wf-surface: #F6F5F2;    /* frame bar, inset panels */
+  --wf-surface-2: #FAFAF8;  /* mail header */
+
+  /* Lines */
+  --wf-rule: #E3E1DD;       /* 1px hairline divider */
+  --wf-border: #CFCCC6;     /* stronger frame outline */
+
+  /* Semantic — rationed */
+  --wf-signal: #5F7D4E;         /* threshold met · savings (green) */
+  --wf-signal-ink: #1B4D3E;     /* green text on tint */
+  --wf-signal-tint: #E8F0EC;    /* passed ledger row */
+  --wf-halt: #8A2B2B;           /* threshold not met (brick red) */
+  --wf-halt-tint: #F6EAEA;      /* failed ledger row */
+  --wf-hold: #8A5A12;           /* preview label · price deadline (amber) */
+  --wf-hold-tint: #FAF0DC;      /* preview-tag background */
+  --wf-hold-border: rgba(138,90,18,0.28);
+
+  /* WhatsApp surface (Zona 3 dark mock) */
+  --wf-wa-bg: #161717;
+  --wf-wa-hd: #242525;
+
+  /* Shadows */
+  --wf-shadow-card: 0 1px 2px 0 rgba(20,22,26,0.04);
+  --wf-shadow-bubble: 0 1px 1px 0 rgba(20,22,26,0.07);
+}

@@ -1,0 +1,25 @@
+/* Windfall — spacing, radii, borders.
+   Values transcribed exactly from the source; not snapped to a 4/8px grid. */
+:root {
+  /* Radii */
+  --wf-radius-sm: 3px;    /* pills, tags, small ledger */
+  --wf-radius-md: 6px;    /* cards, panels, buttons, ledger frame */
+  --wf-radius-lg: 10px;   /* product frames, big cards */
+  --wf-radius-avatar: 11px; /* avatar chips */
+
+  /* Borders */
+  --wf-border-hair: 1px solid var(--wf-rule);
+  --wf-border-frame: 1px solid var(--wf-border);
+  --wf-ring-ink: inset 0 0 0 1px var(--wf-ink);   /* selected card ring */
+  --wf-ring-rule: inset 0 0 0 1px var(--wf-rule);
+  --wf-ring-border: inset 0 0 0 1px var(--wf-border);
+
+  /* Spacing steps seen in the sheet */
+  --wf-space-1: 4px;
+  --wf-space-2: 7px;
+  --wf-space-3: 12px;
+  --wf-space-4: 16px;
+  --wf-space-5: 17px;
+  --wf-space-6: 23px;
+  --wf-space-7: 29px;
+}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none">
+<defs><symbol id="chev" viewBox="0 0 9.2 4.6"><path d="M -1.22 3.38 C -1.893 4.054 -1.893 5.146 -1.22 5.82 C -0.546 6.493 0.546 6.493 1.22 5.82 L 0 4.6 L -1.22 3.38 Z M 4.6 0 L 5.82 -1.22 C 5.146 -1.893 4.054 -1.893 3.38 -1.22 L 4.6 0 Z M 7.98 5.82 C 8.654 6.493 9.746 6.493 10.42 5.82 C 11.093 5.146 11.093 4.054 10.42 3.38 L 9.2 4.6 L 7.98 5.82 Z M 0 4.6 L 1.22 5.82 L 5.82 1.22 L 4.6 0 L 3.38 -1.22 L -1.22 3.38 L 0 4.6 Z M 4.6 0 L 3.38 1.22 L 7.98 5.82 L 9.2 4.6 L 10.42 3.38 L 5.82 -1.22 L 4.6 0 Z" fill="currentColor"></path></symbol></defs>
+<rect width="48" height="48" rx="11" fill="#14161A"></rect>
+<use href="#chev" x="13" y="12" width="22" height="11" color="#FBFAF8"></use>
+<use href="#chev" x="16" y="23" width="16" height="8" color="#878E98"></use>
+<use href="#chev" x="18" y="31" width="12" height="6" color="#5A5E66"></use>
+</svg>

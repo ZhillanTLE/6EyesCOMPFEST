@@ -1,0 +1,6 @@
+/* Windfall — webfonts.
+   Instrument Serif, Archivo, IBM Plex Mono are Google Fonts.
+   SUBSTITUTION NOTE: the source .fig references these three families by name
+   but ships no binaries; we load the Google-hosted versions here. Swap for
+   self-hosted files if offline/self-hosting is required. */
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap');

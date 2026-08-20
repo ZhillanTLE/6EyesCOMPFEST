@@ -20,7 +20,11 @@ npm-debug.log*
 # Probe output
 backend/duffel_hold_probe_result.json
 
-# Design handoff bundle and paper drafts (reference material, not source)
+# The design system is VENDORED at frontend/design-system/ and stays TRACKED:
+# a judge cloning this repo must be able to build without a directory that
+# only exists on one machine.
+
+# Raw handoff bundle (superseded by the vendored copy) and paper drafts
 windfall-design-component-review/
 Windfall Design Comp Review/
 *.pdf

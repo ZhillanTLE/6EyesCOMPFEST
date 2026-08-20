@@ -1,47 +1,51 @@
 /*
- * Windfall design tokens.
+ * Windfall console styles.
  *
- * THE ONLY FILE IN THE CONSOLE THAT CONTAINS A HEX LITERAL. Components
- * reference var(--wf-*) exclusively, so a theme change happens here and
- * nowhere else.
+ * The palette, type scale, radii and spacing are NOT defined here -- they are
+ * imported from the vendored design system at frontend/design-system/, which
+ * is the bundle's own tokens/*.css copied verbatim. An earlier revision of
+ * this file hand-transcribed those values, which made it an undocumented fork
+ * with no way to detect drift. Importing the real files removes that risk.
  *
- * Values transcribed from the design-system bundle
- * (design_system/tokens/*.css) and the dark palette from the console
- * prototype. Radii are deliberately not snapped to a 4px grid; they are
- * copied from the source.
+ * What lives here is only what the bundle does not ship:
+ *   1. font-token rebinding onto next/font (see note below)
+ *   2. a dark theme (the bundle is light-only)
+ *   3. tokens the console needs that the bundle never defined
+ *   4. keyframes and utility classes
+ *
+ * Every hex literal below belongs to category 2 or 3. Nothing here restates a
+ * value the bundle already owns.
  */
 
+@import "../../../design-system/tokens/colors.css";
+@import "../../../design-system/tokens/typography.css";
+@import "../../../design-system/tokens/spacing.css";
+
+/*
+ * tokens/fonts.css is deliberately NOT imported. It pulls Archivo, IBM Plex
+ * Mono and Instrument Serif from the Google Fonts CDN, and the console has to
+ * render identically inside docker compose with no outbound network. The same
+ * three families are self-hosted at build time by next/font in
+ * recovery/layout.tsx; the tokens below rebind the design system's own names
+ * onto those, so components keep referring to --wf-font-* and nothing else
+ * changes.
+ */
 :root {
-  /* Ink ramp — text and solid marks */
-  --wf-ink: #14161a;
-  --wf-ink-2: #4a5058;
-  --wf-ink-3: #878e98;
+  --wf-font-serif: var(--font-instrument-serif), ui-serif, Georgia, "Times New Roman", serif;
+  --wf-font-sans: var(--font-archivo), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --wf-font-mono: var(--font-plex-mono), ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
-  /* Surfaces */
-  --wf-paper: #fbfaf8;
-  --wf-white: #ffffff;
-  --wf-surface: #f6f5f2;
-  --wf-surface-2: #fafaf8;
+  /*
+   * Amber alias. The bundle calls this --wf-hold, meaning the amber marker on
+   * previews and price deadlines. That name collides with Hold Order, the
+   * airline price freeze, so the console refers to it as amber. The bundle
+   * token stays the single source of the actual colour.
+   */
+  --wf-amber: var(--wf-hold);
+  --wf-amber-tint: var(--wf-hold-tint);
+  --wf-amber-border: var(--wf-hold-border);
 
-  /* Lines */
-  --wf-rule: #e3e1dd;
-  --wf-border: #cfccc6;
-
-  /* Semantic — rationed to ledger status and price markers only */
-  --wf-signal: #5f7d4e;
-  --wf-signal-ink: #1b4d3e;
-  --wf-signal-tint: #e8f0ec;
-  --wf-halt: #8a2b2b;
-  --wf-halt-tint: #f6eaea;
-  --wf-amber: #8a5a12;
-  --wf-amber-tint: #faf0dc;
-  --wf-amber-border: rgba(138, 90, 18, 0.28);
-
-  /* WhatsApp mock shell */
-  --wf-wa-bg: #161717;
-  --wf-wa-hd: #242525;
-
-  /* Tier tints — browse chips and filters */
+  /* Tier tints. Inline in the source prototype, never promoted to tokens. */
   --wf-tier-value-bg: #e3edf9;
   --wf-tier-value-ink: #2c5ce0;
   --wf-tier-comfort-bg: #f6ecd8;
@@ -51,42 +55,16 @@
   --wf-tier-cold-bg: #eef0ec;
   --wf-tier-cold-ink: #5c625c;
 
-  /* Actions */
+  /* Actions. The prototype hard-coded these at each call site. */
   --wf-cta: #2c5ce0;
   --wf-cta-ink: #ffffff;
   --wf-approve: #5f7d4e;
-
-  --wf-shadow-card: 0 1px 2px 0 rgba(20, 22, 26, 0.04);
-  --wf-shadow-bubble: 0 1px 1px 0 rgba(20, 22, 26, 0.07);
-
-  /* Radii */
-  --wf-radius-sm: 3px;
-  --wf-radius-md: 6px;
-  --wf-radius-lg: 10px;
-  --wf-radius-avatar: 11px;
-
-  /* Rings and hairlines */
-  --wf-border-hair: 1px solid var(--wf-rule);
-  --wf-border-frame: 1px solid var(--wf-border);
-  --wf-ring-ink: inset 0 0 0 1px var(--wf-ink);
-  --wf-ring-rule: inset 0 0 0 1px var(--wf-rule);
-  --wf-ring-border: inset 0 0 0 1px var(--wf-border);
-
-  /* Spacing steps, as transcribed */
-  --wf-space-1: 4px;
-  --wf-space-2: 7px;
-  --wf-space-3: 12px;
-  --wf-space-4: 16px;
-  --wf-space-5: 17px;
-  --wf-space-6: 23px;
-  --wf-space-7: 29px;
-
-  --wf-track-eyebrow: 0.09em;
 }
 
 /*
- * Dark theme. Explicit opt-in via data-theme so the console does not flip
- * under the analyst mid-review because the OS changed at sunset.
+ * Dark theme. Explicit opt-in via data-wf-theme rather than
+ * prefers-color-scheme, so the console does not flip under the analyst
+ * mid-review because the OS reached sunset.
  */
 [data-wf-theme="dark"] {
   --wf-ink: #edeae5;
@@ -103,9 +81,9 @@
   --wf-signal-tint: #18221a;
   --wf-halt: #c2615e;
   --wf-halt-tint: #251719;
-  --wf-amber: #d6a94e;
-  --wf-amber-tint: #241d10;
-  --wf-amber-border: rgba(214, 169, 78, 0.32);
+  --wf-hold: #d6a94e;
+  --wf-hold-tint: #241d10;
+  --wf-hold-border: rgba(214, 169, 78, 0.32);
   --wf-wa-bg: #0d0e0e;
   --wf-wa-hd: #1b1c1c;
   --wf-tier-value-bg: #16233a;
@@ -123,20 +101,16 @@
 .wf-root {
   background: var(--wf-paper);
   color: var(--wf-ink);
-  font-family: var(--font-archivo), system-ui, sans-serif;
+  font-family: var(--wf-font-sans);
   min-height: 100vh;
 }
 
-.wf-mono {
-  font-family: var(--font-plex-mono), ui-monospace, monospace;
-}
-.wf-serif {
-  font-family: var(--font-instrument-serif), ui-serif, Georgia, serif;
-}
+.wf-mono { font-family: var(--wf-font-mono); }
+.wf-serif { font-family: var(--wf-font-serif); }
 
 /* Uppercase tracked mono is reserved for column headers and status pills. */
 .wf-eyebrow {
-  font-family: var(--font-plex-mono), ui-monospace, monospace;
+  font-family: var(--wf-font-mono);
   font-size: 10px;
   line-height: 1.6;
   letter-spacing: var(--wf-track-eyebrow);
@@ -144,17 +118,15 @@
   color: var(--wf-ink-3);
 }
 
-@keyframes wf-pulse {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 0.85; }
+.wf-root :focus-visible {
+  outline: 2px solid var(--wf-ink);
+  outline-offset: 2px;
+  border-radius: var(--wf-radius-sm);
 }
-@keyframes wf-fade {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: none; }
-}
-@keyframes wf-spin {
-  to { transform: rotate(360deg); }
-}
+
+@keyframes wf-pulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 0.85; } }
+@keyframes wf-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes wf-spin { to { transform: rotate(360deg); } }
 
 .wf-skeleton { animation: wf-pulse 1.4s ease-in-out infinite; }
 .wf-fade { animation: wf-fade 0.4s ease both; }
@@ -162,4 +134,10 @@
 
 @media (prefers-reduced-motion: reduce) {
   .wf-skeleton, .wf-fade, .wf-spin { animation: none; }
+}
+
+/* The prototype was fixed at 1160px; the console has one breakpoint. */
+@media (max-width: 720px) {
+  .wf-h1 { font-size: 30px !important; }
+  .wf-grid-2 { grid-template-columns: 1fr !important; }
 }

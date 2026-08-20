@@ -1,0 +1,25 @@
+/* Windfall — typography tokens.
+   Three roles. Serif (Instrument Serif) only for the product name and section
+   headings, used sparingly. Sans (Archivo) for body, labels, buttons. Mono
+   (IBM Plex Mono) for all numbers, codes, reasoning, status — digits align. */
+:root {
+  --wf-font-serif: "Instrument Serif", ui-serif, Georgia, "Times New Roman", serif;
+  --wf-font-sans: Archivo, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --wf-font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Type scale (role · size / line-height) */
+  --wf-text-display: 400 56px/1.03 var(--wf-font-serif);   /* mastersheet title, product name */
+  --wf-text-heading: 400 30px/1.15 var(--wf-font-serif);   /* section heading */
+  --wf-text-price:   500 22px/1.38 var(--wf-font-mono);    /* new price on comparison */
+  --wf-text-price-lg:400 19px/1.6  var(--wf-font-mono);    /* cart value */
+  --wf-text-name:    500 15px/1.6  var(--wf-font-sans);    /* traveler name, email subject */
+  --wf-text-body:    400 13px/1.7  var(--wf-font-sans);    /* message body */
+  --wf-text-label:   500 13px/1.6  var(--wf-font-sans);    /* component label, button */
+  --wf-text-reason:  400 12px/1.6  var(--wf-font-mono);    /* reasoning line, booking history */
+  --wf-text-meta:    400 11px/1.6  var(--wf-font-mono);    /* meta, timestamps */
+  --wf-text-eyebrow: 400 10px/1.6  var(--wf-font-mono);    /* eyebrow / status; uppercase + tracking */
+  --wf-text-micro:   400 9px/1.6   var(--wf-font-mono);    /* smallest status / ledger tags */
+
+  /* Uppercase eyebrow tracking */
+  --wf-track-eyebrow: 0.09em;
+}

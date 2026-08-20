@@ -12,3 +12,5 @@ export { FareLedger } from "./FareLedger";
 export { OutcomeCard, OutcomeNote } from "./OutcomeCard";
 export { PricePanel, EmailPreview, WhatsAppPreview } from "./previews";
 export { TravelerCard } from "./TravelerCard";
+export { BrowseView } from "./BrowseView";
+export { PipelineView } from "./PipelineView";
