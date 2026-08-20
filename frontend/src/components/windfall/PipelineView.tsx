@@ -20,6 +20,16 @@ import { HoldPanel } from "./HoldPanel";
 import { EmailPreview, WhatsAppPreview } from "./previews";
 import { Skeleton, TierBadge } from "./primitives";
 
+/* Spoken as each phase lands. Terse on purpose -- a screen reader user hears
+   this four times per run. */
+const PHASE_ANNOUNCEMENT: Record<number, string> = {
+  0: "",
+  1: "Classifier running",
+  2: "Classifier complete. Searcher running.",
+  3: "Searcher complete. Drafting the notification.",
+  4: "Pipeline complete. Decision ready for approval.",
+};
+
 function stageMs(result: RecoveryResult, stage: string): number {
   return result.timings.find((t) => t.stage === stage)?.durationMs ?? 0;
 }
@@ -51,7 +61,10 @@ export function PipelineView({
   const winner = decision.attempts.find((a) => a.cleared);
 
   return (
-    <div className="wf-fade" style={{ display: "flex", flexDirection: "column", gap: 26 }}>
+    <div
+      className="wf-fade"
+      style={{ position: "relative", display: "flex", flexDirection: "column", gap: 26 }}
+    >
       <header
         style={{
           display: "flex",
@@ -89,7 +102,30 @@ export function PipelineView({
         </div>
       </header>
 
-      <section aria-label="Agent reasoning" style={{ display: "flex", flexDirection: "column" }}>
+      {/* The pipeline reveals itself over several seconds. Without a live
+          region that progression is entirely silent to a screen reader, which
+          would leave the trace -- the thing the product is actually selling --
+          inaccessible. */}
+      <p
+        aria-live="polite"
+        aria-atomic="true"
+        style={{
+          position: "absolute",
+          width: 1,
+          height: 1,
+          overflow: "hidden",
+          clip: "rect(0 0 0 0)",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {PHASE_ANNOUNCEMENT[phase]}
+      </p>
+
+      <section
+        aria-label="Agent reasoning"
+        role="list"
+        style={{ display: "flex", flexDirection: "column" }}
+      >
         <AgentStage
           title="Classifier Agent"
           model={classification.reasonedBy.startsWith("gemini") ? "gemini" : "fallback"}

@@ -13,6 +13,15 @@ import { ModelTag } from "./primitives";
 
 export type StageStatus = "waiting" | "running" | "done" | "halted";
 
+/* Spoken status. The visual state is a dot and a colour, neither of which a
+   screen reader conveys. */
+const STATUS_WORD: Record<StageStatus, string> = {
+  waiting: "waiting",
+  running: "running",
+  done: "complete",
+  halted: "halted",
+};
+
 export function AgentStage({
   title,
   model,
@@ -40,6 +49,8 @@ export function AgentStage({
 
   return (
     <div
+      role="listitem"
+      aria-label={`${title}: ${STATUS_WORD[status]}${duration ? `, ${duration}` : ""}`}
       style={{
         position: "relative",
         paddingLeft: 20,

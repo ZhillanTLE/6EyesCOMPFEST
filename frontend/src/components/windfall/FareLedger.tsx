@@ -46,7 +46,12 @@ export function FareLedger({
   footerRight?: string;
 }) {
   return (
+    /* Rendered with flex rather than <table> to match the design system's
+       hairline layout, so the semantics have to be supplied explicitly --
+       otherwise a screen reader hears a wall of unlabelled numbers. */
     <div
+      role="table"
+      aria-label="Rebuild attempts"
       style={{
         borderRadius: "var(--wf-radius-md)",
         overflow: "hidden",
@@ -54,6 +59,7 @@ export function FareLedger({
       }}
     >
       <div
+        role="row"
         className="wf-eyebrow"
         style={{
           display: "flex",
@@ -64,11 +70,11 @@ export function FareLedger({
           borderBottom: "1px solid var(--wf-border)",
         }}
       >
-        <span style={{ width: 22 }}>#</span>
-        <span style={{ flex: 1 }}>Attempt</span>
-        <span style={{ width: 116, textAlign: "right" }}>Total</span>
-        <span style={{ width: 64, textAlign: "right" }}>Delta</span>
-        <span style={{ width: 116, textAlign: "right" }}>Status</span>
+        <span role="columnheader" style={{ width: 22 }}>#</span>
+        <span role="columnheader" style={{ flex: 1 }}>Attempt</span>
+        <span role="columnheader" style={{ width: 116, textAlign: "right" }}>Total</span>
+        <span role="columnheader" style={{ width: 64, textAlign: "right" }}>Delta</span>
+        <span role="columnheader" style={{ width: 116, textAlign: "right" }}>Status</span>
       </div>
 
       {attempts.map((a, i) => {
@@ -76,6 +82,8 @@ export function FareLedger({
         return (
           <div
             key={a.index}
+            role="row"
+            aria-label={`Attempt ${a.index}, ${a.label}, ${STATUS_TEXT[state]}`}
             style={{
               display: "flex",
               alignItems: "center",
@@ -86,10 +94,11 @@ export function FareLedger({
                 i < attempts.length - 1 || footerLeft ? "1px solid var(--wf-rule)" : "none",
             }}
           >
-            <span className="wf-mono" style={{ width: 22, fontSize: 12, color: "var(--wf-ink-3)" }}>
+            <span role="cell" className="wf-mono" style={{ width: 22, fontSize: 12, color: "var(--wf-ink-3)" }}>
               {String(a.index).padStart(2, "0")}
             </span>
             <span
+              role="cell"
               className="wf-mono"
               style={{ flex: 1, minWidth: 0, fontSize: 12, lineHeight: 1.6, color: "var(--wf-ink-2)" }}
             >
@@ -102,18 +111,20 @@ export function FareLedger({
               )}
             </span>
             <span
+              role="cell"
               className="wf-mono"
               style={{ width: 116, textAlign: "right", fontSize: 12, color: "var(--wf-ink)" }}
             >
               {a.totalIdr === null ? "—" : idr(a.totalIdr)}
             </span>
             <span
+              role="cell"
               className="wf-mono"
               style={{ width: 64, textAlign: "right", fontSize: 12, color: DELTA_INK[state] }}
             >
               {pct(a.delta)}
             </span>
-            <span style={{ width: 116, textAlign: "right" }}>
+            <span role="cell" style={{ width: 116, textAlign: "right" }}>
               <StatusPill tone={TONE[state]}>{STATUS_TEXT[state]}</StatusPill>
             </span>
           </div>

@@ -54,6 +54,8 @@ export function BrowseView({
       </header>
 
       <div
+        role="group"
+        aria-label="Abandoned carts awaiting a decision"
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
