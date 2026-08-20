@@ -43,32 +43,32 @@ class GoldenCartCase(unittest.TestCase):
         fresh = pipeline.run(self.traveler_id).to_dict()
         stored = self.stored()
         self.assertEqual(fresh["decision"]["outcome"], stored["decision"]["outcome"])
-        self.assertEqual(fresh["decision"]["final_total_idr"],
-                         stored["decision"]["final_total_idr"])
-        self.assertEqual(fresh["decision"]["cleared_rung"],
-                         stored["decision"]["cleared_rung"])
+        self.assertEqual(fresh["decision"]["finalTotalIdr"],
+                         stored["decision"]["finalTotalIdr"])
+        self.assertEqual(fresh["decision"]["clearedRung"],
+                         stored["decision"]["clearedRung"])
 
     def assertNoMarginConceded(self):
-        self.assertEqual(self.stored()["decision"]["margin_conceded_idr"], 0)
+        self.assertEqual(self.stored()["decision"]["marginConcededIdr"], 0)
 
     def assertDeadlineOnlyIfGuaranteed(self):
         hold = self.stored()["hold"]
-        if hold["expires_at"]:
+        if hold["expiresAt"]:
             self.assertEqual(hold["state"], "eligible")
 
     def assertNotificationIsReal(self):
         note = self.stored()["notification"]
         self.assertIsNotNone(note)
         self.assertTrue(note["subject"].strip())
-        self.assertGreaterEqual(len(note["body_paragraphs"]), 2)
+        self.assertGreaterEqual(len(note["bodyParagraphs"]), 2)
         self.assertTrue(note["whatsapp"].strip())
-        self.assertTrue(note["cta_label"].strip())
+        self.assertTrue(note["ctaLabel"].strip())
 
     def assertNoEmoji(self):
         note = self.stored()["notification"]
         if not note:
             return
-        blob = " ".join([note["subject"], note["whatsapp"]] + note["body_paragraphs"])
+        blob = " ".join([note["subject"], note["whatsapp"]] + note["bodyParagraphs"])
         for ch in blob:
             self.assertLess(ord(ch), 0x2190, "emoji in copy: {!r}".format(ch))
 
@@ -86,13 +86,13 @@ class TestPrasetyoReminder(GoldenCartCase):
     def test_gate_closed_on_campaign_share_not_budget(self):
         gate = self.stored()["gate"]
         self.assertFalse(gate["opened"])
-        self.assertFalse(gate["price_sensitive"])
-        self.assertTrue(gate["over_budget"], "the cart IS over budget; the other axis closed it")
+        self.assertFalse(gate["priceSensitive"])
+        self.assertTrue(gate["overBudget"], "the cart IS over budget; the other axis closed it")
 
     def test_price_is_untouched(self):
         d = self.stored()["decision"]
-        self.assertEqual(d["saving_idr"], 0)
-        self.assertEqual(d["final_total_idr"], self.stored()["original_total_idr"])
+        self.assertEqual(d["savingIdr"], 0)
+        self.assertEqual(d["finalTotalIdr"], self.stored()["originalTotalIdr"])
 
     def test_still_gets_a_real_notification(self):
         """A reminder is a decision, not an absence. It gets a full message."""
@@ -121,14 +121,14 @@ class TestAyuRebuild(GoldenCartCase):
     def test_gate_opened_on_both_axes(self):
         gate = self.stored()["gate"]
         self.assertTrue(gate["opened"])
-        self.assertTrue(gate["price_sensitive"])
-        self.assertTrue(gate["over_budget"])
+        self.assertTrue(gate["priceSensitive"])
+        self.assertTrue(gate["overBudget"])
 
     def test_genuinely_clears_the_premium_threshold(self):
         """tau(Premium) = 15%. Constructed to clear, never back-fitted."""
         d = self.stored()["decision"]
-        self.assertEqual(d["cleared_rung"], config.RUNG_TIER_DOWN)
-        self.assertGreaterEqual(d["saving_pct"], config.TAU[config.TIER_PREMIUM])
+        self.assertEqual(d["clearedRung"], config.RUNG_TIER_DOWN)
+        self.assertGreaterEqual(d["savingPct"], config.TAU[config.TIER_PREMIUM])
 
     def test_earlier_rungs_were_tried_and_reported(self):
         attempts = self.stored()["decision"]["attempts"]
@@ -155,7 +155,7 @@ class TestBagusLateral(GoldenCartCase):
     def test_outcome_is_lateral_not_rebuild(self):
         """A same-star swap is not a downgrade and must not read as one."""
         self.assertEqual(self.stored()["decision"]["outcome"], Outcome.LATERAL)
-        self.assertEqual(self.stored()["decision"]["cleared_rung"], config.RUNG_LATERAL)
+        self.assertEqual(self.stored()["decision"]["clearedRung"], config.RUNG_LATERAL)
 
     def test_ladder_stopped_before_tier_down(self):
         rungs = [a["rung"] for a in self.stored()["decision"]["attempts"]]
@@ -183,7 +183,7 @@ class TestIntanAlternative(GoldenCartCase):
 
     def test_gate_opened_but_nothing_cleared(self):
         self.assertTrue(self.stored()["gate"]["opened"])
-        self.assertIsNone(self.stored()["decision"]["cleared_rung"])
+        self.assertIsNone(self.stored()["decision"]["clearedRung"])
 
     def test_every_rung_was_priced_and_reported(self):
         """The rungs that missed are the evidence restraint was earned."""
@@ -209,22 +209,22 @@ class TestRizkyColdStart(GoldenCartCase):
     traveler_id = "wf-05"
 
     def test_campaign_share_is_null_never_fabricated(self):
-        self.assertIsNone(self.stored()["gate"]["campaign_share"])
-        self.assertIsNone(self.stored()["gate"]["price_sensitive"])
+        self.assertIsNone(self.stored()["gate"]["campaignShare"])
+        self.assertIsNone(self.stored()["gate"]["priceSensitive"])
 
     def test_tier_came_from_the_cart_not_history(self):
-        self.assertEqual(self.stored()["classification"]["tier_source"], "cart_proxy")
-        self.assertTrue(self.stored()["classification"]["is_cold_start"])
+        self.assertEqual(self.stored()["classification"]["tierSource"], "cart_proxy")
+        self.assertTrue(self.stored()["classification"]["isColdStart"])
 
     def test_ladder_still_ran_under_the_exception(self):
         """Rebuild concedes no margin, so a weaker signal can still justify it."""
-        self.assertTrue(self.stored()["gate"]["cold_start_exception"])
+        self.assertTrue(self.stored()["gate"]["coldStartException"])
         self.assertTrue(self.stored()["gate"]["opened"])
         self.assertEqual(len(self.stored()["decision"]["attempts"]), 3)
 
     def test_falls_to_reminder_when_nothing_is_worth_showing(self):
         self.assertEqual(self.stored()["decision"]["outcome"], Outcome.REMINDER)
-        self.assertEqual(self.stored()["decision"]["saving_idr"], 0)
+        self.assertEqual(self.stored()["decision"]["savingIdr"], 0)
 
     def test_matches_fresh_run(self):
         self.assertMatchesFreshRun()
@@ -243,7 +243,7 @@ class TestDewiUpstreamFailure(GoldenCartCase):
         self.assertEqual(self.stored()["decision"]["outcome"], Outcome.ERROR)
 
     def test_classifier_still_completed(self):
-        stages = {t["stage"]: t["duration_ms"] for t in self.stored()["timings"]}
+        stages = {t["stage"]: t["durationMs"] for t in self.stored()["timings"]}
         self.assertGreater(stages["classifier"], 0)
         self.assertTrue(self.stored()["classification"]["reasoning"])
 

@@ -4,6 +4,8 @@ repository.py — Loads seed travelers and their abandoned carts.
 Behind the read_traveler_history MCP tool. Post-penyisihan this same module is
 repointed at a live profile store and no agent prompt changes, which is the
 whole architectural argument for putting MCP in front of it.
+
+Seed JSON is camelCase per the data contract; Python locals stay snake_case.
 """
 from __future__ import annotations
 
@@ -11,6 +13,7 @@ import json
 import os
 from typing import Dict, List, Optional, Tuple
 
+from . import config, tiers
 from .schemas import AbandonedCart, FlightSpec, HotelSpec, TravelerHistory
 
 SEED_PATH = os.path.join(os.path.dirname(__file__), "seed", "travelers.json")
@@ -28,31 +31,13 @@ def _load() -> dict:
 
 def _history(row: dict) -> TravelerHistory:
     return TravelerHistory(
-        traveler_id=row["traveler_id"],
+        traveler_id=row["travelerId"],
         name=row["name"],
-        booking_count=row["booking_count"],
-        usual_spend=row["usual_spend"],
-        campaign_share=row["campaign_share"],
-        avg_hotel_stars=row.get("avg_hotel_stars"),
-        premium_cabin_share=row.get("premium_cabin_share"),
-    )
-
-
-def _cart(row: dict, flight_idr: int = 0, hotel_idr: int = 0) -> AbandonedCart:
-    c, f, h = row["cart"], row["cart"]["flight"], row["cart"]["hotel"]
-    return AbandonedCart(
-        cart_id=c["cart_id"],
-        traveler_id=row["traveler_id"],
-        flight=FlightSpec(
-            carrier=f["carrier"], origin=f["origin"], destination=f["destination"],
-            depart_date=f["depart_date"], return_date=f.get("return_date"),
-            cabin=f["cabin"], passengers=f["passengers"], price_idr=flight_idr,
-        ),
-        hotel=HotelSpec(
-            name=h["name"], stars=h["stars"], city=h["city"], area=h["area"],
-            check_in=h["check_in"], check_out=h["check_out"], price_idr=hotel_idr,
-        ),
-        abandoned_hours_ago=c["abandoned_hours_ago"],
+        booking_count=row["bookings"],
+        usual_spend=row["usualSpend"],
+        campaign_share=row["campaignShare"],
+        avg_hotel_stars=row.get("avgStars"),
+        premium_cabin_share=row.get("premiumCabinShare"),
     )
 
 
@@ -62,56 +47,92 @@ def all_travelers() -> List[dict]:
 
 def traveler_ids() -> List[str]:
     # Just the ids, for validating a --cart argument. Exists so callers that
-    # only need to check an id never write `for ... in all_travelers()` --
-    # that is the shape the scope check flags as a bulk runner, and the right
+    # only need to check an id never write `for ... in all_travelers()` -- that
+    # is the shape the scope check flags as a bulk runner, and the right
     # response is to not write it rather than to exempt it.
-    return [t["traveler_id"] for t in _load()["travelers"]]
+    return [t["travelerId"] for t in _load()["travelers"]]
 
 
 def reference_spend() -> List[float]:
     """The distribution the percentile tier is taken against."""
-    field = _load().get("reference_distribution_field", "usual_spend")
+    field = _load().get("referenceDistributionField", "usualSpend")
     return [t[field] for t in _load()["travelers"]]
 
 
 def get(traveler_id: str) -> Tuple[TravelerHistory, dict]:
     for row in _load()["travelers"]:
-        if row["traveler_id"] == traveler_id:
+        if row["travelerId"] == traveler_id:
             return _history(row), row
     raise KeyError("unknown traveler " + repr(traveler_id))
 
 
 def build_cart(row: dict, flight_idr: int, hotel_idr: int) -> AbandonedCart:
     """Cart with prices attached. Prices always come from outside the seed."""
-    return _cart(row, flight_idr, hotel_idr)
+    c, f, h = row["cart"], row["cart"]["flight"], row["cart"]["hotel"]
+    return AbandonedCart(
+        cart_id=c["cartId"],
+        traveler_id=row["travelerId"],
+        flight=FlightSpec(
+            carrier=f["carrier"], origin=f["origin"], destination=f["destination"],
+            depart_date=f["departDate"], return_date=f.get("returnDate"),
+            cabin=f["cabin"], passengers=f["passengers"], price_idr=flight_idr,
+        ),
+        hotel=HotelSpec(
+            name=h["name"], stars=h["stars"], city=h["city"], area=h["area"],
+            check_in=h["checkIn"], check_out=h["checkOut"], price_idr=hotel_idr,
+        ),
+        abandoned_hours_ago=c["abandonedHoursAgo"],
+    )
 
 
 def queue() -> List[Dict]:
     """
-    The browse list. Deliberately withholds tier and campaign share: those are
-    the Classifier's conclusions, and printing them on the card the analyst is
-    about to click would let the pipeline appear to conclude what was already
-    on screen.
+    The browse list.
+
+    Carries a PROVISIONAL tier estimate and the raw campaign share -- not the
+    Classifier's verdict. The distinction is the point: campaign share is raw
+    history and the estimate is a deterministic percentile lookup, both cheap
+    and available before any inference runs. What the Classifier produces is a
+    reasoned tier that can differ from the estimate and can weigh signals a
+    single percentile cannot.
+    
+    Showing the estimate is what gives a judge a hypothesis to test the model
+    against. Without it there is nothing to compare the output to, and the
+    fair question becomes why Gemini is in the loop at all. The UI must label
+    it provisional so the difference reads on screen.
     """
+    spend = reference_spend()
     out = []
     for row in _load()["travelers"]:
         c, f, h = row["cart"], row["cart"]["flight"], row["cart"]["hotel"]
+        history = _history(row)
+        cold = history.is_cold_start
+        if cold:
+            # No monetary history, so the estimate comes from the cart itself.
+            estimate = tiers.tier_from_cart_proxy_fields(f["cabin"], h["stars"])
+        else:
+            estimate = tiers.tier_from_percentile(
+                tiers.percentile_rank(history.usual_spend, spend))
         out.append({
-            "traveler_id": row["traveler_id"],
-            "cart_id": c["cart_id"],
+            "travelerId": row["travelerId"],
+            "cartId": c["cartId"],
             "name": row["name"],
-            "booking_count": row["booking_count"],
-            "route": "{} - {}".format(f["origin"], f["destination"]),
+            "bookings": row["bookings"],
+            "tierEstimate": estimate,
+            "tierEstimateLabel": "Cold-start" if cold else estimate,
+            "isColdStart": cold,
+            "campaignShare": row["campaignShare"],
+            "route": "{} \u2192 {}".format(f["origin"], f["destination"]),
             "carrier": f["carrier"],
             "cabin": f["cabin"],
             "passengers": f["passengers"],
-            "depart_date": f["depart_date"],
-            "return_date": f.get("return_date"),
-            "hotel_name": h["name"],
-            "hotel_stars": h["stars"],
-            "hotel_city": h["city"],
-            "check_in": h["check_in"],
-            "check_out": h["check_out"],
-            "abandoned_hours_ago": c["abandoned_hours_ago"],
+            "departDate": f["departDate"],
+            "returnDate": f.get("returnDate"),
+            "hotelName": h["name"],
+            "hotelStars": h["stars"],
+            "hotelCity": h["city"],
+            "checkIn": h["checkIn"],
+            "checkOut": h["checkOut"],
+            "abandonedHoursAgo": c["abandonedHoursAgo"],
         })
     return out

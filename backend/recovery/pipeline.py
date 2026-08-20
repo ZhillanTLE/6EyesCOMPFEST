@@ -37,41 +37,58 @@ class _Clock:
         return result
 
 
-def _classifier_reasoning(history, cart, tier, tier_source, gate_result) -> List[str]:
+def _classifier_reasoning(history, cart, tier, tier_source, gate_result):
     """
-    Evidence lines that cite the actual numbers behind the tier.
+    Evidence lines behind the tier and the gate. English -- this is the analyst
+    trace, not traveler-facing copy.
 
-    Deterministic by design. classifier_agent.py substitutes Gemini for the
-    live path against this same shape, and falls back here when no key is
-    configured -- the demo must not depend on a network call to be legible.
+    LINE COUNT IS DELIBERATE AND ASYMMETRIC. A price intervention has to justify
+    itself on two axes, so it gets two lines. A reminder is settled by whichever
+    single axis closed the gate, so it gets one. Padding the reminder out to
+    match would imply the system deliberated equally in both cases, when the
+    honest position is that one signal was enough.
+
+    Deterministic by design. classifier_agent.py substitutes Gemini for the live
+    path against this same shape and falls back here when no key is configured
+    -- the demo must not depend on a network call to be legible.
     """
-    from .formatting import idr, plain_pct
+    from .formatting import plain_pct
 
-    lines = ["Membaca {} pemesanan historis via read_traveler_history".format(
-        history.booking_count)]
+    lines = []
+
     if tier_source == "cart_proxy":
         lines.append(
-            "Tanpa riwayat memadai; tingkatan diturunkan dari isi cart "
-            "(kelas {}, hotel {} bintang)".format(cart.flight.cabin, cart.hotel.stars))
-    else:
-        lines.append("Rata-rata pengeluaran {} per perjalanan".format(
-            idr(history.usual_spend)))
-    if history.campaign_share is None:
-        lines.append("Campaign share tidak terukur - tidak ada riwayat diskon")
-    else:
-        lines.append("Campaign share {} terhadap ambang {}".format(
-            plain_pct(history.campaign_share), plain_pct(config.C_STAR)))
+            "No booking history; tier estimated from the cart itself "
+            "({} cabin, {}-star stay)".format(cart.flight.cabin, cart.hotel.stars))
+        if gate_result is not None:
+            lines.append(
+                "Campaign share unmeasurable, so the ladder runs on the proxy "
+                "tier -- a rebuild concedes no margin")
+        return lines
+
     if gate_result is None:
-        lines.append("Total cart tidak dapat dihitung - inventaris tidak tersedia")
+        lines.append("Read {} historical bookings via read_traveler_history".format(
+            history.booking_count))
+        lines.append("Cart total unavailable -- carrier inventory did not respond")
+        return lines
+
+    share = plain_pct(history.campaign_share)
+    gap = plain_pct(gate_result.budget_gap)
+
+    if gate_result.opened:
+        lines.append("Campaign share {} -- price-sensitive".format(share))
+        lines.append("Cart {} above usual spend".format(gap))
+    elif not gate_result.price_sensitive:
+        lines.append("Campaign share {} -- historically pays full price".format(share))
     else:
-        lines.append("Cart {} terhadap pengeluaran biasa".format(
-            plain_pct(gate_result.budget_gap)))
+        lines.append("Cart sits within usual spend; price is not the barrier")
+
     return lines
 
 
 def run(traveler_id: str) -> RecoveryResult:
     history, row = repository.get(traveler_id)
-    cart_id = row["cart"]["cart_id"]
+    cart_id = row["cart"]["cartId"]
     fixture_mode = providers.use_fixtures()
     captured = providers.fixtures().get("timings_ms", {}).get(cart_id) if fixture_mode else None
     clock = _Clock(captured)

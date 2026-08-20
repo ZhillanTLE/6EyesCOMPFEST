@@ -33,7 +33,7 @@ export async function runRecovery(
     await fetch("/api/recovery/run", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ traveler_id: travelerId }),
+      body: JSON.stringify({ travelerId }),
       signal,
     }),
   );

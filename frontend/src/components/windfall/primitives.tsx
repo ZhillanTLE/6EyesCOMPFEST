@@ -167,7 +167,7 @@ export function TierBadge({
       }}
     >
       <span className="wf-eyebrow" style={{ fontSize: 9 }}>
-        Tingkatan
+        Tier
       </span>
       <span style={{ fontSize: 15, fontWeight: 500, color: "var(--wf-ink)" }}>{tier}</span>
       {proxy && (

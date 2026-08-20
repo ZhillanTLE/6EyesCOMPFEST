@@ -36,6 +36,22 @@ def tier_from_percentile(q: float) -> str:
     return config.TIER_PREMIUM
 
 
+def tier_from_cart_proxy_fields(cabin: str, stars: int) -> str:
+    """Cold-start proxy from the two cart signals directly.
+
+    Split out from tier_from_cart_proxy so the browse list can compute its
+    provisional estimate without constructing a priced cart -- prices come from
+    a live API, and the queue must render before any of that runs.
+    """
+    cabin = (cabin or "").strip().lower()
+    stars = stars or 0
+    if cabin in ("business", "first") or stars >= 5:
+        return config.TIER_PREMIUM
+    if cabin == "premium_economy" or stars == 4:
+        return config.TIER_COMFORT
+    return config.TIER_VALUE
+
+
 def tier_from_cart_proxy(cart: AbandonedCart) -> str:
     """
     Cold-start path (paper §3.2.5). With no history there is no monetary
@@ -45,14 +61,7 @@ def tier_from_cart_proxy(cart: AbandonedCart) -> str:
     Deliberately coarse. This is a proxy standing in for a missing measurement,
     and dressing it up with more rules would not make it better informed.
     """
-    cabin = (cart.flight.cabin or "").strip().lower()
-    stars = cart.hotel.stars or 0
-
-    if cabin in ("business", "first") or stars >= 5:
-        return config.TIER_PREMIUM
-    if cabin == "premium_economy" or stars == 4:
-        return config.TIER_COMFORT
-    return config.TIER_VALUE
+    return tier_from_cart_proxy_fields(cart.flight.cabin, cart.hotel.stars)
 
 
 def assign_tier(

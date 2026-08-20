@@ -1,9 +1,12 @@
 /**
  * Contract mirror for the recovery pipeline.
  *
- * Hand-kept in step with backend/recovery/schemas.py. The golden fixture at
+ * camelCase on the wire, matching the data contract in CLAUDE.md. The backend
+ * keeps snake_case Python internally and converts once at the JSON boundary
+ * (backend/recovery/serialize.py).
+ *
  * backend/recovery/seed/golden.json is the shared reference both sides build
- * against, and `npm run typecheck` against it is what catches drift.
+ * against; `npm run build` typechecking against it is what catches drift.
  */
 
 export const OUTCOMES = ["rebuild", "lateral", "reminder", "alternative", "error"] as const;
@@ -21,44 +24,44 @@ export interface HotelSpec {
   stars: number;
   city: string;
   area: string;
-  check_in: string;
-  check_out: string;
-  price_idr: number;
+  checkIn: string;
+  checkOut: string;
+  priceIdr: number;
 }
 
 export interface FlightSpec {
   carrier: string;
   origin: string;
   destination: string;
-  depart_date: string;
-  return_date: string | null;
+  departDate: string;
+  returnDate: string | null;
   cabin: string;
   passengers: number;
-  price_idr: number;
-  duffel_offer_id: string | null;
+  priceIdr: number;
+  duffelOfferId: string | null;
 }
 
 export interface Classification {
   tier: Tier;
-  tier_prior: Tier;
+  tierPrior: Tier;
   /** tau(tier): 0.05 | 0.10 | 0.15 */
   threshold: number;
   reasoning: string[];
-  override_reason: string | null;
-  is_cold_start: boolean;
+  overrideReason: string | null;
+  isColdStart: boolean;
   /** "history" | "cart_proxy" — cart_proxy must be labelled as such in the UI. */
-  tier_source: string;
+  tierSource: string;
 }
 
 export interface GateResult {
   opened: boolean;
   /** null when the traveler has no history: unmeasurable, never fabricated. */
-  campaign_share: number | null;
-  budget_gap: number;
-  price_sensitive: boolean | null;
-  over_budget: boolean;
+  campaignShare: number | null;
+  budgetGap: number;
+  priceSensitive: boolean | null;
+  overBudget: boolean;
   reason: string;
-  cold_start_exception: boolean;
+  coldStartException: boolean;
 }
 
 export interface LadderAttempt {
@@ -67,7 +70,7 @@ export interface LadderAttempt {
   label: string;
   /** false = nothing found. Distinct from priced-but-missed (available, !cleared). */
   available: boolean;
-  total_idr: number | null;
+  totalIdr: number | null;
   delta: number | null;
   cleared: boolean;
   hotel: HotelSpec | null;
@@ -76,74 +79,83 @@ export interface LadderAttempt {
 
 export interface Decision {
   outcome: Outcome;
-  cleared_rung: string | null;
+  clearedRung: string | null;
   attempts: LadderAttempt[];
-  final_total_idr: number | null;
-  /** What the traveler saves. NOT what the partner gave up — see below. */
-  saving_idr: number;
-  saving_pct: number | null;
+  finalTotalIdr: number | null;
+  /** What the traveler saves. NOT what the partner gave up. */
+  savingIdr: number;
+  savingPct: number | null;
   /** What the partner conceded. Zero on every path, by construction. */
-  margin_conceded_idr: number;
+  marginConcededIdr: number;
   rationale: string;
 }
 
 export interface HoldStatus {
   state: HoldState;
-  /** Sourced from Duffel payment_required_by. The only legitimate countdown. */
-  expires_at: string | null;
+  /** From Duffel payment_required_by. The only legitimate countdown source. */
+  expiresAt: string | null;
   carrier: string | null;
   note: string | null;
 }
 
 export interface StageTiming {
   stage: StageName;
-  duration_ms: number;
+  durationMs: number;
 }
 
 export interface NotificationDraft {
   subject: string;
-  body_paragraphs: string[];
+  bodyParagraphs: string[];
   whatsapp: string;
-  cta_label: string;
-  channel_note: string | null;
+  ctaLabel: string;
+  channelNote: string | null;
 }
 
 export interface RecoveryResult {
-  cart_id: string;
-  traveler_name: string;
+  cartId: string;
+  travelerName: string;
   classification: Classification;
   gate: GateResult;
   decision: Decision;
   hold: HoldStatus;
   notification: NotificationDraft | null;
   timings: StageTiming[];
-  original_total_idr: number;
+  originalTotalIdr: number;
   /** "live" | "fixture" — fixture must be visibly labelled in the UI. */
   source: string;
 }
 
 /**
- * Browse-list entry. Deliberately carries neither tier nor campaign share:
- * those are the Classifier's conclusions, and showing them before the pipeline
- * runs would let it appear to conclude what was already on the card.
+ * Browse-list entry.
+ *
+ * Carries `tierEstimate` and `campaignShare`: the cheap deterministic estimate,
+ * available before any inference. It is NOT the Classifier's verdict, and the
+ * UI must label it provisional so the difference is legible — if the estimate
+ * and the reasoned verdict were always identical, the fair question would be
+ * why a model is in the loop at all.
  */
 export interface QueueEntry {
-  traveler_id: string;
-  cart_id: string;
+  travelerId: string;
+  cartId: string;
   name: string;
-  booking_count: number;
+  bookings: number;
+  tierEstimate: Tier;
+  /** "Cold-start" when derived from the cart rather than from history. */
+  tierEstimateLabel: string;
+  isColdStart: boolean;
+  campaignShare: number | null;
   route: string;
   carrier: string;
   cabin: string;
   passengers: number;
-  depart_date: string;
-  return_date: string | null;
-  hotel_name: string;
-  hotel_stars: number;
-  hotel_city: string;
-  check_in: string;
-  check_out: string;
-  abandoned_hours_ago: number;
+  departDate: string;
+  returnDate: string | null;
+  hotelName: string;
+  hotelStars: number;
+  hotelCity: string;
+  checkIn: string;
+  checkOut: string;
+  abandonedHoursAgo: number;
 }
 
 export interface QueueResponse {
@@ -153,5 +165,5 @@ export interface QueueResponse {
 
 /** A deadline may render only when a carrier genuinely guaranteed the fare. */
 export function mayRenderDeadline(hold: HoldStatus): boolean {
-  return hold.state === "eligible" && Boolean(hold.expires_at);
+  return hold.state === "eligible" && Boolean(hold.expiresAt);
 }

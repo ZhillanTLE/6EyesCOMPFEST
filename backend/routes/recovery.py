@@ -52,9 +52,11 @@ def run():
     drafted notification. Nothing is streamed and nothing is deferred.
     """
     data = request.get_json(silent=True) or {}
-    traveler_id = data.get("traveler_id")
+    # camelCase is the wire contract; snake_case accepted so an older client
+    # or a hand-rolled curl does not silently 400.
+    traveler_id = data.get("travelerId") or data.get("traveler_id")
     if not traveler_id:
-        return jsonify({"error": "Missing 'traveler_id' in request body"}), 400
+        return jsonify({"error": "Missing 'travelerId' in request body"}), 400
 
     try:
         result = pipeline.run(traveler_id)

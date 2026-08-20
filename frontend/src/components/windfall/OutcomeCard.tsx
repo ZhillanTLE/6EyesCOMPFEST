@@ -112,7 +112,7 @@ export function OutcomeCard({
             {LABELS[outcome]}
           </span>
           <span className="wf-eyebrow" style={{ color: "var(--wf-signal-ink)" }}>
-            {outcome === "error" ? "Tidak ada aksi" : "Margin mitra utuh"}
+            {outcome === "error" ? "No action" : "Partner margin intact"}
           </span>
         </div>
         <div style={{ marginTop: 4, fontSize: 11, lineHeight: 1.6, color: "var(--wf-ink-3)" }}>
@@ -130,18 +130,18 @@ export function OutcomeCard({
         }}
       >
         <Cell
-          label="Cart semula"
+          label="Original cart"
           value={idr(originalTotal)}
           tone={intervened ? "muted" : "ink"}
         />
         <Cell
-          label={intervened ? "Setelah disusun ulang" : "Harga akhir"}
-          value={idr(decision.final_total_idr ?? originalTotal)}
+          label={intervened ? "After rebuild" : "Final price"}
+          value={idr(decision.finalTotalIdr ?? originalTotal)}
         />
         <Cell
-          label={intervened ? "Traveler hemat" : "Diskon diberikan"}
-          value={intervened ? idr(decision.saving_idr) : "IDR 0"}
-          sub={intervened ? pct(decision.saving_pct) : `Ambang ${plainPct(threshold)}`}
+          label={intervened ? "Traveler saves" : "Discount given"}
+          value={intervened ? idr(decision.savingIdr) : "IDR 0"}
+          sub={intervened ? pct(decision.savingPct) : `Threshold ${plainPct(threshold)}`}
           tone="signal"
         />
       </div>
@@ -173,19 +173,19 @@ export function OutcomeCard({
         <div style={{ background: "var(--wf-white)", padding: "12px 16px" }}>
           <div className="wf-eyebrow">Campaign share</div>
           <div className="wf-mono" style={{ marginTop: 5, fontSize: 15, color: "var(--wf-ink)" }}>
-            {gate.campaign_share === null ? "Tidak terukur" : plainPct(gate.campaign_share)}
+            {gate.campaignShare === null ? "Not measurable" : plainPct(gate.campaignShare)}
           </div>
         </div>
         <div style={{ background: "var(--wf-white)", padding: "12px 16px" }}>
-          <div className="wf-eyebrow">Selisih anggaran</div>
+          <div className="wf-eyebrow">Delta anggaran</div>
           <div className="wf-mono" style={{ marginTop: 5, fontSize: 15, color: "var(--wf-ink)" }}>
-            {plainPct(gate.budget_gap)}
+            {plainPct(gate.budgetGap)}
           </div>
         </div>
         <div style={{ background: "var(--wf-white)", padding: "12px 16px" }}>
-          <div className="wf-eyebrow">Margin dikorbankan</div>
+          <div className="wf-eyebrow">Margin conceded</div>
           <div className="wf-mono" style={{ marginTop: 5, fontSize: 15, color: "var(--wf-signal-ink)" }}>
-            {idr(decision.margin_conceded_idr)}
+            {idr(decision.marginConcededIdr)}
           </div>
         </div>
       </div>

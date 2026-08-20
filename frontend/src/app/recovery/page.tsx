@@ -111,13 +111,13 @@ export default function RecoveryConsole() {
                   color: "var(--wf-amber)",
                 }}
               >
-                Memutar ulang rekaman
+                Replaying capture
               </span>
             )}
             <button
               type="button"
               onClick={toggleTheme}
-              aria-label="Ganti tema"
+              aria-label="Toggle theme"
               className="wf-mono"
               style={{
                 padding: "6px 11px",
@@ -132,7 +132,7 @@ export default function RecoveryConsole() {
                 cursor: "pointer",
               }}
             >
-              {theme === "dark" ? "Terang" : "Gelap"}
+              {theme === "dark" ? "Light" : "Dark"}
             </button>
           </div>
         </nav>

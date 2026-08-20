@@ -34,7 +34,7 @@ export function BrowseView({
             color: "var(--wf-ink)",
           }}
         >
-          Cart yang ditinggalkan
+          Abandoned carts
         </h1>
         <p
           style={{
@@ -46,9 +46,10 @@ export function BrowseView({
             textWrap: "pretty",
           }}
         >
-          Pilih satu cart untuk menjalankan pipeline. Setiap keputusan dibaca dari dua
-          sinyal: seberapa sering wisatawan menunggu promo, dan seberapa jauh cart ini
-          dari pengeluaran biasanya. Diskon hanya keluar bila keduanya sepakat.
+          Pick one cart to run the pipeline. Every decision reads two signals: how
+          often this traveler waits for a promotion, and how far the cart sits from
+          what they usually spend. A price intervention needs both to agree. The tier
+          shown on each card is a provisional estimate, not the Classifier&rsquo;s verdict.
         </p>
       </header>
 
@@ -61,9 +62,9 @@ export function BrowseView({
       >
         {queue.map((entry) => (
           <TravelerCard
-            key={entry.traveler_id}
+            key={entry.travelerId}
             entry={entry}
-            busy={busyId === entry.traveler_id}
+            busy={busyId === entry.travelerId}
             onSelect={onSelect}
           />
         ))}

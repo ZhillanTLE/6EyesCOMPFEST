@@ -19,7 +19,7 @@ import { EmailPreview, WhatsAppPreview } from "./previews";
 import { Skeleton, TierBadge } from "./primitives";
 
 function stageMs(result: RecoveryResult, stage: string): number {
-  return result.timings.find((t) => t.stage === stage)?.duration_ms ?? 0;
+  return result.timings.find((t) => t.stage === stage)?.durationMs ?? 0;
 }
 
 export function PipelineView({
@@ -67,12 +67,12 @@ export function PipelineView({
             cursor: "pointer",
           }}
         >
-          &larr; Semua cart
+          &larr; All carts
         </button>
         <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: 15, fontWeight: 500 }}>{result.traveler_name}</div>
+          <div style={{ fontSize: 15, fontWeight: 500 }}>{result.travelerName}</div>
           <div className="wf-mono" style={{ marginTop: 2, fontSize: 11, color: "var(--wf-ink-3)" }}>
-            {result.cart_id}
+            {result.cartId}
           </div>
         </div>
       </header>
@@ -94,8 +94,8 @@ export function PipelineView({
           {phase >= 2 && (
             <TierBadge
               tier={classification.tier}
-              threshold={`Ambang ${plainPct(classification.threshold)}`}
-              source={classification.tier_source}
+              threshold={`Threshold ${plainPct(classification.threshold)}`}
+              source={classification.tierSource}
             />
           )}
         </AgentStage>
@@ -108,8 +108,8 @@ export function PipelineView({
         >
           {halted && phase >= 2 && (
             <OutcomeNote>
-              Inventaris maskapai sedang tidak tersedia, sehingga rebuild tidak dapat
-              dijalankan. Cart ini dilewati pada siklus ini.
+              Carrier inventory is unavailable, so the rebuild could not
+              run. This cart was skipped on this cycle.
             </OutcomeNote>
           )}
 
@@ -125,7 +125,7 @@ export function PipelineView({
               the difference between a decision and an omission. */}
           {!halted && ladderComplete && decision.attempts.length === 0 && (
             <OutcomeNote>
-              <strong style={{ color: "var(--wf-ink)" }}>Ladder tidak dijalankan.</strong>{" "}
+              <strong style={{ color: "var(--wf-ink)" }}>Ladder did not run.</strong>{" "}
               {gate.reason}
             </OutcomeNote>
           )}
@@ -136,14 +136,14 @@ export function PipelineView({
                 attempts={attempts}
                 footerLeft={
                   ladderComplete
-                    ? `Ambang tingkatan ${classification.tier} ${plainPct(classification.threshold)}`
+                    ? `Threshold for tier ${classification.tier} ${plainPct(classification.threshold)}`
                     : undefined
                 }
                 footerRight={
                   ladderComplete
                     ? winner
-                      ? `Berhenti di percobaan ${String(winner.index).padStart(2, "0")}`
-                      : "Tidak ada yang memenuhi ambang"
+                      ? `Stopped at attempt ${String(winner.index).padStart(2, "0")}`
+                      : "Nothing met the threshold"
                     : undefined
                 }
               />
@@ -171,7 +171,7 @@ export function PipelineView({
                       display: "inline-block",
                     }}
                   />
-                  Menguji percobaan berikutnya…
+                  Testing the next attempt…
                 </div>
               )}
             </>
@@ -186,8 +186,8 @@ export function PipelineView({
           reasons={
             phase >= 4 && notification
               ? [
-                  `Nada disesuaikan untuk tingkatan ${classification.tier}`,
-                  "Menjelaskan keputusan yang diambil, bukan urgensi generik",
+                  `Tone tuned for tier ${classification.tier}`,
+                  "States the decision taken, not generic urgency",
                 ]
               : []
           }
@@ -206,14 +206,14 @@ export function PipelineView({
         <OutcomeCard
           decision={decision}
           gate={gate}
-          originalTotal={result.original_total_idr}
+          originalTotal={result.originalTotalIdr}
           threshold={classification.threshold}
         />
       )}
 
       {phase >= 4 && notification && (
         <section
-          aria-label="Pratinjau notifikasi"
+          aria-label="Notification previews"
           className="wf-fade"
           style={{
             display: "grid",
@@ -225,15 +225,15 @@ export function PipelineView({
           <EmailPreview
             draft={notification}
             hold={hold}
-            originalTotal={result.original_total_idr}
-            finalTotal={decision.final_total_idr ?? result.original_total_idr}
-            saving={decision.saving_idr}
-            savingPct={decision.saving_pct}
+            originalTotal={result.originalTotalIdr}
+            finalTotal={decision.finalTotalIdr ?? result.originalTotalIdr}
+            saving={decision.savingIdr}
+            savingPct={decision.savingPct}
           />
           <WhatsAppPreview
             draft={notification}
-            finalTotal={decision.final_total_idr ?? result.original_total_idr}
-            saving={decision.saving_idr}
+            finalTotal={decision.finalTotalIdr ?? result.originalTotalIdr}
+            saving={decision.savingIdr}
           />
         </section>
       )}

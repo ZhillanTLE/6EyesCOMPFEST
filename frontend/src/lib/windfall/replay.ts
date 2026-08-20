@@ -29,7 +29,7 @@ export interface ReplayState {
 
 function durations(result: RecoveryResult): Record<StageName, number> {
   const out: Record<StageName, number> = { classifier: 0, searcher: 0, notifier: 0 };
-  for (const t of result.timings) out[t.stage] = t.duration_ms;
+  for (const t of result.timings) out[t.stage] = t.durationMs;
   return out;
 }
 
@@ -37,7 +37,7 @@ export function useReplay(result: RecoveryResult | null, enabled = true): Replay
   const [state, setState] = useState<ReplayState>({ phase: 0, revealed: 0, done: false });
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  const key = result ? `${result.cart_id}:${result.timings.map((t) => t.duration_ms).join("-")}` : "";
+  const key = result ? `${result.cartId}:${result.timings.map((t) => t.durationMs).join("-")}` : "";
 
   const plan = useMemo(() => (result ? durations(result) : null), [result]);
 

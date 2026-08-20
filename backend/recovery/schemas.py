@@ -233,4 +233,6 @@ class RecoveryResult:
     source: str = "live"                 # "live" | "fixture"
 
     def to_dict(self) -> dict:
-        return asdict(self)
+        """camelCase on the wire, per the data contract. Python stays snake."""
+        from .serialize import camelize
+        return camelize(asdict(self))

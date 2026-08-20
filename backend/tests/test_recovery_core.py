@@ -253,7 +253,7 @@ class TestSeed(unittest.TestCase):
             self.seed = json.load(fh)
 
     def test_six_travelers_one_per_path(self):
-        targets = [t["calibration_target"] for t in self.seed["travelers"]]
+        targets = [t["calibrationTarget"] for t in self.seed["travelers"]]
         self.assertEqual(len(targets), 6)
         self.assertEqual(len(set(targets)), 6)
 
@@ -261,8 +261,8 @@ class TestSeed(unittest.TestCase):
         """A traveler with no history cannot have a measured discount share.
         The prototype shipped one with booking_count 1 and campaign 45%."""
         for t in self.seed["travelers"]:
-            if t["booking_count"] <= config.COLD_START_MAX_BOOKINGS:
-                self.assertIsNone(t["campaign_share"], t["name"])
+            if t["bookings"] <= config.COLD_START_MAX_BOOKINGS:
+                self.assertIsNone(t["campaignShare"], t["name"])
 
     def test_seed_carries_no_prices_and_no_outcomes(self):
         """Prices come from live re-query; outcomes are computed. A seed holding
@@ -280,7 +280,7 @@ class TestSeed(unittest.TestCase):
         """c* = 0.25 is calibrated against this distribution. If a share drifts
         near the bar, the demo outcome becomes a coin flip."""
         for t in self.seed["travelers"]:
-            share = t["campaign_share"]
+            share = t["campaignShare"]
             if share is not None:
                 self.assertGreater(abs(share - config.C_STAR), 0.05, t["name"])
 

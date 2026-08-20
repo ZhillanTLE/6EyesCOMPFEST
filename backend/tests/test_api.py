@@ -27,17 +27,34 @@ class TestRecoveryApi(unittest.TestCase):
         body = self.c.get("/api/recovery/queue").get_json()
         self.assertEqual(len(body["queue"]), 6)
 
-    def test_queue_withholds_classifier_conclusions(self):
+    def test_queue_carries_the_provisional_estimate(self):
+        """Browse cards show the cheap deterministic estimate -- percentile tier
+        and raw campaign share -- so a judge has a hypothesis to test the model
+        against. Without it there is nothing to compare the verdict to."""
         for entry in self.c.get("/api/recovery/queue").get_json()["queue"]:
-            for banned in ("tier", "campaign_share", "usual_spend", "outcome"):
+            self.assertIn("tierEstimate", entry)
+            self.assertIn("campaignShare", entry)
+
+    def test_queue_withholds_the_reasoned_verdict(self):
+        """The estimate is not the Classifier's conclusion. Nothing the
+        pipeline reasons its way to may appear before it has run."""
+        for entry in self.c.get("/api/recovery/queue").get_json()["queue"]:
+            for banned in ("tier", "outcome", "reasoning", "decision", "threshold"):
                 self.assertNotIn(banned, entry)
+
+    def test_cold_start_campaign_share_stays_null_on_the_card(self):
+        queue = self.c.get("/api/recovery/queue").get_json()["queue"]
+        cold = [e for e in queue if e["isColdStart"]]
+        self.assertTrue(cold)
+        for e in cold:
+            self.assertIsNone(e["campaignShare"])
 
     def test_run_returns_the_whole_trace_in_one_response(self):
         """No streaming, no follow-up call: everything the console renders has
         to be in this body."""
-        body = self.c.post("/api/recovery/run", json={"traveler_id": "wf-03"}).get_json()
+        body = self.c.post("/api/recovery/run", json={"travelerId": "wf-03"}).get_json()
         for key in ("classification", "gate", "decision", "hold",
-                    "notification", "timings", "original_total_idr", "source"):
+                    "notification", "timings", "originalTotalIdr", "source"):
             self.assertIn(key, body)
         self.assertTrue(body["classification"]["reasoning"])
         self.assertTrue(body["decision"]["attempts"])
@@ -45,28 +62,28 @@ class TestRecoveryApi(unittest.TestCase):
 
     def test_failed_attempts_are_reported_not_hidden(self):
         """The rungs that missed are the evidence that restraint was earned."""
-        body = self.c.post("/api/recovery/run", json={"traveler_id": "wf-02"}).get_json()
+        body = self.c.post("/api/recovery/run", json={"travelerId": "wf-02"}).get_json()
         attempts = body["decision"]["attempts"]
         self.assertGreater(len(attempts), 1)
         self.assertFalse(attempts[0]["cleared"])
         self.assertTrue(attempts[-1]["cleared"])
 
     def test_reminder_still_carries_a_full_notification(self):
-        body = self.c.post("/api/recovery/run", json={"traveler_id": "wf-01"}).get_json()
+        body = self.c.post("/api/recovery/run", json={"travelerId": "wf-01"}).get_json()
         self.assertEqual(body["decision"]["outcome"], "reminder")
         self.assertIsNotNone(body["notification"])
-        self.assertGreaterEqual(len(body["notification"]["body_paragraphs"]), 2)
+        self.assertGreaterEqual(len(body["notification"]["bodyParagraphs"]), 2)
 
     def test_error_path_returns_200_with_an_error_outcome(self):
         """An upstream inventory failure is a result the console renders, not
         an HTTP failure. Only a broken pipeline is a 5xx."""
-        r = self.c.post("/api/recovery/run", json={"traveler_id": "wf-06"})
+        r = self.c.post("/api/recovery/run", json={"travelerId": "wf-06"})
         self.assertEqual(r.status_code, 200)
         self.assertEqual(r.get_json()["decision"]["outcome"], "error")
 
     def test_unknown_traveler_404(self):
         self.assertEqual(
-            self.c.post("/api/recovery/run", json={"traveler_id": "nope"}).status_code, 404)
+            self.c.post("/api/recovery/run", json={"travelerId": "nope"}).status_code, 404)
 
     def test_missing_body_400(self):
         self.assertEqual(self.c.post("/api/recovery/run", json={}).status_code, 400)

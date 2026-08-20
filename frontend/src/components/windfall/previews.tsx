@@ -84,7 +84,7 @@ export function PricePanel({
           className="wf-mono"
           style={{ marginTop: 12, fontSize: 11, lineHeight: 1.6, color: "var(--wf-amber)" }}
         >
-          Harga penerbangan dijamin {hold.carrier} sampai {hold.expires_at}. Tarif hotel
+          Harga penerbangan dijamin {hold.carrier} sampai {hold.expiresAt}. Tarif hotel
           dihitung ulang saat pembayaran.
         </div>
       )}
@@ -166,13 +166,13 @@ export function EmailPreview({
               {draft.subject}
             </div>
             <div className="wf-mono" style={{ marginTop: 2, fontSize: 10, color: "var(--wf-ink-3)" }}>
-              Windfall &middot; draf, belum dikirim
+              Windfall &middot; draft, not yet sent
             </div>
           </div>
         </header>
 
         <div style={{ padding: 16, display: "flex", flexDirection: "column", gap: 14 }}>
-          {draft.body_paragraphs.map((p, i) => (
+          {draft.bodyParagraphs.map((p, i) => (
             <p key={i} style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: "var(--wf-ink-2)" }}>
               {p}
             </p>
@@ -201,12 +201,12 @@ export function EmailPreview({
               color: changed ? "var(--wf-cta-ink)" : "var(--wf-ink)",
             }}
           >
-            {draft.cta_label}
+            {draft.ctaLabel}
           </span>
 
-          {draft.channel_note && (
+          {draft.channelNote && (
             <p className="wf-mono" style={{ margin: 0, fontSize: 11, color: "var(--wf-ink-3)" }}>
-              {draft.channel_note}
+              {draft.channelNote}
             </p>
           )}
         </div>
@@ -321,7 +321,7 @@ export function WhatsAppPreview({
                 fontWeight: 600,
               }}
             >
-              {draft.cta_label}
+              {draft.ctaLabel}
             </div>
           </div>
         </div>

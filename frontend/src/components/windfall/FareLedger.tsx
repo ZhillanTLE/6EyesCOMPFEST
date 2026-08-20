@@ -31,9 +31,9 @@ const DELTA_INK = {
 };
 const TONE = { pass: "pass", fail: "fail", unavailable: "neutral" } as const;
 const STATUS_TEXT = {
-  pass: "Lolos",
-  fail: "Di bawah ambang",
-  unavailable: "Tidak tersedia",
+  pass: "Cleared",
+  fail: "Below threshold",
+  unavailable: "Not available",
 };
 
 export function FareLedger({
@@ -65,9 +65,9 @@ export function FareLedger({
         }}
       >
         <span style={{ width: 22 }}>#</span>
-        <span style={{ flex: 1 }}>Percobaan</span>
+        <span style={{ flex: 1 }}>Attempt</span>
         <span style={{ width: 116, textAlign: "right" }}>Total</span>
-        <span style={{ width: 64, textAlign: "right" }}>Selisih</span>
+        <span style={{ width: 64, textAlign: "right" }}>Delta</span>
         <span style={{ width: 116, textAlign: "right" }}>Status</span>
       </div>
 
@@ -105,7 +105,7 @@ export function FareLedger({
               className="wf-mono"
               style={{ width: 116, textAlign: "right", fontSize: 12, color: "var(--wf-ink)" }}
             >
-              {a.total_idr === null ? "—" : idr(a.total_idr)}
+              {a.totalIdr === null ? "—" : idr(a.totalIdr)}
             </span>
             <span
               className="wf-mono"
