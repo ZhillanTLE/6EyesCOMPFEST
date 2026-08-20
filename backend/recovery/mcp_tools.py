@@ -28,7 +28,7 @@ from __future__ import annotations
 import os
 from typing import Dict, List, Optional
 
-from . import providers, repository
+from . import hold_manager, providers, repository
 from .schemas import HoldState
 
 
@@ -135,15 +135,8 @@ def check_hold_eligibility(cart_id: str, carrier: str,
     Covers the FLIGHT only. The hotel has no equivalent primitive and re-prices
     at conversion; callers must say so rather than implying the cart is frozen.
     """
-    status = providers.hold_status(cart_id, carrier)
-    return {
-        "state": status.state,
-        "expiresAt": status.expires_at,
-        "carrier": status.carrier,
-        "note": status.note,
-        "scope": "flight_only",
-        "mayRenderDeadline": status.may_render_deadline,
-    }
+    return hold_manager.as_tool_payload(
+        hold_manager.evaluate(cart_id, carrier, offer=None))
 
 
 TOOLS = {
@@ -155,7 +148,49 @@ TOOLS = {
 
 
 def call_tool(name: str, **kwargs):
-    """Dispatch by name, so the call site reads as a tool call either way."""
+    """
+    Dispatch by name, so the call site reads as a tool call either way.
+
+    WINDFALL_MCP=stdio routes through a real MCP client session instead of
+    calling in-process. Same tool, same arguments, same result -- which is the
+    point: it demonstrates that the contract holds across the process boundary
+    rather than asking anyone to take that on trust.
+
+    Not the default. Each call spawns `python -m backend.mcp_server` and pays
+    roughly a second of process startup, which is a poor trade for every cart
+    click when the implementation is shared either way.
+    """
     if name not in TOOLS:
         raise KeyError("no such tool: {} (create_hold is deliberately absent)".format(name))
+    if use_stdio():
+        return _call_over_stdio(name, kwargs)
     return TOOLS[name](**kwargs)
+
+
+def _call_over_stdio(name: str, arguments: dict):
+    """
+    Call the tool through a real MCP stdio session.
+
+    Synchronous from the caller's perspective: asyncio.run drives the session
+    to completion inside the request that triggered it, so this stays within
+    one request/response cycle and adds no background work.
+    """
+    import asyncio
+    import json as _json
+    import sys
+
+    from mcp import ClientSession, StdioServerParameters
+    from mcp.client.stdio import stdio_client
+
+    async def _run():
+        params = StdioServerParameters(
+            command=sys.executable, args=["-m", "backend.mcp_server"], env=dict(os.environ))
+        async with stdio_client(params) as (read, write):
+            async with ClientSession(read, write) as session:
+                await session.initialize()
+                result = await session.call_tool(name, arguments)
+                text = "".join(
+                    getattr(c, "text", "") for c in (result.content or []))
+                return _json.loads(text) if text else None
+
+    return asyncio.run(_run())

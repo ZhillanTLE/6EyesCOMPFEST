@@ -17,8 +17,9 @@ import time
 from dataclasses import replace
 from typing import Callable, List, Optional, Tuple
 
-from . import (classifier_agent, gate, ladder, mcp_tools, notification_curator,
-               outcomes, providers, repository, searcher_agent, tiers)
+from . import (classifier_agent, gate, hold_manager, ladder, mcp_tools,
+               notification_curator, outcomes, providers, repository,
+               searcher_agent, tiers)
 from .schemas import (
     Classification, HoldState, HoldStatus, RecoveryResult, StageTiming,
 )
@@ -173,10 +174,9 @@ def run(traveler_id: str) -> RecoveryResult:
 
     decision = outcomes.decide(gate_result, original_total, attempts, alternative_total)
 
-    # Hold eligibility through the MCP tool. Read-only; there is no create_hold.
-    hold_row = mcp_tools.call_tool(
-        "check_hold_eligibility", cart_id=cart_id, carrier=cart.flight.carrier)
-    hold = providers.hold_status(cart_id, cart.flight.carrier)
+    # Hold eligibility, read-only. There is no create_hold anywhere in this
+    # package: placing a hold is a real write against airline inventory.
+    hold = hold_manager.evaluate(cart_id, cart.flight.carrier)
 
     # ── Stage 3: Notification Curator ───────────────────────────────────────
     alt = (providers.fixtures().get("alternatives") or {}).get(cart_id) or {}

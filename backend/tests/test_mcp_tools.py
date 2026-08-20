@@ -87,3 +87,48 @@ class TestCheckHoldEligibility(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestContractHoldsAcrossTheProcessBoundary(unittest.TestCase):
+    """
+    Paper section 5.1's architectural claim, made testable.
+
+    The claim is that MCP is a real interface contract, not decoration: the
+    same tool call produces the same result whether it runs in-process or over
+    a real stdio session. If the two ever diverge, the claim is false and the
+    "swap the data source without touching a prompt" argument goes with it.
+
+    Spawns `python -m backend.mcp_server`, so it is slower than the rest of the
+    suite. That cost buys a claim that would otherwise rest on assertion.
+    """
+
+    def setUp(self):
+        self._env = dict(os.environ)
+
+    def tearDown(self):
+        os.environ.clear()
+        os.environ.update(self._env)
+
+    def _both_paths(self, tool, **kwargs):
+        os.environ["WINDFALL_MCP"] = ""
+        in_process = mcp_tools.call_tool(tool, **kwargs)
+        os.environ["WINDFALL_MCP"] = "stdio"
+        over_stdio = mcp_tools.call_tool(tool, **kwargs)
+        return in_process, over_stdio
+
+    def test_read_traveler_history_agrees(self):
+        a, b = self._both_paths("read_traveler_history", traveler_id="wf-02")
+        self.assertEqual(a, b)
+
+    def test_cold_start_null_survives_the_boundary(self):
+        """Null is the easiest thing for a serialisation layer to quietly turn
+        into 0, which would fabricate the price-sensitivity signal."""
+        a, b = self._both_paths("read_traveler_history", traveler_id="wf-05")
+        self.assertIsNone(a["campaignShare"])
+        self.assertIsNone(b["campaignShare"])
+
+    def test_hold_eligibility_agrees(self):
+        a, b = self._both_paths("check_hold_eligibility",
+                                cart_id="cart-wf-02", carrier="Singapore Airlines")
+        self.assertEqual(a, b)
+        self.assertEqual(a["state"], "eligible")

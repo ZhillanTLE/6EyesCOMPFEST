@@ -16,6 +16,7 @@ import { ApprovalBar } from "./ApprovalBar";
 import { AgentStage } from "./AgentStage";
 import { FareLedger } from "./FareLedger";
 import { OutcomeCard, OutcomeNote } from "./OutcomeCard";
+import { HoldPanel } from "./HoldPanel";
 import { EmailPreview, WhatsAppPreview } from "./previews";
 import { Skeleton, TierBadge } from "./primitives";
 
@@ -233,6 +234,8 @@ export function PipelineView({
           threshold={classification.threshold}
         />
       )}
+
+      {phase >= 4 && !halted && <HoldPanel hold={hold} />}
 
       {phase >= 4 && (
         <ApprovalBar

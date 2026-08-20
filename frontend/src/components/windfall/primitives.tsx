@@ -172,7 +172,7 @@ export function TierBadge({
       <span style={{ fontSize: 15, fontWeight: 500, color: "var(--wf-ink)" }}>{tier}</span>
       {proxy && (
         <span className="wf-eyebrow" style={{ fontSize: 9, color: "var(--wf-amber)" }}>
-          dari cart
+          from cart
         </span>
       )}
       <span

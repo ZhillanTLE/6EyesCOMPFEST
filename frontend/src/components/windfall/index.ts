@@ -15,3 +15,4 @@ export { TravelerCard } from "./TravelerCard";
 export { BrowseView } from "./BrowseView";
 export { PipelineView } from "./PipelineView";
 export { ApprovalBar } from "./ApprovalBar";
+export { HoldPanel } from "./HoldPanel";
