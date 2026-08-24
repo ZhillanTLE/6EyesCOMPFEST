@@ -28,3 +28,7 @@ backend/duffel_hold_probe_result.json
 windfall-design-component-review/
 Windfall Design Comp Review/
 *.pdf
+
+# Reference two-page design bundle and its decoded pages (plan: docs/design-plan.md)
+Windfall (landing + console).html
+design/
