@@ -83,8 +83,9 @@ function Channels() {
 
 export function WaveFooter({ variant }: { variant: "landing" | "console" }) {
   const landing = variant === "landing";
-  /* Anchors resolve on the landing page; the console links across to it. */
-  const prefix = landing ? "" : "/windfall";
+  /* Anchors resolve in place on the landing page, which is the root route;
+     the console links across to it. */
+  const prefix = landing ? "" : "/";
 
   return (
     <div style={{ background: "var(--wf-footer-paper)" }}>

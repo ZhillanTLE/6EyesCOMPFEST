@@ -366,11 +366,20 @@ Two routes, both client-only against Flask:
 - `/recovery` — the console. Three views: **browse → pipeline → previews**.
   Approval lives on the previews screen, before anything is sent. The pipeline
   screen ends on a forward control, not on the send button.
-- `/windfall` — the landing page. Static, no data fetching. Every figure is a
+- `/` — the landing page. Static, no data fetching. Every figure is a
   count from the captured run or a statement of mechanism; the design's "32%"
   and "68/32" claims were dropped as unmeasured.
 
-`/` remains the pre-existing plan-trip app and is out of recovery scope.
+`/` **is the Windfall landing page.** It previously held the pre-existing
+plan-trip app (Mapbox canvas, budget HUD, SocketIO); that page and its three
+components were removed on request, so the only UI this repo serves is
+Windfall. The `/api/plan-trip` backend is untouched and simply has no page in
+front of it — deleting a Flask blueprint was not asked for and is not needed
+for the recovery path to stand alone.
+
+Removing it also narrows the FE surface the penyisihan rule cares about: a
+second, unrelated trip-planning app was the strongest thing in the repo that
+could read as a "dashboard".
 
 ---
 

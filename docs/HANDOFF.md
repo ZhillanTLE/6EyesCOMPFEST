@@ -18,7 +18,7 @@ python -m unittest discover -s backend/tests -t .   # 120 tests, all green
 python scripts/scope_check.py                       # must exit 0
 cd frontend && npm run build                        # must pass
 WINDFALL_FIXTURES=1 PORT=8000 python -m backend.app # then curl /api/recovery/health
-cd frontend && npx next start -p 3067               # /windfall and /recovery
+cd frontend && npx next start -p 3067               # / and /recovery
 ```
 
 Run BOTH servers. The console fetches its cards from Flask through the Next
@@ -78,7 +78,7 @@ are **done and committed**. Remaining: **step 6, `docker compose`** — plus the
 loose ends under *Not done*.
 
 The console is now the handoff's three-view flow — **browse → pipeline →
-previews** — and there is a landing page at `/windfall`.
+previews** — and the landing page is served at `/`.
 
 **Design-alignment pass (Aug 2026, see `docs/design-plan.md`):** both pages
 were rebuilt/reworked to the two-page reference bundle. The landing carries
@@ -152,7 +152,7 @@ the browser stays same-origin.
 
 ```
 app/recovery/{layout,page,windfall.css}   the console, three views
-app/windfall/{layout,page,reveal}         the landing page
+app/{page,reveal}                        the landing page, at /
 components/windfall/  primitives, AgentStage, AgentAvatar, FareLedger,
                       OutcomeCard, previews, TravelerCard, BrowseView,
                       PipelineView, PreviewsView, ApprovalBar, HoldPanel,

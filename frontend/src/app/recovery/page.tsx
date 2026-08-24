@@ -136,7 +136,7 @@ export default function RecoveryConsole() {
         >
           {/* The lockup links to the landing page, as the handoff specifies. */}
           <Link
-            href="/windfall"
+            href="/"
             style={{ display: "flex", alignItems: "center", gap: 11, flex: "0 0 auto", textDecoration: "none" }}
           >
             <span

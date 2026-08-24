@@ -1,881 +1,1116 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import io, { Socket } from "socket.io-client";
-import BudgetTracker from "@/components/BudgetTracker";
-import MapCanvas from "@/components/MapCanvas";
-import ControlPanel from "@/components/ControlPanel";
-import { Sparkles, CheckCircle2, PlaneTakeoff, PlaneLanding, Hotel, Calendar, ExternalLink, Clock, MapPin } from "lucide-react";
-import { getIdToken } from "@/lib/auth";
+/**
+ * The Windfall landing page, served at "/" — the argument, where /recovery is
+ * the tool.
+ *
+ * Layout, motion and copy follow the reference design
+ * (docs/design-plan.md maps every section). Departures, all required by
+ * CLAUDE.md:
+ *
+ *  1. Claims discipline. The design's "32% recovered with zero discount",
+ *     "68% offered / 32% declined", "62% carts abandoned" and "IDR 40jt avg
+ *     cart" were never measured. Every figure on this page is a count taken
+ *     from the captured ten-cart run (see backend/recovery/seed/golden.json)
+ *     or a statement of mechanism. "IDR 0 margin conceded" survives verbatim
+ *     because it is true across every outcome and a test asserts it.
+ *  2. The pipeline demo drops the design's fake browser chrome
+ *     (`BrowserFrame` is on the do-not-build list) and shows Ria Lavenia's
+ *     captured run: real ledger figures, real per-stage durations, the real
+ *     drafted email. It is a replay of recorded data, not inference.
+ *  3. The Searcher card states the tiered thresholds, not the design's flat
+ *     "≥ 3%" — the frozen constants win.
+ *
+ * The page is static: no fetch, no server data.
+ */
+import Link from "next/link";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { WaveFooter } from "@/components/windfall/WaveFooter";
+import { useReveal } from "./reveal";
 
-const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+/* ---------------------------------------------------------------- data --
+   Everything below is transcribed from the captured run in
+   backend/recovery/seed/golden.json. If the seed changes, these change. */
 
-export default function Home() {
-  const [totalBudget, setTotalBudget] = useState<number | null>(null);
-  const [remainingBudget, setRemainingBudget] = useState<number | null>(null);
-  const [currency, setCurrency] = useState("USD");
-  const [currencySymbol, setCurrencySymbol] = useState("$");
-  
-  // Option lists from server
-  const [outboundOptions, setOutboundOptions] = useState<any[]>([]);
-  const [inboundOptions, setInboundOptions] = useState<any[]>([]);
-  const [hotelOptions, setHotelOptions] = useState<any[]>([]);
-  const [itinerary, setItinerary] = useState<any[]>([]);
+type Tag = "REBUILT" | "LATERAL" | "REMINDER" | "ALTERNATIVE" | "SKIPPED";
 
-  // Selected Indices
-  const [selectedOutboundIdx, setSelectedOutboundIdx] = useState<number>(0);
-  const [selectedInboundIdx, setSelectedInboundIdx] = useState<number>(0);
-  const [selectedHotelIdx, setSelectedHotelIdx] = useState<number>(0);
+const TAG_TINT: Record<Tag, { ink: string; bg: string }> = {
+  REBUILT: { ink: "var(--wf-signal)", bg: "var(--wf-signal-tint)" },
+  LATERAL: { ink: "var(--wf-signal)", bg: "var(--wf-signal-tint)" },
+  REMINDER: { ink: "var(--wf-ink-2)", bg: "var(--wf-warm)" },
+  ALTERNATIVE: { ink: "var(--wf-amber)", bg: "var(--wf-amber-tint)" },
+  SKIPPED: { ink: "var(--wf-halt)", bg: "var(--wf-halt-tint)" },
+};
 
-  // Swap panels visibility toggles
-  const [showOutboundSwap, setShowOutboundSwap] = useState(false);
-  const [showInboundSwap, setShowInboundSwap] = useState(false);
-  const [showHotelSwap, setShowHotelSwap] = useState(false);
-  
-  const [isLoading, setIsLoading] = useState(false);
-  const [statusText, setStatusText] = useState("");
-  const [finalSummary, setFinalSummary] = useState<string | null>(null);
-  const [currentStep, setCurrentStep] = useState<string>("parsing");
+const MARQUEE: { name: string; route: string; tag: Tag; figure: string; note: string }[] = [
+  { name: "Ria Lavenia", route: "HND → SIN", tag: "REBUILT", figure: "−11,2%", note: "saves 766.080 · hotel one star down" },
+  { name: "Zhillan Baniaksa", route: "GRU → LIS", tag: "REBUILT", figure: "−12,6%", note: "saves 4.757.760 · hotel one star down" },
+  { name: "Nasywa Namira", route: "DXB → LHR", tag: "REMINDER", figure: "IDR 0", note: "campaign share 9% · margin kept" },
+  { name: "Adriano Goran", route: "BLR → DXB", tag: "ALTERNATIVE", figure: "−14,3%", note: "cold start · different trip fits" },
+  { name: "Zayyan Ramadzaki", route: "ACC → LHR", tag: "LATERAL", figure: "−10,8%", note: "saves 3.758.400 · same-star swap" },
+  { name: "Christiano Hosea", route: "PVG → NRT", tag: "SKIPPED", figure: "—", note: "inventory unavailable · no send" },
+  { name: "Micguel Katili", route: "FCO → JFK", tag: "REBUILT", figure: "−8,7%", note: "saves 508.950 · hotel one star down" },
+  { name: "Salsabilla Hasan", route: "SCL → MAD", tag: "REMINDER", figure: "IDR 0", note: "campaign share 11% · margin kept" },
+  { name: "Darius Sagala", route: "LOS → ADD", tag: "ALTERNATIVE", figure: "−20,3%", note: "saves 6.763.960 · different trip" },
+  { name: "Tania Ju", route: "NRT → HNL", tag: "REBUILT", figure: "−10,2%", note: "saves 871.080 · hotel one star down" },
+];
 
-  type StepState = "pending" | "in_progress" | "done" | "failed";
-  interface PlanStep {
-    state: StepState;
-    message: string;
-  }
-  const initialSteps: Record<string, PlanStep> = {
-    parsing: { state: "pending", message: "Parsing Request" },
-    flights: { state: "pending", message: "Searching Flights" },
-    budget: { state: "pending", message: "Checking Budget" },
-    hotels: { state: "pending", message: "Searching Hotels" },
-    itinerary: { state: "pending", message: "Building Itinerary" },
-    finalize: { state: "pending", message: "Finalizing" }
-  };
-  const [planSteps, setPlanSteps] = useState<Record<string, PlanStep>>(initialSteps);
+/* Ria Lavenia (wf-01): the demo cart. Durations are the run's measured
+   per-stage wall clock; the ledger rows are its actual attempts. */
+const DEMO = {
+  classifierMs: 1800,
+  searcherMs: 3100,
+  notifierMs: 1550,
+  classifier: ["→ Campaign share 46,0% — price-sensitive", "→ Cart 14,0% above usual spend"],
+  tier: "Value",
+  threshold: "THRESHOLD ≥ 5%",
+  ledger: [
+    { n: "01", label: "Same cart, re-priced", total: "6.696.360", delta: "−2,1%", cleared: false },
+    { n: "02", label: "Same-star hotel swap, same area", total: "6.580.080", delta: "−3,8%", cleared: false },
+    { n: "03", label: "Hotel down one star, same area", total: "6.073.920", delta: "−11,2%", cleared: true },
+  ],
+  ledgerFooterL: "Value tier threshold ≥ 5,0%",
+  ledgerFooterR: "Stopped at attempt 03",
+  notifier: ["→ Tone tuned to the tier, leads with the rebuild", "→ States what changed, no invented urgency"],
+  recon: {
+    sub: "Hotel down one star, same area and dates",
+    oldTotal: "IDR 6.840.000",
+    newTotal: "IDR 6.073.920",
+    line: "−11,2% · saves 766.080",
+  },
+  email: {
+    subject: "Perjalanan Singapore Anda, disusun ulang agar pas",
+    body:
+      "Kami menyusun ulang satu bagian saja agar totalnya IDR 766.080 lebih ringan: penerbangan, tanggal, dan kawasannya tetap sama, yang berubah hanya penginapannya menjadi Hotel Boss (3 bintang).",
+    old: "6.840.000",
+    nw: "6.073.920",
+    save: "Save IDR 766.080",
+    pct: "−11,2%",
+    cta: "Lihat perjalanan yang disusun ulang",
+    closing: "Jika yang semula tetap yang Anda inginkan, versi itu masih utuh dan bisa Anda pilih kembali kapan saja.",
+  },
+};
 
-  const socketRef = useRef<Socket | null>(null);
-  const sessionIdRef = useRef<string>("");
+const AGENT_CARDS = [
+  {
+    icon: "classifier",
+    n: "01",
+    name: "Classifier",
+    body: "Reads the booking history, sets the tier, and states the two signals in plain lines an analyst can argue with.",
+    foot: "Tier · campaign share · spend gap",
+  },
+  {
+    icon: "searcher",
+    n: "02",
+    name: "Searcher",
+    body: "Walks the rebuild ladder — re-price, same-star swap, one star down — and stops at the first attempt that clears the tier threshold.",
+    foot: "Value 5% · Comfort 10% · Premium 15%",
+  },
+  {
+    icon: "notifier",
+    n: "03",
+    name: "Notifier",
+    body: "Drafts the email and the WhatsApp message for the decision that was actually made, with no invented deadlines.",
+    foot: "Email + WhatsApp · approval required",
+  },
+] as const;
 
-  const activeOutbound = outboundOptions[selectedOutboundIdx] || null;
-  const activeInbound = inboundOptions[selectedInboundIdx] || null;
-  const activeHotel = hotelOptions[selectedHotelIdx] || null;
+const SEGMENTS = [
+  {
+    num: "01",
+    name: "Flight OTAs",
+    why: "High volume, thin margin per ticket, so a discount aimed at the wrong traveler is felt immediately.",
+    stat: "thin margins",
+  },
+  {
+    num: "02",
+    name: "Full-service airlines",
+    why: "Graded cabins mean “comparable” can be defined precisely instead of guessed.",
+    stat: "graded cabins",
+  },
+  {
+    num: "03",
+    name: "Hotel groups & packagers",
+    why: "Flight and stay in one cart: two partner margins to protect in a single decision.",
+    stat: "two margins, one cart",
+  },
+];
 
-  // Formatting helper for currency sensitivity
-  const formatPrice = (val: number | null) => {
-    if (val === null) return "";
-    if (currency === "IDR") {
-      return `Rp ${val.toLocaleString("id-ID", { maximumFractionDigits: 0 })}`;
-    }
-    if (currency === "JPY") {
-      return `¥${val.toLocaleString("ja-JP", { maximumFractionDigits: 0 })}`;
-    }
-    if (currency === "CNY") {
-      return `¥${val.toLocaleString("zh-CN", { maximumFractionDigits: 0 })}`;
-    }
-    if (currency === "EUR") {
-      return `€${val.toLocaleString("de-DE", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
-    }
-    return `${currencySymbol}${val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
-  };
+const WATCHERS = [
+  { role: "The analyst decides", does: "Approves or rejects each send; the agents only propose" },
+  {
+    role: "The partner sees why",
+    does: "When an OTA asks why an offer was or was not made, the reasoning trace answers, per cart, on the record",
+  },
+  { role: "Marketing owns tone", does: "Message wording and channel are editable; the decision itself is not" },
+  {
+    role: "The traveler can reply",
+    does: "The message states what changed and why, so a wrong read is answerable rather than final",
+  },
+];
 
-  // Initialize socket connection
-  const initSocket = () => {
-    if (socketRef.current) return;
+/* ------------------------------------------------------------- helpers -- */
 
-    console.log("Connecting to WebSocket backend at:", BACKEND_URL);
-    const socket = io(BACKEND_URL, {
-      transports: ["polling", "websocket"],
-      reconnectionAttempts: 5,
-    });
+const mono = (extra: React.CSSProperties = {}): React.CSSProperties => ({
+  fontFamily: "var(--wf-font-mono)",
+  ...extra,
+});
 
-    socket.on("connect", () => {
-      console.log("Connected to WebSocket server.");
-    });
+const eyebrow = (extra: React.CSSProperties = {}): React.CSSProperties =>
+  mono({
+    fontSize: 10.5,
+    letterSpacing: "0.09em",
+    textTransform: "uppercase",
+    color: "var(--wf-ink-3)",
+    ...extra,
+  });
 
-    socket.on("join_response", (data) => {
-      console.log("Successfully joined Socket room:", data);
-    });
+function AgentDot({ agent, done, size = 34 }: { agent: string; done: boolean; size?: number }) {
+  return (
+    <span
+      aria-hidden
+      style={{
+        position: "relative",
+        display: "block",
+        width: size,
+        height: size,
+        border: "1px solid var(--wf-rule)",
+        borderRadius: "50%",
+        background: "var(--wf-surface)",
+        boxSizing: "border-box",
+        overflow: "hidden",
+        flex: "none",
+      }}
+    >
+      {(["awake", "finished"] as const).map((state) => (
+        <span
+          key={state}
+          style={{
+            position: "absolute",
+            inset: 3,
+            backgroundImage: `url(/windfall/agents/${agent}-${state}.svg)`,
+            backgroundSize: "contain",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+            opacity: state === "finished" ? (done ? 1 : 0) : 1,
+            transition: "opacity .4s ease",
+          }}
+        />
+      ))}
+    </span>
+  );
+}
 
-    socket.on("outbound_flight_locked", (data) => {
-      console.log("Socket: Outbound flight options locked:", data);
-      setOutboundOptions(data.options || []);
-      setSelectedOutboundIdx(data.selected_idx ?? 0);
-      setRemainingBudget(data.remaining_budget);
-      setStatusText("Outbound flight locked!");
-    });
+/* ------------------------------------------------------- pipeline demo --
+   A replay of Ria Lavenia's captured run at the pace the server measured.
+   Starts when scrolled into view; RUN AGAIN restarts it. */
 
-    socket.on("inbound_flight_locked", (data) => {
-      console.log("Socket: Inbound flight options locked:", data);
-      setInboundOptions(data.options || []);
-      setSelectedInboundIdx(data.selected_idx ?? 0);
-      setRemainingBudget(data.remaining_budget);
-      setStatusText("Inbound return flight locked!");
-    });
+function PipelineDemo() {
+  const [phase, setPhase] = useState(0); // 0 idle · 1 classifying · 2 searching · 3 drafting · 4 done
+  const [rows, setRows] = useState(0);
+  const timers = useRef<number[]>([]);
+  const frame = useRef<HTMLDivElement | null>(null);
+  const started = useRef(false);
 
-    socket.on("hotel_locked", (data) => {
-      console.log("Socket: Hotel options locked:", data);
-      setHotelOptions(data.options || []);
-      setSelectedHotelIdx(data.selected_idx ?? 0);
-      setRemainingBudget(data.remaining_budget);
-      setStatusText("Hotels locked successfully!");
-    });
-
-    socket.on("agent_progress", (data) => {
-      console.log("Socket: Agent Progress status:", data);
-      if (data.status) {
-        setStatusText(data.status);
-      }
-    });
-
-    socket.on("step_progress", (data) => {
-      console.log("Socket: Step Progress:", data);
-      const { step, state, message } = data;
-      setPlanSteps((prev) => ({
-        ...prev,
-        [step]: { state, message }
-      }));
-      if (state === "in_progress") {
-        setCurrentStep(step);
-      }
-      if (message) {
-        setStatusText(message);
-      }
-    });
-
-    socket.on("itinerary_progress", (data) => {
-      console.log("Socket: Itinerary progress:", data);
-      setPlanSteps((prev) => ({
-        ...prev,
-        itinerary: { state: "in_progress", message: `Building Itinerary - Day ${data.day} of ${data.total_days} planned` }
-      }));
-      setItinerary((prev) => {
-        const existing = prev.filter(item => item.day !== data.day);
-        const next = [...existing, data.data];
-        return next.sort((a, b) => a.day - b.day);
-      });
-      setStatusText(`Building Itinerary - Day ${data.day} of ${data.total_days} planned`);
-    });
-
-    socket.on("itinerary_locked", (data) => {
-      console.log("Socket: Daily Itinerary locked:", data);
-      setItinerary(data.itinerary || []);
-    });
-
-    socket.on("item_swapped", (data) => {
-      console.log("Socket: Broadcast swap update received:", data);
-      const { item_type, option_index, remaining_budget } = data;
-      setRemainingBudget(remaining_budget);
-      if (item_type === "outbound") {
-        setSelectedOutboundIdx(option_index);
-      } else if (item_type === "inbound") {
-        setSelectedInboundIdx(option_index);
-      } else if (item_type === "hotel") {
-        setSelectedHotelIdx(option_index);
-      }
-    });
-
-    socket.on("plan_completed", (data) => {
-      console.log("Socket: Trip Plan completed:", data);
-      setIsLoading(false);
-      setStatusText("Plan complete!");
-      setFinalSummary(data.summary);
-      if (data.remaining_budget !== undefined) {
-        setRemainingBudget(data.remaining_budget);
-      }
-    });
-
-    socket.on("plan_error", (data) => {
-      console.log("Socket: Trip Plan error:", data);
-      setIsLoading(false);
-      setStatusText("Error: " + data.error);
-      setFinalSummary("I need more information to plan this trip: " + data.error);
-      setPlanSteps((prev) => {
-        // Find the first in_progress or pending step and mark it failed
-        const newSteps = { ...prev };
-        for (const key of Object.keys(newSteps)) {
-          if (newSteps[key].state === "in_progress" || newSteps[key].state === "pending") {
-            newSteps[key].state = "failed";
-            newSteps[key].message = data.error;
-            break;
-          }
-        }
-        return newSteps;
-      });
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Disconnected from WebSocket server.");
-    });
-
-    socketRef.current = socket;
-  };
-
-  useEffect(() => {
-    // Initialize real socket connection
-    initSocket();
-
-    return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        socketRef.current = null;
-      }
-    };
+  const run = useCallback(() => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+    setPhase(1);
+    setRows(0);
+    const at = (ms: number, fn: () => void) => timers.current.push(window.setTimeout(fn, ms));
+    const { classifierMs, searcherMs, notifierMs, ledger } = DEMO;
+    at(classifierMs, () => setPhase(2));
+    ledger.forEach((_, i) =>
+      at(classifierMs + Math.round(((i + 1) * searcherMs) / (ledger.length + 1)), () => setRows(i + 1)),
+    );
+    at(classifierMs + searcherMs, () => setPhase(3));
+    at(classifierMs + searcherMs + notifierMs, () => setPhase(4));
   }, []);
 
-  // Stuck-state safety net (FR4)
   useEffect(() => {
-    if (!isLoading) return;
-
-    let stuckTimer: NodeJS.Timeout | null = null;
-    
-    // Find if there is an in_progress step
-    const inProgressStep = Object.entries(planSteps).find(([_, stepData]) => stepData.state === "in_progress");
-    
-    if (inProgressStep) {
-      const [stepName] = inProgressStep;
-      stuckTimer = setTimeout(() => {
-        setStatusText("Still working - finalizing details...");
-        if (stepName === "itinerary") {
-          setPlanSteps(prev => ({
-            ...prev,
-            itinerary: { ...prev.itinerary, message: "Still working - finalizing day-by-day plans..." }
-          }));
-        }
-      }, 8000); // 8 second safety net
-    }
-
-    return () => {
-      if (stuckTimer) clearTimeout(stuckTimer);
-    };
-  }, [planSteps, isLoading]);
-
-  // Handle plan submit POST request
-  const handlePlanTrip = async (prompt: string, isDemo: boolean = false) => {
-    setIsLoading(true);
-    setStatusText("Analyzing your trip request...");
-    setFinalSummary(null);
-    setOutboundOptions([]);
-    setInboundOptions([]);
-    setHotelOptions([]);
-    setItinerary([]);
-    setSelectedOutboundIdx(0);
-    setSelectedInboundIdx(0);
-    setSelectedHotelIdx(0);
-    setShowOutboundSwap(false);
-    setShowInboundSwap(false);
-    setShowHotelSwap(false);
-    setPlanSteps(initialSteps);
-
-    const session = "sess-" + Math.random().toString(36).substring(2, 9);
-    sessionIdRef.current = session;
-
-    if (socketRef.current) {
-      socketRef.current.emit("join_session", { session_id: session });
-    }
-
-    try {
-      const idToken = await getIdToken();
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (idToken) headers["Authorization"] = `Bearer ${idToken}`;
-      const response = await fetch(`${BACKEND_URL}/api/plan-trip`, {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          user_text: prompt,
-          session_id: session,
-          isDemo,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Server returned error status: ${response.status}`);
+    const el = frame.current;
+    if (!el) return;
+    if (!("IntersectionObserver" in window)) {
+      if (!started.current) {
+        started.current = true;
+        run();
       }
-
-      const data = await response.json();
-      console.log("POST /api/plan-trip success:", data);
-      
-      setTotalBudget(data.initial_budget);
-      setRemainingBudget(data.initial_budget);
-      setCurrency(data.currency || "USD");
-      setCurrencySymbol(data.currency_symbol || "$");
-      setStatusText("Trip plan initiated. Starting agent workflow...");
-    } catch (err: any) {
-      console.error("Failed to plan trip via Flask backend:", err);
-      setStatusText(`Connection failed. Please ensure the backend is running.`);
-      setPlanSteps((prev) => {
-        const newSteps = { ...prev };
-        for (const key of Object.keys(newSteps)) {
-          if (newSteps[key].state === "in_progress" || newSteps[key].state === "pending") {
-            newSteps[key].state = "failed";
-            newSteps[key].message = "Connection failed";
-            break;
-          }
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting) && !started.current) {
+          started.current = true;
+          run();
+          io.disconnect();
         }
-        return newSteps;
-      });
-      setIsLoading(false);
-    }
+      },
+      { threshold: 0.25 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, [run]);
+
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+
+  const dim = (from: number): React.CSSProperties => ({
+    opacity: phase >= from ? 1 : 0.16,
+    transform: phase >= from ? "none" : "translateY(8px)",
+    transition: "opacity .45s ease, transform .45s cubic-bezier(.22,.61,.36,1)",
+  });
+  const dur = (ms: number) => `${(ms / 1000).toFixed(2).replace(".", ",")}s`;
+
+  return (
+    <div
+      ref={frame}
+      data-reveal
+      style={{
+        marginTop: 40,
+        border: "var(--wf-border-frame)",
+        borderRadius: "var(--wf-radius-lg)",
+        background: "var(--wf-white)",
+        boxShadow: "var(--wf-shadow-card)",
+        overflow: "hidden",
+      }}
+    >
+      {/* Provenance bar, in place of the design's fake browser chrome. */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 12,
+          padding: "10px 14px",
+          borderBottom: "var(--wf-border-hair)",
+          background: "var(--wf-surface)",
+        }}
+      >
+        <span style={eyebrow()}>From the captured run &middot; Ria Lavenia &middot; HND → SIN</span>
+        <button
+          type="button"
+          onClick={run}
+          style={mono({
+            fontSize: 10.5,
+            letterSpacing: "0.09em",
+            color: "var(--wf-ink)",
+            background: "var(--wf-white)",
+            border: "var(--wf-border-frame)",
+            borderRadius: "var(--wf-radius-sm)",
+            padding: "5px 10px",
+            cursor: "pointer",
+          })}
+        >
+          {phase > 0 && phase < 4 ? "RUNNING…" : "RUN AGAIN"}
+        </button>
+      </div>
+
+      <div className="wf-cols" style={{ display: "grid", gridTemplateColumns: "1.08fr 1fr" }}>
+        {/* Left: the reasoning timeline. */}
+        <div
+          style={{
+            padding: 24,
+            borderRight: "var(--wf-border-hair)",
+            display: "flex",
+            flexDirection: "column",
+            gap: 16,
+          }}
+        >
+          <span style={eyebrow()}>Agent reasoning</span>
+
+          {/* Classifier */}
+          <div style={{ display: "flex", gap: 12 }}>
+            <span style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: "none" }}>
+              <AgentDot agent="classifier" done={phase >= 2} />
+              <span style={{ flex: 1, width: 1, background: "var(--wf-rule)", marginTop: 6 }} />
+            </span>
+            <div style={{ flex: 1, minWidth: 0, ...dim(1) }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 13.5, fontWeight: 500 }}>Classifier</span>
+                <span style={eyebrow({ fontSize: 9.5, border: "var(--wf-border-hair)", borderRadius: "var(--wf-radius-sm)", padding: "2px 6px" })}>
+                  GEMINI
+                </span>
+                <span style={mono({ marginLeft: "auto", fontSize: 11, color: "var(--wf-ink-3)" })}>
+                  {phase >= 2 ? dur(DEMO.classifierMs) : ""}
+                </span>
+              </div>
+              <div style={mono({ display: "flex", flexDirection: "column", gap: 7, marginTop: 9, fontSize: 11.5, lineHeight: 1.6, color: "var(--wf-ink-2)" })}>
+                {DEMO.classifier.map((l) => (
+                  <span key={l}>{l}</span>
+                ))}
+              </div>
+              <span
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 10,
+                  marginTop: 11,
+                  boxShadow: "var(--wf-ring-ink)",
+                  borderRadius: "var(--wf-radius-md)",
+                  padding: "7px 11px",
+                }}
+              >
+                <span style={eyebrow({ fontSize: 10 })}>Tier</span>
+                <span style={{ fontSize: 14, fontWeight: 500, lineHeight: 1 }}>{DEMO.tier}</span>
+                <span style={{ width: 1, height: 14, background: "var(--wf-rule)" }} />
+                <span style={eyebrow({ fontSize: 10 })}>{DEMO.threshold}</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Searcher */}
+          <div style={{ display: "flex", gap: 12 }}>
+            <span style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: "none" }}>
+              <AgentDot agent="searcher" done={phase >= 3} />
+              <span style={{ flex: 1, width: 1, background: "var(--wf-rule)", marginTop: 6 }} />
+            </span>
+            <div style={{ flex: 1, minWidth: 0, ...dim(2) }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 13.5, fontWeight: 500 }}>Searcher</span>
+                <span style={eyebrow({ fontSize: 9.5, border: "var(--wf-border-hair)", borderRadius: "var(--wf-radius-sm)", padding: "2px 6px" })}>
+                  GEMINI + MCP
+                </span>
+                <span style={mono({ marginLeft: "auto", fontSize: 11, color: "var(--wf-ink-3)" })}>
+                  {phase >= 3 ? dur(DEMO.searcherMs) : ""}
+                </span>
+              </div>
+              <div style={mono({ display: "block", marginTop: 9, border: "var(--wf-border-hair)", borderRadius: "var(--wf-radius-md)", overflow: "hidden", fontSize: 11 })}>
+                <span
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr auto auto auto",
+                    gap: 12,
+                    padding: "7px 11px",
+                    background: "var(--wf-surface)",
+                    letterSpacing: "0.09em",
+                    fontSize: 9.5,
+                    color: "var(--wf-ink-3)",
+                  }}
+                >
+                  <span>ATTEMPT</span>
+                  <span style={{ textAlign: "right" }}>TOTAL</span>
+                  <span style={{ textAlign: "right" }}>DIFF</span>
+                  <span style={{ textAlign: "right" }}>STATUS</span>
+                </span>
+                {DEMO.ledger.slice(0, phase >= 4 ? DEMO.ledger.length : rows).map((r) => (
+                  <span
+                    key={r.n}
+                    className="wf-fade"
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr auto auto auto",
+                      gap: 12,
+                      padding: "8px 11px",
+                      background: r.cleared ? "var(--wf-signal-tint)" : "var(--wf-halt-tint)",
+                      borderTop: "var(--wf-border-hair)",
+                      color: "var(--wf-ink-2)",
+                    }}
+                  >
+                    <span>
+                      <span style={{ color: "var(--wf-ink-3)" }}>{r.n}</span> {r.label}
+                    </span>
+                    <span style={{ textAlign: "right" }}>{r.total}</span>
+                    <span style={{ textAlign: "right" }}>{r.delta}</span>
+                    <span style={{ textAlign: "right", color: r.cleared ? "var(--wf-signal)" : "var(--wf-halt)" }}>
+                      {r.cleared ? "Cleared" : "Failed"}
+                    </span>
+                  </span>
+                ))}
+                {phase >= 4 && (
+                  <span
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      gap: 12,
+                      padding: "8px 11px",
+                      borderTop: "var(--wf-border-hair)",
+                      color: "var(--wf-ink-3)",
+                    }}
+                  >
+                    <span>{DEMO.ledgerFooterL}</span>
+                    <span>{DEMO.ledgerFooterR}</span>
+                  </span>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Notifier */}
+          <div style={{ display: "flex", gap: 12 }}>
+            <AgentDot agent="notifier" done={phase >= 4} />
+            <div style={{ flex: 1, minWidth: 0, ...dim(3) }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ fontSize: 13.5, fontWeight: 500 }}>Notifier</span>
+                <span style={eyebrow({ fontSize: 9.5, border: "var(--wf-border-hair)", borderRadius: "var(--wf-radius-sm)", padding: "2px 6px" })}>
+                  GEMINI
+                </span>
+                <span style={mono({ marginLeft: "auto", fontSize: 11, color: "var(--wf-ink-3)" })}>
+                  {phase >= 4 ? dur(DEMO.notifierMs) : ""}
+                </span>
+              </div>
+              <div style={mono({ display: "flex", flexDirection: "column", gap: 7, marginTop: 9, fontSize: 11.5, lineHeight: 1.6, color: "var(--wf-ink-2)" })}>
+                {DEMO.notifier.map((l) => (
+                  <span key={l}>{l}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Reconciliation */}
+          <div
+            style={{
+              marginTop: "auto",
+              display: "flex",
+              alignItems: "baseline",
+              justifyContent: "space-between",
+              gap: 12,
+              paddingTop: 15,
+              borderTop: "var(--wf-border-hair)",
+              ...dim(4),
+            }}
+          >
+            <span>
+              <span style={eyebrow({ display: "block", fontSize: 10 })}>Reconciliation · met</span>
+              <span style={{ display: "block", marginTop: 3, fontSize: 15, fontWeight: 500 }}>Rebuild approved</span>
+              <span style={mono({ display: "block", fontSize: 11.5, color: "var(--wf-ink-3)" })}>{DEMO.recon.sub}</span>
+            </span>
+            <span style={{ textAlign: "right", whiteSpace: "nowrap" }}>
+              <span style={mono({ display: "block", fontSize: 12, color: "var(--wf-ink-3)", textDecoration: "line-through" })}>
+                {DEMO.recon.oldTotal}
+              </span>
+              <span style={mono({ display: "block", fontWeight: 500, fontSize: 20 })}>{DEMO.recon.newTotal}</span>
+              <span style={mono({ display: "block", fontSize: 12, color: "var(--wf-signal)" })}>{DEMO.recon.line}</span>
+            </span>
+          </div>
+        </div>
+
+        {/* Right: the drafted message. */}
+        <div style={{ padding: 24, display: "flex", flexDirection: "column", gap: 12, background: "var(--wf-paper)" }}>
+          <span
+            style={eyebrow({
+              color: "var(--wf-amber)",
+              background: "var(--wf-amber-tint)",
+              borderRadius: "var(--wf-radius-sm)",
+              padding: "3px 8px",
+              alignSelf: "flex-start",
+            })}
+          >
+            Preview only
+          </span>
+          <div
+            style={{
+              border: "var(--wf-border-hair)",
+              borderRadius: 8,
+              background: "var(--wf-surface)",
+              overflow: "hidden",
+              ...dim(4),
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 7, padding: "9px 12px" }}>
+              {["var(--wf-chrome-close)", "var(--wf-chrome-min)", "var(--wf-chrome-max)"].map((c) => (
+                <span key={c} style={{ width: 8, height: 8, borderRadius: "50%", background: c }} />
+              ))}
+              <span style={{ marginLeft: 8, fontSize: 11.5, fontWeight: 500, color: "var(--wf-ink-2)" }}>Inbox</span>
+              <span style={mono({ fontSize: 11, color: "var(--wf-ink-3)" })}>&middot; 1 pesan baru</span>
+            </div>
+            <div style={{ margin: "0 10px 10px", border: "var(--wf-border-hair)", borderRadius: "var(--wf-radius-md)", background: "var(--wf-white)", overflow: "hidden" }}>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 9,
+                  padding: "11px 13px",
+                  borderBottom: "var(--wf-border-hair)",
+                  background: "var(--wf-surface-2)",
+                }}
+              >
+                <span
+                  aria-hidden
+                  style={{
+                    display: "block",
+                    width: 18,
+                    height: 18,
+                    flex: "none",
+                    backgroundImage: "url(/windfall/brand/windfall-mark-ink.svg)",
+                    backgroundSize: "contain",
+                    backgroundRepeat: "no-repeat",
+                  }}
+                />
+                <span style={{ fontSize: 13, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                  {DEMO.email.subject}
+                </span>
+              </div>
+              <div style={{ padding: "14px 13px", display: "flex", flexDirection: "column", gap: 11 }}>
+                <p style={{ margin: 0, fontSize: 12.5, lineHeight: 1.75, color: "var(--wf-ink)", textWrap: "pretty" }}>
+                  {DEMO.email.body}
+                </p>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "baseline",
+                    justifyContent: "space-between",
+                    gap: 12,
+                    padding: "12px 13px",
+                    borderRadius: "var(--wf-radius-md)",
+                    background: "var(--wf-surface)",
+                  }}
+                >
+                  <span style={mono({ display: "flex", alignItems: "baseline", gap: 9, whiteSpace: "nowrap" })}>
+                    <span style={{ fontSize: 12, color: "var(--wf-ink-3)", textDecoration: "line-through" }}>{DEMO.email.old}</span>
+                    <span style={{ fontWeight: 500, fontSize: 19 }}>{DEMO.email.nw}</span>
+                  </span>
+                  <span style={mono({ textAlign: "right", whiteSpace: "nowrap", fontSize: 11.5, color: "var(--wf-signal)" })}>
+                    <span style={{ display: "block" }}>{DEMO.email.save}</span>
+                    <span style={{ display: "block" }}>{DEMO.email.pct}</span>
+                  </span>
+                </div>
+                <span
+                  style={{
+                    display: "block",
+                    textAlign: "center",
+                    fontSize: 12.5,
+                    fontWeight: 600,
+                    color: "var(--wf-cta-ink)",
+                    background: "var(--wf-cta)",
+                    borderRadius: "var(--wf-radius-md)",
+                    padding: "12px 14px",
+                  }}
+                >
+                  {DEMO.email.cta}
+                </span>
+                <span style={{ fontSize: 11.5, lineHeight: 1.6, color: "var(--wf-ink-3)", textWrap: "pretty" }}>
+                  {DEMO.email.closing}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div
+            style={{
+              marginTop: "auto",
+              display: "flex",
+              alignItems: "baseline",
+              justifyContent: "space-between",
+              paddingTop: 14,
+              borderTop: "var(--wf-border-hair)",
+            }}
+          >
+            <span style={eyebrow({ fontSize: 11 })}>Sent after approval</span>
+            <span style={mono({ fontSize: 12, color: "var(--wf-ink-2)" })}>email + whatsapp</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------------------------------------------------------------- page -- */
+
+export default function WindfallLanding() {
+  useReveal();
+
+  const inkBtn: React.CSSProperties = {
+    fontSize: 14,
+    fontWeight: 500,
+    lineHeight: "22px",
+    whiteSpace: "nowrap",
+    padding: "12px 22px",
+    borderRadius: "var(--wf-radius-md)",
+    background: "var(--wf-ink)",
+    color: "var(--wf-paper)",
+    textDecoration: "none",
   };
-
-  // Modular Swapping Handler
-  const handleSwapItem = async (itemType: "outbound" | "inbound" | "hotel", optionIndex: number) => {
-    // 1. Calculate budget changes locally for rapid UI response
-    let updatedOutbound = selectedOutboundIdx;
-    let updatedInbound = selectedInboundIdx;
-    let updatedHotel = selectedHotelIdx;
-
-    if (itemType === "outbound") {
-      updatedOutbound = optionIndex;
-      setSelectedOutboundIdx(optionIndex);
-    } else if (itemType === "inbound") {
-      updatedInbound = optionIndex;
-      setSelectedInboundIdx(optionIndex);
-    } else if (itemType === "hotel") {
-      updatedHotel = optionIndex;
-      setSelectedHotelIdx(optionIndex);
-    }
-
-    const outboundCost = outboundOptions[updatedOutbound]?.cost ?? 0.0;
-    const inboundCost = inboundOptions[updatedInbound]?.cost ?? 0.0;
-    const hotelCost = hotelOptions[updatedHotel]?.cost ?? 0.0;
-
-    if (totalBudget !== null) {
-      setRemainingBudget(totalBudget - (outboundCost + inboundCost + hotelCost));
-    }
-
-    // 2. Call backend swap endpoint to update session document state
-    try {
-      const response = await fetch(`${BACKEND_URL}/api/swap-item`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          session_id: sessionIdRef.current || "mock-session",
-          item_type: itemType,
-          option_index: optionIndex
-        })
-      });
-      if (response.ok) {
-        const data = await response.json();
-        setRemainingBudget(data.remaining_budget);
-        console.log(`Synced swap update successfully to backend: ${itemType} -> Option ${optionIndex}`);
-      }
-    } catch (err) {
-      console.error("Failed to sync item swap with Flask backend:", err);
-    }
-  };
-
-  const handleReset = () => {
-    setTotalBudget(null);
-    setRemainingBudget(null);
-    setCurrency("USD");
-    setCurrencySymbol("$");
-    setOutboundOptions([]);
-    setInboundOptions([]);
-    setHotelOptions([]);
-    setItinerary([]);
-    setSelectedOutboundIdx(0);
-    setSelectedInboundIdx(0);
-    setSelectedHotelIdx(0);
-    setShowOutboundSwap(false);
-    setShowInboundSwap(false);
-    setShowHotelSwap(false);
-    setIsLoading(false);
-    setStatusText("Session reset. Map cleared.");
-    setFinalSummary(null);
-    setPlanSteps(initialSteps);
-  };
-
-  const hasItineraryDetails = finalSummary !== null || itinerary.length > 0 || outboundOptions.length > 0 || inboundOptions.length > 0 || hotelOptions.length > 0;
-
-  // Custom Hotel Link builder redirecting directly to the API-provided booking link
-  const getHotelLink = (hotel: any) => {
-    if (!hotel) return "#";
-    return hotel.booking_link || `https://www.trip.com/hotels/list?searchText=${encodeURIComponent(hotel.hotel_name)}&curr=${currency}`;
+  const outlineBtn: React.CSSProperties = {
+    fontSize: 14,
+    fontWeight: 500,
+    lineHeight: "22px",
+    whiteSpace: "nowrap",
+    padding: "12px 22px",
+    borderRadius: "var(--wf-radius-md)",
+    border: "var(--wf-border-frame)",
+    background: "var(--wf-white)",
+    color: "var(--wf-ink)",
+    textDecoration: "none",
   };
 
   return (
-    <main className="relative w-screen h-screen overflow-hidden bg-zinc-950 font-sans text-white">
-      {/* 1. Google Map Viewport */}
-      <div className="absolute inset-0 z-0">
-        <MapCanvas
-          googleMapsApiKey={GOOGLE_MAPS_API_KEY}
-          outboundFlight={activeOutbound}
-          inboundFlight={activeInbound}
-          hotelData={activeHotel}
-          itinerary={itinerary}
-          currentStep={currentStep}
-        />
+    /* The landing page commits to the light palette, as the reference does;
+       the console keeps the theme toggle. */
+    <div data-wf-theme="light" className="wf-root">
+      <nav className="wf-landing-nav">
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 24,
+            maxWidth: 1080,
+            margin: "0 auto",
+            padding: "12px 22px",
+            boxSizing: "border-box",
+          }}
+        >
+          <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span
+              aria-hidden
+              style={{
+                display: "block",
+                width: 26,
+                height: 26,
+                backgroundImage: "url(/windfall/brand/windfall-mark-ink.svg)",
+                backgroundSize: "contain",
+                backgroundRepeat: "no-repeat",
+              }}
+            />
+            <span className="wf-serif" style={{ fontSize: 25, lineHeight: 1, color: "var(--wf-ink)" }}>
+              Windfall
+            </span>
+          </span>
+          <div className="wf-cols" style={{ display: "flex", alignItems: "center", gap: 28, fontSize: 13, fontWeight: 500 }}>
+            {[
+              ["Product", "#product"],
+              ["Market", "#market"],
+              ["Who runs it", "#user"],
+            ].map(([label, hash]) => (
+              <a key={hash} href={hash} style={{ color: "var(--wf-ink)", textDecoration: "none", whiteSpace: "nowrap" }}>
+                {label}
+              </a>
+            ))}
+          </div>
+          <Link href="/recovery" className="wf-btn-ink" style={{ ...inkBtn, padding: "8px 15px", fontSize: 13, lineHeight: "20px" }}>
+            Open the console
+          </Link>
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <div style={{ background: "var(--wf-paper)" }}>
+        <div style={{ maxWidth: 1080, margin: "0 auto", padding: "96px 22px 72px", boxSizing: "border-box" }}>
+          <a
+            href="#product"
+            data-reveal
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 10,
+              padding: "5px 14px 5px 5px",
+              background: "var(--wf-warm)",
+              borderRadius: 999,
+              whiteSpace: "nowrap",
+              textDecoration: "none",
+            }}
+          >
+            <span
+              style={{
+                fontSize: 13,
+                fontWeight: 600,
+                lineHeight: 1,
+                color: "var(--wf-paper)",
+                background: "var(--wf-approve)",
+                borderRadius: 999,
+                padding: "7px 12px",
+              }}
+            >
+              New
+            </span>
+            <span style={{ fontSize: 14, fontWeight: 500, lineHeight: 1, color: "var(--wf-ink)" }}>
+              The three-agent pipeline is live
+            </span>
+            <span style={{ display: "flex", alignItems: "center" }}>
+              {["classifier", "searcher", "notifier"].map((a, i) => (
+                <span
+                  key={a}
+                  aria-hidden
+                  style={{
+                    display: "block",
+                    width: 24,
+                    height: 24,
+                    borderRadius: 5,
+                    marginLeft: i ? -7 : 0,
+                    boxShadow: "0 0 0 2px var(--wf-warm)",
+                    background: "var(--wf-white)",
+                    backgroundImage: `url(/windfall/agents/${a}-awake.svg)`,
+                    backgroundSize: "contain",
+                    backgroundRepeat: "no-repeat",
+                    backgroundPosition: "center",
+                  }}
+                />
+              ))}
+            </span>
+            <span style={mono({ fontSize: 14, color: "var(--wf-ink-3)" })}>&rsaquo;</span>
+          </a>
+
+          <h1 className="wf-display" data-reveal data-reveal-delay="80" style={{ margin: "26px 0 0", maxWidth: "20ch", textWrap: "pretty" }}>
+            We rebuild abandoned carts, not give discounts.
+          </h1>
+
+          <div
+            style={{
+              display: "flex",
+              flexWrap: "wrap",
+              alignItems: "flex-end",
+              justifyContent: "space-between",
+              gap: 28,
+              marginTop: 26,
+            }}
+          >
+            <p
+              data-reveal
+              data-reveal-delay="160"
+              style={{ margin: 0, maxWidth: "56ch", fontSize: 16, lineHeight: 1.65, color: "var(--wf-ink-2)", textWrap: "pretty" }}
+            >
+              Three agents read two signals on every cart: how often the traveler waits for a promo, and how far this
+              cart sits from what they usually spend. Only when both signals agree does an offer leave the building.
+            </p>
+            <div
+              data-reveal
+              data-reveal-delay="200"
+              style={{ display: "flex", flexWrap: "wrap", gap: "14px 40px", paddingTop: 18, borderTop: "var(--wf-border-hair)" }}
+            >
+              <span>
+                <span style={mono({ display: "block", fontWeight: 700, fontSize: 26, lineHeight: 1.1, letterSpacing: "-0.01em", color: "var(--wf-signal)" })}>
+                  2 of 10
+                </span>
+                <span style={{ display: "block", marginTop: 4, fontSize: 13, lineHeight: 1.6, color: "var(--wf-ink-2)" }}>
+                  seeded carts sent a reminder, no offer — on purpose
+                </span>
+              </span>
+              <span>
+                <span style={mono({ display: "block", fontWeight: 700, fontSize: 26, lineHeight: 1.1, letterSpacing: "-0.01em" })}>
+                  IDR 0
+                </span>
+                <span style={{ display: "block", marginTop: 4, fontSize: 13, lineHeight: 1.6, color: "var(--wf-ink-2)" }}>
+                  margin conceded, on every outcome
+                </span>
+              </span>
+            </div>
+            <div data-reveal data-reveal-delay="240" style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <Link href="/recovery" className="wf-btn-ink" style={inkBtn}>
+                Rebuild carts now
+              </Link>
+              <a href="#product" className="wf-btn-outline" style={outlineBtn}>
+                See the logic
+              </a>
+            </div>
+          </div>
+
+          {/* Decision marquee */}
+          <div className="wf-mq" data-reveal style={{ marginTop: 44, position: "relative", overflow: "hidden" }}>
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 16, paddingBottom: 14 }}>
+              <span style={mono({ fontSize: 15, lineHeight: 1.5, letterSpacing: "-0.005em", color: "var(--wf-ink-2)" })}>
+                Decisions from the captured run
+              </span>
+              <span style={{ fontSize: 12.5, lineHeight: 1.6, color: "var(--wf-ink-2)", textAlign: "right" }}>
+                7 of 10 carts got an offer. 2 were left alone on purpose. 1 was skipped on an inventory failure.
+              </span>
+            </div>
+            <div className="wf-mq-track">
+              {[...MARQUEE, ...MARQUEE].map((c, i) => (
+                <div
+                  key={`${c.name}-${i}`}
+                  className="wf-mq-card"
+                  aria-hidden={i >= MARQUEE.length}
+                  style={{
+                    flex: "0 0 auto",
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 8,
+                    width: 236,
+                    padding: "14px 16px",
+                    border: "var(--wf-border-hair)",
+                    borderRadius: "var(--wf-radius-md)",
+                    background: "var(--wf-white)",
+                  }}
+                >
+                  <span style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10 }}>
+                    <span style={{ fontSize: 13, fontWeight: 500, whiteSpace: "nowrap" }}>{c.name}</span>
+                    <span style={mono({ fontSize: 11, color: "var(--wf-ink-3)", whiteSpace: "nowrap" })}>{c.route}</span>
+                  </span>
+                  <span style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                    <span
+                      style={mono({
+                        fontSize: 10,
+                        letterSpacing: "0.08em",
+                        color: TAG_TINT[c.tag].ink,
+                        background: TAG_TINT[c.tag].bg,
+                        borderRadius: "var(--wf-radius-sm)",
+                        padding: "3px 7px",
+                        whiteSpace: "nowrap",
+                      })}
+                    >
+                      {c.tag}
+                    </span>
+                    <span style={mono({ fontSize: 12.5, whiteSpace: "nowrap" })}>{c.figure}</span>
+                  </span>
+                  <span style={mono({ fontSize: 11, color: "var(--wf-ink-3)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" })}>
+                    {c.note}
+                  </span>
+                </div>
+              ))}
+            </div>
+            <div
+              aria-hidden
+              style={{ position: "absolute", left: 0, bottom: 0, width: 96, height: 96, background: "linear-gradient(90deg, var(--wf-paper), transparent)", pointerEvents: "none" }}
+            />
+            <div
+              aria-hidden
+              style={{ position: "absolute", right: 0, bottom: 0, width: 96, height: 96, background: "linear-gradient(270deg, var(--wf-paper), transparent)", pointerEvents: "none" }}
+            />
+          </div>
+
+          <PipelineDemo />
+        </div>
       </div>
 
-
-      {/* 3. Budget Tracker Overlay */}
-      <BudgetTracker
-        totalBudget={totalBudget}
-        remainingBudget={remainingBudget}
-        currency={currency}
-        currencySymbol={currencySymbol}
-      />
-
-      {/* 4. Unified Itinerary & Swap Center Drawer Panel */}
-      {hasItineraryDetails && (
-        <div className="absolute top-6 right-6 bottom-28 w-[380px] bg-zinc-950/90 backdrop-blur-md border border-zinc-850 rounded-xl p-5 shadow-2xl overflow-y-auto z-10 space-y-5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-zinc-800 transition-all duration-300">
-          
-          <div className="flex items-center gap-2 text-blue-400 font-bold text-sm border-b border-zinc-800/80 pb-2">
-            <CheckCircle2 className="w-4 h-4" />
-            <span>Itinerary & Swap Center</span>
+      {/* Product */}
+      <div id="product" style={{ background: "var(--wf-white)", borderTop: "var(--wf-border-hair)", borderBottom: "var(--wf-border-hair)" }}>
+        <div style={{ maxWidth: 1080, margin: "0 auto", padding: "88px 22px", boxSizing: "border-box" }}>
+          <h2 className="wf-h2" data-reveal style={{ maxWidth: "24ch" }}>
+            One console. Three agents. Nothing else.
+          </h2>
+          <div className="wf-cols" data-reveal style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16, marginTop: 36 }}>
+            {AGENT_CARDS.map((a) => (
+              <div
+                key={a.n}
+                className="wf-lift"
+                style={{
+                  border: "var(--wf-border-hair)",
+                  borderRadius: "var(--wf-radius-md)",
+                  background: "var(--wf-paper)",
+                  padding: 24,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                }}
+              >
+                <span style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                  <span
+                    aria-hidden
+                    style={{
+                      display: "block",
+                      width: 34,
+                      height: 34,
+                      backgroundImage: `url(/windfall/agents/${a.icon}-awake.svg)`,
+                      backgroundSize: "contain",
+                      backgroundRepeat: "no-repeat",
+                    }}
+                  />
+                  <span style={mono({ fontSize: 11, letterSpacing: "0.09em", color: "var(--wf-ink-3)" })}>{a.n}</span>
+                </span>
+                <h3 style={mono({ margin: 0, fontWeight: 700, fontSize: 19, letterSpacing: "-0.01em" })}>{a.name}</h3>
+                <p style={{ margin: 0, fontSize: 13, lineHeight: 1.7, color: "var(--wf-ink-2)", textWrap: "pretty" }}>{a.body}</p>
+                <span style={mono({ marginTop: "auto", paddingTop: 14, borderTop: "var(--wf-border-hair)", fontSize: 11.5, color: "var(--wf-ink-2)" })}>
+                  {a.foot}
+                </span>
+              </div>
+            ))}
           </div>
-
-          {/* Swapping HUD Options */}
-          <div className="space-y-4 pt-1">
-            
-            {/* Outbound Flights Swap Card */}
-            {activeOutbound && (
-              <div className="space-y-2">
-                <div className="flex items-center gap-1 text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
-                  <PlaneTakeoff className="w-3.5 h-3.5" />
-                  <span>Outbound Flight</span>
-                </div>
-                
-                <div className="relative group bg-zinc-900/40 border border-zinc-800/80 rounded-xl p-3.5 transition-all duration-200 hover:border-zinc-700">
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-0.5 pr-20">
-                      <div className="text-zinc-200 font-sans font-semibold text-xs leading-normal">
-                        {activeOutbound.carrier}
-                      </div>
-                      <div className="text-zinc-500 text-[10px] font-medium">
-                        Locked Choice
-                      </div>
-                    </div>
-                    <span className="text-sm font-mono font-bold text-white whitespace-nowrap">
-                      {formatPrice(activeOutbound.cost)}
-                    </span>
-                  </div>
-
-                  {/* Hover Buttons Overlay */}
-                  <div className="absolute inset-0 bg-zinc-950/95 backdrop-blur-[2px] flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-xl">
-                    <button
-                      onClick={() => setShowOutboundSwap(!showOutboundSwap)}
-                      className="bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-xs px-3.5 py-1.5 rounded-lg transition-all cursor-pointer"
-                    >
-                      {showOutboundSwap ? "Close Swap" : "Swap"}
-                    </button>
-                    {activeOutbound.skyscanner_link && (
-                      <a
-                        href={activeOutbound.skyscanner_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1 cursor-pointer"
-                      >
-                        <span>Book</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-
-                {/* Dropdown Options for Outbound Swapping */}
-                {showOutboundSwap && outboundOptions.length > 0 && (
-                  <div className="bg-zinc-900/30 border border-zinc-850 rounded-xl p-2.5 space-y-1.5 animate-fade-in">
-                    <div className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider px-1">Alternate outbound choices:</div>
-                    {outboundOptions.map((opt, i) => (
-                      <label 
-                        key={opt.id} 
-                        className={`flex items-center justify-between p-2.5 rounded-lg border text-xs cursor-pointer transition-all duration-200 ${
-                          selectedOutboundIdx === i 
-                            ? "bg-blue-600/10 border-blue-500 text-white" 
-                            : "bg-zinc-900/40 border-zinc-800/50 text-zinc-400 hover:bg-zinc-800/30"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="radio"
-                            name="outbound_flight"
-                            checked={selectedOutboundIdx === i}
-                            onChange={() => {
-                              handleSwapItem("outbound", i);
-                              setShowOutboundSwap(false);
-                            }}
-                            className="accent-blue-500 cursor-pointer"
-                          />
-                          <span className="font-sans font-medium text-[11px] leading-tight">{opt.carrier}</span>
-                        </div>
-                        <span className="font-mono font-semibold text-[11px] whitespace-nowrap">{formatPrice(opt.cost)}</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Inbound Flights Swap Card */}
-            {activeInbound && (
-              <div className="space-y-2">
-                <div className="flex items-center gap-1 text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
-                  <PlaneLanding className="w-3.5 h-3.5" />
-                  <span>Inbound return Flight</span>
-                </div>
-                
-                <div className="relative group bg-zinc-900/40 border border-zinc-800/80 rounded-xl p-3.5 transition-all duration-200 hover:border-zinc-700">
-                  <div className="flex justify-between items-start">
-                    <div className="space-y-0.5 pr-20">
-                      <div className="text-zinc-200 font-sans font-semibold text-xs leading-normal">
-                        {activeInbound.carrier}
-                      </div>
-                      <div className="text-zinc-500 text-[10px] font-medium">
-                        Locked Choice
-                      </div>
-                    </div>
-                    <span className="text-sm font-mono font-bold text-white whitespace-nowrap">
-                      {formatPrice(activeInbound.cost)}
-                    </span>
-                  </div>
-
-                  {/* Hover Buttons Overlay */}
-                  <div className="absolute inset-0 bg-zinc-950/95 backdrop-blur-[2px] flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-xl">
-                    <button
-                      onClick={() => setShowInboundSwap(!showInboundSwap)}
-                      className="bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-xs px-3.5 py-1.5 rounded-lg transition-all cursor-pointer"
-                    >
-                      {showInboundSwap ? "Close Swap" : "Swap"}
-                    </button>
-                    {activeInbound.skyscanner_link && (
-                      <a
-                        href={activeInbound.skyscanner_link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-purple-600 hover:bg-purple-500 text-white font-semibold text-xs px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1 cursor-pointer"
-                      >
-                        <span>Book</span>
-                        <ExternalLink className="w-3 h-3" />
-                      </a>
-                    )}
-                  </div>
-                </div>
-
-                {/* Dropdown Options for Inbound Swapping */}
-                {showInboundSwap && inboundOptions.length > 0 && (
-                  <div className="bg-zinc-900/30 border border-zinc-850 rounded-xl p-2.5 space-y-1.5 animate-fade-in">
-                    <div className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider px-1">Alternate inbound choices:</div>
-                    {inboundOptions.map((opt, i) => (
-                      <label 
-                        key={opt.id} 
-                        className={`flex items-center justify-between p-2.5 rounded-lg border text-xs cursor-pointer transition-all duration-200 ${
-                          selectedInboundIdx === i 
-                            ? "bg-purple-600/10 border-purple-500 text-white" 
-                            : "bg-zinc-900/40 border-zinc-800/50 text-zinc-400 hover:bg-zinc-800/30"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="radio"
-                            name="inbound_flight"
-                            checked={selectedInboundIdx === i}
-                            onChange={() => {
-                              handleSwapItem("inbound", i);
-                              setShowInboundSwap(false);
-                            }}
-                            className="accent-purple-500 cursor-pointer"
-                          />
-                          <span className="font-sans font-medium text-[11px] leading-tight">{opt.carrier}</span>
-                        </div>
-                        <span className="font-mono font-semibold text-[11px] whitespace-nowrap">{formatPrice(opt.cost)}</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Hotels Swap Card */}
-            {activeHotel && (
-              <div className="space-y-2">
-                <div className="flex items-center gap-1 text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
-                  <Hotel className="w-3.5 h-3.5" />
-                  <span>Accommodation</span>
-                </div>
-                
-                <div className="relative group bg-zinc-900/40 border border-zinc-800/80 rounded-xl p-3.5 transition-all duration-200 hover:border-zinc-700">
-                  <div className="flex justify-between items-start gap-3">
-                    {activeHotel.thumbnail && (
-                      <div className="flex-shrink-0 w-12 h-12 rounded-lg overflow-hidden border border-zinc-700/50">
-                        <img src={activeHotel.thumbnail} alt={activeHotel.hotel_name} className="w-full h-full object-cover" />
-                      </div>
-                    )}
-                    <div className="flex-grow space-y-0.5 pr-4">
-                      <div className="text-zinc-200 font-sans font-semibold text-xs leading-normal">
-                        {activeHotel.hotel_name}
-                      </div>
-                      <div className="flex items-center gap-2 text-[10px] font-medium">
-                        <span className="text-zinc-500">Locked Choice</span>
-                        {activeHotel.rating > 0 && (
-                          <span className="flex items-center text-amber-400">
-                            ★ {activeHotel.rating.toFixed(1)}
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <span className="text-sm font-mono font-bold text-white whitespace-nowrap">
-                      {formatPrice(activeHotel.cost)}
-                    </span>
-                  </div>
-
-                  {/* Hover Buttons Overlay */}
-                  <div className="absolute inset-0 bg-zinc-950/95 backdrop-blur-[2px] flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-xl">
-                    <button
-                      onClick={() => setShowHotelSwap(!showHotelSwap)}
-                      className="bg-zinc-800 hover:bg-zinc-700 text-white font-semibold text-xs px-3.5 py-1.5 rounded-lg transition-all cursor-pointer"
-                    >
-                      {showHotelSwap ? "Close Swap" : "Swap"}
-                    </button>
-                    <a
-                      href={getHotelLink(activeHotel)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1 cursor-pointer"
-                    >
-                      <span>Book</span>
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-                </div>
-
-                {/* Dropdown Options for Hotel Swapping */}
-                {showHotelSwap && hotelOptions.length > 0 && (
-                  <div className="bg-zinc-900/30 border border-zinc-850 rounded-xl p-2.5 space-y-1.5 animate-fade-in">
-                    <div className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider px-1">Alternate accommodation choices:</div>
-                    {hotelOptions.map((opt, i) => (
-                      <label 
-                        key={opt.id} 
-                        className={`flex items-center justify-between p-2.5 rounded-lg border text-xs cursor-pointer transition-all duration-200 ${
-                          selectedHotelIdx === i 
-                            ? "bg-amber-600/10 border-amber-500 text-white" 
-                            : "bg-zinc-900/40 border-zinc-800/50 text-zinc-400 hover:bg-zinc-800/30"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="radio"
-                            name="hotel_selection"
-                            checked={selectedHotelIdx === i}
-                            onChange={() => {
-                              handleSwapItem("hotel", i);
-                              setShowHotelSwap(false);
-                            }}
-                            className="accent-amber-500 cursor-pointer"
-                          />
-                          <span className="font-sans font-medium text-[11px] leading-tight">{opt.hotel_name}</span>
-                        </div>
-                        <span className="font-mono font-semibold text-[11px] whitespace-nowrap">{formatPrice(opt.cost)}</span>
-                      </label>
-                    ))}
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Daily Schedule Itinerary */}
-          {itinerary.length > 0 && (
-            <div className="space-y-3 pt-2 border-t border-zinc-800/80">
-              <div className="flex items-center gap-1 text-[10px] text-zinc-500 font-bold uppercase tracking-wider">
-                <Calendar className="w-3.5 h-3.5" />
-                <span>Curated Daily Itinerary</span>
-              </div>
-              <div className="space-y-3">
-                {itinerary.map((day) => {
-                  // Support both new `activities` array format and legacy morning/afternoon/evening
-                  const activities: Array<{ time?: string; spot?: string; description?: string; estimated_spend?: number }> =
-                    Array.isArray(day.activities) && day.activities.length > 0
-                      ? day.activities
-                      : [
-                          day.morning   ? { time: "Morning",   description: day.morning   } : null,
-                          day.afternoon ? { time: "Afternoon", description: day.afternoon } : null,
-                          day.evening   ? { time: "Evening",   description: day.evening   } : null,
-                        ].filter(Boolean) as any[];
-
-                  const dailyTotal = activities.reduce(
-                    (sum, a) => sum + (a.estimated_spend ?? 0),
-                    day.estimated_cost ? 0 : 0  // reset; use activities if available
-                  );
-                  const showDailyTotal = dailyTotal > 0;
-                  const displayCost = showDailyTotal ? dailyTotal : (day.estimated_cost ?? null);
-
-                  return (
-                    <details key={day.day} className="group bg-zinc-900/30 border border-zinc-850/60 rounded-xl [&_summary::-webkit-details-marker]:hidden">
-                      <summary className="flex justify-between items-center cursor-pointer p-3.5 list-none select-none">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[10px] bg-zinc-800 px-2 py-0.5 rounded text-zinc-300 font-semibold font-mono group-open:bg-amber-500/20 group-open:text-amber-400 transition-colors">
-                            DAY {day.day}
-                          </span>
-                          <span className="text-zinc-200 font-sans font-semibold text-xs group-open:text-white transition-colors">{day.title}</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          {displayCost != null && (
-                            <span className="text-[10px] text-amber-400/80 font-mono font-semibold">
-                              ~{formatPrice(displayCost)}
-                            </span>
-                          )}
-                          <span className="text-zinc-500 group-open:rotate-180 transition-transform duration-200">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                          </span>
-                        </div>
-                      </summary>
-
-                      <div className="px-3.5 pb-3.5 space-y-1.5">
-                        {activities.map((act, idx) => (
-                          <div
-                            key={idx}
-                            className="flex gap-3 py-2 border-b border-zinc-800/40 last:border-0"
-                          >
-                            {/* Time column */}
-                            <div className="flex-shrink-0 w-16 flex flex-col items-start gap-0.5 pt-0.5">
-                              {act.time && (
-                                <div className="flex items-center gap-1">
-                                  <Clock className="w-2.5 h-2.5 text-zinc-600" />
-                                  <span className="text-[9px] text-zinc-400 font-mono font-semibold">{act.time}</span>
-                                </div>
-                              )}
-                              {act.estimated_spend != null && act.estimated_spend > 0 && (
-                                <span className="text-[9px] text-amber-400/70 font-mono mt-0.5">
-                                  {formatPrice(act.estimated_spend)}
-                                </span>
-                              )}
-                            </div>
-
-                            {/* Content column */}
-                            <div className="flex-1 min-w-0">
-                              {act.spot && (
-                                <div className="flex items-center gap-1 mb-0.5">
-                                  <MapPin className="w-2.5 h-2.5 text-blue-400/70 flex-shrink-0" />
-                                  <span className="text-[10px] text-blue-300 font-semibold truncate">{act.spot}</span>
-                                </div>
-                              )}
-                              {act.description && (
-                                <p className="text-zinc-400 text-[10px] leading-relaxed font-medium font-sans">
-                                  {act.description}
-                                </p>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-
-                        {/* Daily tip (legacy field) */}
-                        {day.tips && (
-                          <div className="flex gap-2.5 mt-1 pt-2 border-t border-zinc-800/40">
-                            <span className="text-[10px] text-emerald-400/60 font-bold uppercase tracking-wider min-w-[52px] mt-0.5">💡 Tip</span>
-                            <p className="text-zinc-500 text-[10px] leading-relaxed font-medium font-sans italic">{day.tips}</p>
-                          </div>
-                        )}
-
-                        {/* Daily total (only if activities supply individual costs) */}
-                        {showDailyTotal && (
-                          <div className="flex justify-between items-center mt-2 pt-2 border-t border-zinc-800/60">
-                            <span className="text-[9px] text-zinc-500 font-bold uppercase tracking-wider">Daily Total</span>
-                            <span className="text-[11px] text-amber-400 font-mono font-bold">{formatPrice(dailyTotal)}</span>
-                          </div>
-                        )}
-                      </div>
-                    </details>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-
-
-
+          <p
+            data-reveal
+            style={{
+              margin: "16px 0 0",
+              padding: "16px 20px",
+              border: "1px dashed var(--wf-border)",
+              borderRadius: "var(--wf-radius-md)",
+              fontSize: 13,
+              lineHeight: 1.7,
+              color: "var(--wf-ink-2)",
+            }}
+          >
+            <span style={mono({ fontSize: 15, lineHeight: 1.5, letterSpacing: "-0.005em", color: "var(--wf-halt)" })}>
+              Not built on purpose.&nbsp;&nbsp;
+            </span>
+            No CRM, no pricing engine, no blast tool. Windfall answers one question per cart.
+          </p>
         </div>
-      )}
+      </div>
 
-      {/* 5. Control Panel UI Overlay */}
-      <ControlPanel
-        onPlanTrip={handlePlanTrip}
-        isLoading={isLoading}
-        statusText={statusText}
-        onReset={handleReset}
-      />
-
-
-      {/* Dynamic agent progress HUD — bottom-center, above input bar, progressive reveal */}
-      {isLoading && (() => {
-        // Only show steps that have actually started (in_progress, done, or failed)
-        // pending steps are hidden until the server signals them
-        const visibleSteps = Object.entries(planSteps).filter(
-          ([, s]) => s.state !== "pending"
-        );
-        return (
-          <div className="fixed bottom-[88px] left-1/2 -translate-x-1/2 z-[9998] w-80 bg-zinc-950/95 backdrop-blur-lg border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden animate-fade-in pointer-events-none">
-            {/* Header bar */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-zinc-800/80 bg-zinc-900/50">
-              <div className="relative w-6 h-6 flex-shrink-0 flex items-center justify-center">
-                <span className="absolute inset-0 border-2 border-blue-500/20 rounded-full" />
-                <span className="absolute inset-0 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
-                <Sparkles className="w-3 h-3 text-blue-400" />
+      {/* Market */}
+      <div id="market" style={{ background: "var(--wf-warm)" }}>
+        <div style={{ maxWidth: 1080, margin: "0 auto", padding: "88px 22px", boxSizing: "border-box" }}>
+          <div className="wf-cols" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 28, alignItems: "end" }}>
+            <h2 className="wf-h2" data-reveal style={{ margin: 0 }}>
+              Carts too valuable to discount blindly.
+            </h2>
+            <p data-reveal style={{ margin: 0, fontSize: 14, lineHeight: 1.75, color: "var(--wf-ink-2)", textWrap: "pretty" }}>
+              Reasoning costs more than a cheap cart is worth. Windfall pays for itself where one abandoned cart is tens
+              of millions of rupiah and a partner&rsquo;s margin rides on the answer.
+            </p>
+          </div>
+          <div data-reveal style={{ marginTop: 36, borderTop: "1px solid var(--wf-border)" }}>
+            {SEGMENTS.map((s) => (
+              <div
+                key={s.num}
+                className="wf-cols wf-row-hover"
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 1fr",
+                  gap: 16,
+                  alignItems: "baseline",
+                  padding: "24px 14px",
+                  borderBottom: "1px solid var(--wf-warm-rule)",
+                  borderRadius: "var(--wf-radius-md)",
+                }}
+              >
+                <span style={{ display: "flex", alignItems: "baseline", gap: 16 }}>
+                  <span style={mono({ fontSize: 11, letterSpacing: "0.09em", color: "var(--wf-ink-3)" })}>{s.num}</span>
+                  <span style={mono({ fontWeight: 700, fontSize: 23, letterSpacing: "-0.01em" })}>{s.name}</span>
+                </span>
+                <span style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 20 }}>
+                  <span style={{ fontSize: 13, lineHeight: 1.7, color: "var(--wf-ink-2)", maxWidth: "42ch", textWrap: "pretty" }}>
+                    {s.why}
+                  </span>
+                  <span style={mono({ fontSize: 13, whiteSpace: "nowrap" })}>{s.stat}</span>
+                </span>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-white font-semibold text-[11px] leading-none">Agent Planning Active</p>
-                <p className="text-zinc-400 text-[9px] mt-0.5 truncate">{statusText || "Initializing..."}</p>
+            ))}
+          </div>
+          <p data-reveal style={mono({ margin: "18px 0 0", fontSize: 12, color: "var(--wf-ink-3)" })}>
+            Not for flat-priced retail carts or single-property stays. Without tiers, &ldquo;comparable&rdquo; has no
+            meaning.
+          </p>
+        </div>
+      </div>
+
+      {/* Who runs it */}
+      <div id="user" style={{ background: "var(--wf-white)", borderTop: "var(--wf-border-hair)" }}>
+        <div style={{ maxWidth: 1080, margin: "0 auto", padding: "88px 22px", boxSizing: "border-box" }}>
+          <h2 className="wf-h2" data-reveal style={{ maxWidth: "30ch" }}>
+            One decision, one approver, and a trace everyone else can read.
+          </h2>
+          <div className="wf-cols" data-reveal style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginTop: 36, alignItems: "start" }}>
+            <div className="wf-lift" style={{ border: "var(--wf-border-frame)", borderRadius: "var(--wf-radius-md)", background: "var(--wf-paper)", overflow: "hidden" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 13, padding: 20, borderBottom: "var(--wf-border-hair)" }}>
+                <span
+                  style={mono({
+                    width: 44,
+                    height: 44,
+                    borderRadius: "var(--wf-radius-avatar)",
+                    background: "var(--wf-ink)",
+                    color: "var(--wf-paper)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: 14,
+                  })}
+                >
+                  MK
+                </span>
+                <span>
+                  {/* Staff persona only; the name never appears in the traveler seed. */}
+                  <span style={{ display: "block", fontSize: 16, fontWeight: 500 }}>Mika Kurosawa</span>
+                  <span style={mono({ display: "block", fontSize: 11.5, color: "var(--wf-ink-3)" })}>
+                    Revenue recovery analyst &middot; approves every send
+                  </span>
+                </span>
+              </div>
+              <div style={mono({ padding: 20, display: "flex", flexDirection: "column", gap: 10, fontSize: 12, color: "var(--wf-ink-2)" })}>
+                <span>
+                  <span style={{ color: "var(--wf-ink)" }}>08.40</span>&nbsp;&nbsp;opens the queue of abandoned carts
+                </span>
+                <span>
+                  <span style={{ color: "var(--wf-ink)" }}>09.05</span>&nbsp;&nbsp;approves Ria&rsquo;s rebuild at −11,2%
+                </span>
+                <span>
+                  <span style={{ color: "var(--wf-ink)" }}>09.11</span>&nbsp;&nbsp;reads why Nasywa got no offer: campaign share 9%
+                </span>
+                <span>
+                  <span style={{ color: "var(--wf-ink)" }}>16.30</span>&nbsp;&nbsp;reads what came back, notes what didn&rsquo;t
+                </span>
+              </div>
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "12px 16px",
+                  flexWrap: "wrap",
+                  padding: "14px 20px",
+                  background: "var(--wf-warm)",
+                  borderTop: "var(--wf-border-hair)",
+                }}
+              >
+                <span style={{ fontSize: 13, lineHeight: 1.7 }}>The agents never send on their own.</span>
+                <span style={mono({ fontSize: 11, letterSpacing: "0.06em", color: "var(--wf-signal)" })}>NAMED APPROVER</span>
               </div>
             </div>
-
-            {/* Progressive step log — only started steps */}
-            {visibleSteps.length > 0 && (
-              <div className="px-4 py-3 space-y-2.5">
-                {visibleSteps.map(([stepKey, stepData]) => {
-                  const isInProgress = stepData.state === "in_progress";
-                  const isDone = stepData.state === "done";
-                  const isFailed = stepData.state === "failed";
-
-                  return (
-                    <div key={stepKey} className="flex items-start gap-2.5 animate-fade-in">
-                      {/* State icon */}
-                      <div className="relative flex items-center justify-center w-4 h-4 flex-shrink-0 mt-0.5">
-                        {isDone && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
-                        {isInProgress && (
-                          <>
-                            <span className="absolute inset-0 border-[1.5px] border-blue-500/20 rounded-full" />
-                            <span className="absolute inset-0 border-[1.5px] border-blue-500 border-t-transparent rounded-full animate-spin" />
-                          </>
-                        )}
-                        {isFailed && (
-                          <div className="w-4 h-4 rounded-full bg-red-500/20 flex items-center justify-center">
-                            <span className="block w-2 h-0.5 bg-red-400 rotate-45 absolute" />
-                            <span className="block w-2 h-0.5 bg-red-400 -rotate-45 absolute" />
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Label + message */}
-                      <div className="flex-1 min-w-0">
-                        <span className={`block text-[11px] font-semibold leading-none mb-0.5 ${
-                          isDone ? "text-emerald-400" :
-                          isInProgress ? "text-blue-400" :
-                          "text-red-400"
-                        }`}>
-                          {{ parsing: "Parsing Request", flights: "Searching Flights", budget: "Checking Budget", hotels: "Searching Hotels", itinerary: "Building Itinerary", finalize: "Finalizing" }[stepKey] ?? stepKey}
-                        </span>
-                        <span className="block text-[9px] text-zinc-500 leading-relaxed truncate">
-                          {stepData.message}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* Indeterminate progress bar */}
-            <div className="h-[2px] bg-zinc-800 w-full overflow-hidden">
-              <div className="h-full w-1/3 bg-blue-500 rounded-full animate-[slide_1.5s_ease-in-out_infinite]"
-                style={{ animation: "slide 1.5s ease-in-out infinite" }} />
+            <div style={{ display: "flex", flexDirection: "column", borderTop: "1px solid var(--wf-border)" }}>
+              {WATCHERS.map((w) => (
+                <div
+                  key={w.role}
+                  className="wf-row-hover"
+                  style={{
+                    display: "flex",
+                    alignItems: "baseline",
+                    justifyContent: "space-between",
+                    gap: 18,
+                    padding: "16px 12px",
+                    borderBottom: "var(--wf-border-hair)",
+                    borderRadius: "var(--wf-radius-sm)",
+                  }}
+                >
+                  <span style={{ fontSize: 14, fontWeight: 500, lineHeight: 1.6, flex: "none", maxWidth: "15ch" }}>{w.role}</span>
+                  <span style={{ fontSize: 13, lineHeight: 1.7, color: "var(--wf-ink-2)", textAlign: "right", textWrap: "pretty" }}>
+                    {w.does}
+                  </span>
+                </div>
+              ))}
+              <p style={mono({ margin: "16px 0 0", fontSize: 15, lineHeight: 1.5, letterSpacing: "-0.005em", color: "var(--wf-ink-2)", textWrap: "pretty" })}>
+                Relationships to the trace, not seats in an org chart.
+              </p>
             </div>
           </div>
-        );
-      })()}
+        </div>
+      </div>
 
-    </main>
+      {/* Closing CTA */}
+      <div style={{ background: "var(--wf-footer-ink)", color: "var(--wf-footer-paper)" }}>
+        <div style={{ maxWidth: 1080, margin: "0 auto", padding: "52px 22px 56px", boxSizing: "border-box", textAlign: "center" }}>
+          <span
+            aria-hidden
+            data-reveal
+            style={{
+              display: "block",
+              width: 34,
+              height: 34,
+              margin: "0 auto 18px",
+              backgroundImage: "url(/windfall/brand/windfall-mark-paper.svg)",
+              backgroundSize: "contain",
+              backgroundRepeat: "no-repeat",
+            }}
+          />
+          <h2 className="wf-h2" data-reveal style={{ margin: "0 auto", maxWidth: "22ch" }}>
+            Rebuild carts now and read the reasoning.
+          </h2>
+          <p
+            data-reveal
+            style={{ margin: "18px auto 0", maxWidth: "50ch", fontSize: 15, lineHeight: 1.7, color: "var(--wf-footer-mute)", textWrap: "pretty" }}
+          >
+            Seeded data, no integration. Five minutes tells you whether this is how your team should be deciding
+            offers.
+          </p>
+          <Link
+            href="/recovery"
+            data-reveal
+            className="wf-btn-ink"
+            style={{
+              display: "inline-block",
+              marginTop: 28,
+              fontSize: 14,
+              fontWeight: 500,
+              lineHeight: "22px",
+              padding: "12px 22px",
+              borderRadius: "var(--wf-radius-md)",
+              whiteSpace: "nowrap",
+              background: "var(--wf-footer-paper)",
+              color: "var(--wf-footer-ink)",
+              textDecoration: "none",
+            }}
+          >
+            Open the console
+          </Link>
+        </div>
+      </div>
+
+      <WaveFooter variant="landing" />
+    </div>
   );
 }

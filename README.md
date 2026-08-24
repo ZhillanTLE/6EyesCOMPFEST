@@ -22,9 +22,8 @@ deliberately sending no discount to travelers whom price was never blocking.
 docker compose up --build
 ```
 
-Then open **http://localhost:3000/recovery** for the console, or
-**http://localhost:3000/windfall** for the landing page that explains the
-decision logic.
+Then open **http://localhost:3000** for the landing page that explains the
+decision logic, or **http://localhost:3000/recovery** for the console.
 
 That is the whole setup. No API keys, no database, no accounts. The demo ships
 with `WINDFALL_FIXTURES=1`, replaying a captured run from local files, and the
