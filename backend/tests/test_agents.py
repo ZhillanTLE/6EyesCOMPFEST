@@ -73,6 +73,40 @@ class TestInferenceGating(unittest.TestCase):
         os.environ["MOCK_LLM"] = "true"
         llm.require_configured()  # mock: declared, allowed
 
+    def test_live_inference_can_run_over_replayed_prices(self):
+        """
+        A Gemini key alone must be demonstrable.
+
+        Live PRICES additionally need Duffel and RapidAPI credentials, which
+        need a signup and a paid subscription. Without this opt-in the two axes
+        move together and a Gemini key does nothing at all.
+        """
+        os.environ["WINDFALL_FIXTURES"] = "1"
+        os.environ["MOCK_LLM"] = "false"
+        os.environ["WINDFALL_LIVE_INFERENCE"] = "1"
+        os.environ["GEMINI_API_KEY"] = "a-key"
+        self.assertTrue(llm.available())
+        self.assertEqual(llm.why_unavailable(), "available")
+
+    def test_the_opt_in_without_a_key_is_refused(self):
+        """Asking for live reasoning with no key is a misconfiguration too."""
+        os.environ["WINDFALL_FIXTURES"] = "1"
+        os.environ["MOCK_LLM"] = "false"
+        os.environ["WINDFALL_LIVE_INFERENCE"] = "1"
+        os.environ["GEMINI_API_KEY"] = ""
+        with self.assertRaises(llm.LiveInferenceUnavailable):
+            llm.require_configured()
+
+    def test_plain_fixture_mode_stays_offline_and_quota_free(self):
+        """The default must not start spending Gemini quota."""
+        os.environ["WINDFALL_FIXTURES"] = "1"
+        os.environ["MOCK_LLM"] = "false"
+        os.environ.pop("WINDFALL_LIVE_INFERENCE", None)
+        os.environ["GEMINI_API_KEY"] = "a-key"
+        self.assertFalse(llm.available())
+        self.assertIn("captured run", llm.why_unavailable())
+        llm.require_configured()  # and it must not raise
+
     def test_a_configured_live_run_is_allowed(self):
         os.environ["WINDFALL_FIXTURES"] = "0"
         os.environ["MOCK_LLM"] = "false"

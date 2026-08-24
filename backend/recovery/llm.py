@@ -59,8 +59,28 @@ def has_key() -> bool:
     return bool(os.environ.get("GEMINI_API_KEY", "").strip())
 
 
+def live_inference_opt_in() -> bool:
+    """
+    Run real inference while prices still replay.
+
+    WINDFALL_FIXTURES governs PRICES: it replays captured Duffel/RapidAPI
+    totals so judging day survives a rate limit or a dead network. Reasoning is
+    a separate axis. Without this flag the two move together, which means a
+    Gemini key cannot be demonstrated at all unless Duffel and RapidAPI keys
+    are also present -- and those need a signup and a paid subscription.
+
+    Swapping the data source behind a tool without touching a prompt is the
+    architectural claim the paper makes in section 5.1, so exercising real
+    agents over replayed prices demonstrates that claim rather than bending it.
+
+    It stays OFF by default: a plain WINDFALL_FIXTURES=1 run must remain fully
+    offline and quota-free.
+    """
+    return os.environ.get("WINDFALL_LIVE_INFERENCE", "").strip().lower() in ("1", "true", "yes")
+
+
 def live_mode() -> bool:
-    """True when the run is meant to reach a real model: no mock, no fixtures."""
+    """True when PRICES come from live providers: no mock, no fixtures."""
     if mocked():
         return False
     from . import providers
@@ -75,7 +95,7 @@ def require_configured() -> None:
     stage has produced prose, and the caller gets one clear message instead of
     a trace whose reasoning is templates wearing the model's label.
     """
-    if live_mode() and not has_key():
+    if (live_mode() or live_inference_opt_in()) and not has_key():
         raise LiveInferenceUnavailable(
             "Live inference is enabled but GEMINI_API_KEY is not set, so the "
             "Classifier and Notification Curator cannot run. Set GEMINI_API_KEY "
@@ -86,7 +106,10 @@ def require_configured() -> None:
 
 def available() -> bool:
     """Whether a real inference call should be attempted at all."""
-    if not live_mode():
+    if mocked():
+        return False
+    from . import providers
+    if providers.use_fixtures() and not live_inference_opt_in():
         return False
     return has_key()
 
@@ -96,7 +119,7 @@ def why_unavailable() -> str:
     if mocked():
         return "MOCK_LLM=true"
     from . import providers
-    if providers.use_fixtures():
+    if providers.use_fixtures() and not live_inference_opt_in():
         return "replaying a captured run"
     if not has_key():
         # Unreachable through pipeline.run, which refuses this case up front.

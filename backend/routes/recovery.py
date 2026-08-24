@@ -37,7 +37,11 @@ def queue():
     """
     return jsonify({
         "queue": repository.queue(),
+        # `source` is about PRICES. Reasoning is a separate axis, reported
+        # alongside it so the console can say which half is replayed rather
+        # than labelling a run with live agents "Replaying capture".
         "source": "fixture" if providers.use_fixtures() else "live",
+        "inference": "gemini" if llm.available() else llm.why_unavailable(),
     }), 200
 
 

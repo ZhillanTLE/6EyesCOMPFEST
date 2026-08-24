@@ -19,6 +19,8 @@ import type { QueueEntry, RecoveryResult, SendReceipt } from "@/lib/windfall/typ
 export default function RecoveryConsole() {
   const [queue, setQueue] = useState<QueueEntry[]>([]);
   const [source, setSource] = useState<string>("live");
+  /* Which half is replayed: prices always, reasoning only when Gemini is off. */
+  const [inference, setInference] = useState<string>("");
   const [result, setResult] = useState<RecoveryResult | null>(null);
   /* Which screen is showing. Derived from `result` for browse-vs-run, and
      from this flag for the step after the trace completes. */
@@ -38,6 +40,7 @@ export default function RecoveryConsole() {
       .then((r) => {
         setQueue(r.queue);
         setSource(r.source);
+        setInference(r.inference ?? "");
       })
       .catch((e: Error) => {
         if (e.name !== "AbortError") setError(e.message);
@@ -194,7 +197,9 @@ export default function RecoveryConsole() {
 
           <div style={{ display: "flex", alignItems: "center", gap: 12, flex: "0 0 auto" }}>
             {/* Fixture mode is stated plainly and never buried. "Cached for
-                reliability" must not quietly become "faked". */}
+                reliability" must not quietly become "faked" -- and when the
+                agents really are running over replayed prices, the badge says
+                PRICES rather than claiming the whole run is a replay. */}
             {source === "fixture" && (
               <span
                 className="wf-mono"
@@ -209,7 +214,7 @@ export default function RecoveryConsole() {
                   color: "var(--wf-amber)",
                 }}
               >
-                Replaying capture
+                {inference === "gemini" ? "Replaying prices · live agents" : "Replaying capture"}
               </span>
             )}
             <div

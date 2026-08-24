@@ -179,7 +179,10 @@ export interface QueueEntry {
 
 export interface QueueResponse {
   queue: QueueEntry[];
+  /** Where PRICES came from: "fixture" (replayed) or "live". */
   source: string;
+  /** "gemini" when the agents really ran, else why they did not. */
+  inference?: string;
 }
 
 /** A deadline may render only when a carrier genuinely guaranteed the fare. */
