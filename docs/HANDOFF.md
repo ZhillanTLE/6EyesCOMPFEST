@@ -9,6 +9,68 @@ design system. CLAUDE.md wins over the paper where they conflict.
 
 ---
 
+## Next session — start here (written Aug 2026)
+
+**Verify state in five commands**
+
+```bash
+python -m unittest discover -s backend/tests -t .   # 120 tests, all green
+python scripts/scope_check.py                       # must exit 0
+cd frontend && npm run build                        # must pass
+WINDFALL_FIXTURES=1 PORT=8000 python -m backend.app # then curl /api/recovery/health
+cd frontend && npx next start -p 3067               # /windfall and /recovery
+```
+
+Run BOTH servers. The console fetches its cards from Flask through the Next
+rewrite, so with Flask down `/recovery` shows a bare "Internal Server Error"
+and no cards. That is the whole explanation for the missing-seed-data report
+from last session — the data was never broken, the backend process had been
+stopped.
+
+### The one thing left that cannot be done from here
+
+**Step 8 — `docker compose up` has still never run.** Docker is not installed
+on this machine. Everything else on *Done means* is verified; this is not.
+Run `docker compose up --build` first thing on a machine with Docker, then
+open `http://localhost:3000/recovery`.
+
+Verified by reading, this session (see *Docker audit* below): compose service
+names, ports, build contexts, both Dockerfiles' COPY paths against the real
+tree, the backend HEALTHCHECK that `depends_on: service_healthy` needs, the
+build-arg-not-env-var handling of `WINDFALL_API_ORIGIN`, and `.env.example`
+against every variable the code reads. **Still unproven and only provable by
+running it:** that the base images pull, that `npm ci` resolves in-image, that
+both healthchecks actually pass, and that `depends_on` sequences correctly.
+
+### Unfinished thread from this session
+
+The live-inference refusal was committed and unit-tested (120 green), but the
+**HTTP** verification was interrupted before it ran. Confirm it by hand:
+
+```bash
+WINDFALL_FIXTURES=0 MOCK_LLM=false GEMINI_API_KEY= PORT=8001 python -m backend.app
+curl  http://127.0.0.1:8001/api/recovery/health         # inferenceConfigured: false
+curl -X POST http://127.0.0.1:8001/api/recovery/run      -H 'Content-Type: application/json' -d '{"travelerId":"wf-01"}'
+# expect HTTP 503 and reason: live_inference_unconfigured
+```
+
+Also still worth doing: the console renders whatever `error` string the API
+returns, so a dead backend reads as "Internal Server Error". Distinguishing a
+connectivity failure from an API error in `frontend/src/lib/windfall/api.ts`
+would turn that into something actionable. Not started.
+
+### When the Gemini key arrives
+
+The live path is complete and wired — `llm.py` (one `complete_json`, temp 0,
+static prompts), `classifier_agent`, `searcher_agent`, `notification_curator`,
+and the four MCP tools in `mcp_tools.py` (in-process by default,
+`WINDFALL_MCP=stdio` to route through a real MCP session). Put the key in
+`backend/.env` and run with `WINDFALL_FIXTURES=0`. Watch for `reasonedBy` /
+`writtenBy` reading `gemini` rather than `deterministic (...)`, and for the
+FALLBACK badge disappearing from the pipeline stages.
+
+---
+
 ## Where things stand
 
 Steps 1, 2, 3, 4, the sending feature and the frontend design-handoff work
@@ -399,3 +461,31 @@ the boundary.
 whatever it reveals, then load `/recovery` and `/windfall` in a real browser and
 look at them. After that, set `GEMINI_API_KEY` and confirm the agents report
 `gemini` rather than `deterministic`.
+
+---
+
+## Docker audit — read line by line, Aug 2026
+
+Done because compose cannot be run here. Findings, both fixed:
+
+1. **`.dockerignore` never applied.** Both services build with `context: .`,
+   and Docker resolves `.dockerignore` from the context root only, so
+   `backend/.dockerignore` and `frontend/.dockerignore` were dead files. Every
+   build would have shipped `.git`, `frontend/node_modules`, `frontend/.next`,
+   `__pycache__` and any `backend/.env` into the context — the first of those
+   bakes secrets into an image layer, and the second drops host (Windows)
+   binaries on top of the clean `npm ci` tree via `COPY frontend ./` and breaks
+   the in-image build. Consolidated into one file at the context root; the dead
+   copies were deleted rather than left looking protective.
+
+2. **`.env.example` was missing `WINDFALL_MCP`.** Every other variable the
+   recovery path reads was already documented; that one was not.
+
+Confirmed correct and needing no change: `backend/Dockerfile` carries the
+HEALTHCHECK that the frontend's `depends_on: condition: service_healthy`
+requires (it is in the Dockerfile, not compose — valid, and easy to misread as
+missing); `WINDFALL_API_ORIGIN` is a build arg because `next.config.ts`
+resolves `rewrites()` at build time; ports 8000/3000 match the README;
+`backend/` is a PEP 420 namespace package so `python -m backend.app` needs no
+`__init__.py`; the seed JSON and `frontend/design-system/` both ship; and
+nothing the build needs is caught by the new ignore patterns.
