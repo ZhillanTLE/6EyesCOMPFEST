@@ -11,8 +11,12 @@ design system. CLAUDE.md wins over the paper where they conflict.
 
 ## Where things stand
 
-Steps 1, 2, 3, 4 and the sending feature are **done and committed**. Remaining:
-**step 6, `docker compose`** — plus the loose ends under *Not done*.
+Steps 1, 2, 3, 4, the sending feature and the frontend design-handoff work
+are **done and committed**. Remaining: **step 6, `docker compose`** — plus the
+loose ends under *Not done*.
+
+The console is now the handoff's three-view flow — **browse → pipeline →
+previews** — and there is a landing page at `/windfall`.
 
 ```
 b5d686c  feat: send the approved notification on explicit approval
@@ -32,7 +36,7 @@ as co-author on two commits — the user was advised to delete it.
 ### Verify state in four commands
 
 ```bash
-python -m unittest discover -s backend/tests -t .   # 83 tests, all green
+python -m unittest discover -s backend/tests -t .   # 111 tests, all green
 python scripts/scope_check.py                       # must exit 0
 cd frontend && npm run build                        # must pass
 python -m backend.tools.duffel_hold_probe           # needs a key; see Blockers
@@ -69,13 +73,25 @@ Flask**, nothing more. `next.config.ts` rewrites `/api/recovery/*` to Flask so
 the browser stays same-origin.
 
 ```
-app/recovery/{layout,page,windfall.css}
-components/windfall/  primitives, AgentStage, FareLedger, OutcomeCard,
-                      previews, TravelerCard, BrowseView, PipelineView,
-                      ApprovalBar, index (barrel)
-lib/windfall/         types, format, api, replay
+app/recovery/{layout,page,windfall.css}   the console, three views
+app/windfall/{layout,page,reveal}         the landing page
+components/windfall/  primitives, AgentStage, AgentAvatar, FareLedger,
+                      OutcomeCard, previews, TravelerCard, BrowseView,
+                      PipelineView, PreviewsView, ApprovalBar, HoldPanel,
+                      index (barrel)
+lib/windfall/         types, format, api, replay, fonts
 design-system/        VENDORED tokens + assets, tracked in git
 ```
+
+`windfall.css` is shared by both routes and stays the only file allowed a hex
+literal. `lib/windfall/fonts.ts` holds the three next/font calls so the console
+and the landing page cannot drift onto different weights.
+
+**Route-name overlap, verified harmless.** The landing page is `/windfall` and
+the static assets live under `public/windfall/`. Next serves the public file
+for an exact asset path and the page for `/windfall` itself; both were probed
+and return 200. Do not add a nested route under `app/windfall/` that collides
+with an asset directory name.
 
 ---
 
@@ -124,8 +140,23 @@ Each cost a round trip with the user. They are settled.
 8. **Git history is append-only.** No amend, rebase, or force-push. Earlier
    rewrites predate the rule and were user-instructed.
 
-9. **Commits:** conventional style, message body only, **no attribution or
-   co-author trailer**. `.claude/settings.local.json` lives in the *parent*
+9. **Previews are their own screen, reached BEFORE approving.** The prototype
+   reached `previews` only after approving and headed it "Disetujui". That
+   inverts the product — CLAUDE.md is explicit that the analyst approves before
+   anything is sent, and the handoff README states the purpose as reading the
+   message before it sends. So `ApprovalBar` lives on the previews screen and
+   the sent state renders there. The pipeline screen ends on a forward control.
+
+10. **The landing page ships at `/windfall`, with its headline figures
+    replaced.** The design's "32% recovered with zero discount" and "68% offered
+    / 32% purposely declined" were never measured, and with six carts a
+    percentage is noise. The rail states counts taken from the captured run.
+    "IDR 0 margin conceded" survives verbatim — true across every outcome, and
+    asserted by a test. `/` is still the pre-existing plan-trip app and was left
+    alone.
+
+11. **Commits:** conventional style, message body only, **no attribution or
+    co-author trailer**. `.claude/settings.local.json` lives in the *parent*
    directory `compfest/`, not the repo. Author as
    `Zhillan <zhillanbaniaksa@gmail.com>` so GitHub shows one contributor.
 
@@ -209,17 +240,24 @@ What is still unproven: whether the images actually build, whether
 pass, and whether `depends_on: service_healthy` sequences correctly. **Run
 `docker compose up --build` first thing.**
 
-**Still never seen in a browser.** The page returns HTTP 200 and every UI
+**Seen in a browser only through curl.** Both routes were served from a real
+`npm run start` with Flask behind the proxy and probed: `/windfall` 200 with
+every section present in the server-rendered HTML, `/recovery` 200, the queue
+proxy 200, `POST /api/recovery/run` for wf-02 returning `rebuild` with
+`marginConcededIdr: 0` and real per-stage timings, and both the agent and brand
+SVGs 200. What that does NOT prove is layout: nobody has looked at the pixels.
+
+Historic note, still partly true: The page returns HTTP 200 and every UI
 string is present in the client bundle, but the browse cards are fetched
 client-side (a direct consequence of CLAUDE.md forbidding Server Component data
 fetching), so server-rendered HTML contains the shell and no cards. Nobody has
 *looked* at the console. Do this immediately after compose works — it is the
 cheapest way to find layout breakage.
 
-**Agent avatars unused.** Nine SVGs (`sleep`/`awake`/`finished` × 3 agents) are
-vendored and copied to `public/windfall/agents/` but `AgentStage` never renders
-them. The design crossfades them by opacity with all three stacked — never swap
-`src`, which flashes a broken image. Purely cosmetic; nothing depends on it.
+**Agent avatars now render.** `AgentAvatar.tsx` stacks all three states and
+crossfades by opacity, as the handoff requires; `avatarState()` ports the
+prototype's `stFor()`, including the halted case where the Classifier finishes
+and everything downstream stays asleep.
 
 **Accessibility done.** Live region announcing each phase, table semantics on
 the fare ledger, spoken status on agent stages, `:focus-visible` rings,
@@ -255,9 +293,19 @@ outcome. With keys, nothing is known: the ladder may not clear, and the seed
 was calibrated against fixtures, so **wf-02 clearing tau=15% on live prices is
 unverified**.
 
-Smaller: `MOCK_LLM` documented but unimplemented; no `README.md` run
-instructions; `docs/windfall-paper.md` errata are applied in the markdown but
-**the submitted PDF still carries all eleven defects**.
+Smaller: `docs/windfall-paper.md` errata are applied in the markdown but **the
+submitted PDF still carries all eleven defects**. (`MOCK_LLM` and the README run
+instructions were listed here as missing; both have since landed.)
+
+**`frontend/windfallpaper.md` is a stale untracked duplicate** of the spec — 435
+lines against the 642 in `docs/windfall-paper.md`, with none of the errata
+applied. Delete it; a second copy of the spec that disagrees with the first is a
+trap.
+
+**`npm run build` passes but `npx eslint` reports one pre-existing error** in
+`app/recovery/page.tsx`: the theme-hydration effect calls `setState` directly
+(`react-hooks/set-state-in-effect`). Predates this work and does not fail the
+build, because Next 16 no longer lints during `build`.
 
 ---
 
@@ -331,6 +379,7 @@ the boundary.
 - [x] No unmeasured claims in any copy
 - [x] Pre-commit scope check passes on every commit
 
-**Suggested next move:** run `docker compose up --build` and fix whatever it
-reveals, load `/recovery` in a browser, then wire Gemini behind the two agent
-modules.
+**Suggested next move:** install Docker, run `docker compose up --build` and fix
+whatever it reveals, then load `/recovery` and `/windfall` in a real browser and
+look at them. After that, set `GEMINI_API_KEY` and confirm the agents report
+`gemini` rather than `deterministic`.

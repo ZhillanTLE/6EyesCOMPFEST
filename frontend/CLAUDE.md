@@ -359,6 +359,21 @@ plumbing work — most iterations don't need inference at all.
 
 ---
 
+## Frontend surfaces
+
+Two routes, both client-only against Flask:
+
+- `/recovery` — the console. Three views: **browse → pipeline → previews**.
+  Approval lives on the previews screen, before anything is sent. The pipeline
+  screen ends on a forward control, not on the send button.
+- `/windfall` — the landing page. Static, no data fetching. Every figure is a
+  count from the captured run or a statement of mechanism; the design's "32%"
+  and "68/32" claims were dropped as unmeasured.
+
+`/` remains the pre-existing plan-trip app and is out of recovery scope.
+
+---
+
 ## Known stale spec in the design bundle
 
 The bundle predates these decisions and will mislead if followed literally:
@@ -373,11 +388,12 @@ The bundle predates these decisions and will mislead if followed literally:
 
 ---
 
-## Paper errata (outstanding — fix in the doc, follow this file meanwhile)
+## Paper errata — all eleven now APPLIED in `docs/windfall-paper.md`
 
-Resolved in the current paper: the two-axis rule now appears in §4.1, the
-percentile notation and `k*` stopping rule landed, and `s_i` is introduced in
-§3.2.1. Still outstanding:
+The markdown is clean; it carries an Errata table listing every correction. What
+is still outstanding is only that **the submitted PDF has not been regenerated**
+and still carries all eleven defects. The list below is what those were, kept
+for the regeneration pass:
 
 - **Tabel 1.5 says "rendering preview tanpa pengiriman aktual"** — wrong.
   Sending on approval is in scope. The Abstrak and Tabel 1.7 ("serta mengirim

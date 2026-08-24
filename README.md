@@ -22,7 +22,9 @@ deliberately sending no discount to travelers whom price was never blocking.
 docker compose up --build
 ```
 
-Then open **http://localhost:3000/recovery**
+Then open **http://localhost:3000/recovery** for the console, or
+**http://localhost:3000/windfall** for the landing page that explains the
+decision logic.
 
 That is the whole setup. No API keys, no database, no accounts. The demo ships
 with `WINDFALL_FIXTURES=1`, replaying a captured run from local files, and the
@@ -119,6 +121,11 @@ every path.
 frontend (Next.js 16)  :3000   the console — a client that calls Flask
 backend  (Flask)       :8000   the synchronous recovery pipeline
 ```
+
+The console is three screens: **browse** the open carts, watch the **pipeline**
+reason over the one you picked, then read the **previews** of what the traveler
+will receive. Approval lives on that third screen, so nothing is sent by
+scrolling past a finished trace.
 
 The whole pipeline runs inside **one request/response cycle**. No background
 jobs, no queue, no scheduler, no distributed database — the seed is a local
