@@ -30,8 +30,11 @@ export default function RecoveryConsole() {
   const [receipt, setReceipt] = useState<SendReceipt | null>(null);
   const [sending, setSending] = useState(false);
   const [replayNonce, setReplayNonce] = useState(0);
-  /* The reference console defaults dark; a saved preference wins. */
-  const [theme, setTheme] = useState<"light" | "dark">("dark");
+  /* Light by default, matching the landing page so moving between the two
+     does not flip the palette. The reference console opens dark, but both
+     themes are complete and the toggle is one click; a saved preference
+     still wins over this default. */
+  const [theme, setTheme] = useState<"light" | "dark">("light");
   const abort = useRef<AbortController | null>(null);
 
   useEffect(() => {
