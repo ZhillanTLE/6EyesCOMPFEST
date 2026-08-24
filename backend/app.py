@@ -32,8 +32,12 @@ if _async_mode == "gevent":
     monkey.patch_all()
 
 # Load environment variables from .env file.
-# override=True ensures changing variables in .env are reloaded cleanly in dev.
-load_dotenv(override=True)
+# override=False so an explicitly set variable beats the file:
+#   WINDFALL_FIXTURES=0 python -m backend.app
+# has to mean what it says even when backend/.env pins it to 1. With
+# override=True the file silently won, which also let a developer's .env
+# reconfigure the test suite during discovery.
+load_dotenv(override=False)
 
 # Setup logging
 logging.basicConfig(level=logging.INFO)
