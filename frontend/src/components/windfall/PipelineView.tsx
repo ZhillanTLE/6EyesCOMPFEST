@@ -8,17 +8,19 @@
  * ledger, revealed row by row across its real duration. The Notifier emits
  * drafted copy. Giving them a shared layout would flatten three different
  * kinds of work into one shape.
+ *
+ * The notification previews are NOT here. They own the third screen, so the
+ * one irreversible action in the product is not reached by scrolling past a
+ * finished trace.
  */
-import type { RecoveryResult, SendReceipt } from "@/lib/windfall/types";
+import type { RecoveryResult } from "@/lib/windfall/types";
 import { plainPct, seconds } from "@/lib/windfall/format";
 import { stageStatus, useReplay } from "@/lib/windfall/replay";
-import { ApprovalBar } from "./ApprovalBar";
 import { AgentStage } from "./AgentStage";
 import { avatarState } from "./AgentAvatar";
 import { FareLedger } from "./FareLedger";
 import { OutcomeCard, OutcomeNote } from "./OutcomeCard";
 import { HoldPanel } from "./HoldPanel";
-import { EmailPreview, WhatsAppPreview } from "./previews";
 import { Skeleton, TierBadge } from "./primitives";
 
 /* Spoken as each phase lands. Terse on purpose -- a screen reader user hears
@@ -38,17 +40,13 @@ function stageMs(result: RecoveryResult, stage: string): number {
 export function PipelineView({
   result,
   onBack,
-  receipt,
-  sending,
-  onApprove,
+  onReview,
   replayNonce,
   onReplay,
 }: {
   result: RecoveryResult;
   onBack: () => void;
-  receipt: SendReceipt | null;
-  sending: boolean;
-  onApprove: () => void;
+  onReview: () => void;
   replayNonce: number;
   onReplay: () => void;
 }) {
@@ -277,46 +275,85 @@ export function PipelineView({
 
       {phase >= 4 && !halted && <HoldPanel hold={hold} />}
 
+      {/* The pipeline drafts; it never sends. The forward control opens the
+          previews screen, where approval lives. Replay sits beside it because
+          replaying is a property of the trace, not of the decision. */}
       {phase >= 4 && (
-        <ApprovalBar
-          receipt={receipt}
-          sending={sending}
-          disabled={!notification}
-          disabledReason={
-            "This cart produced no notification, so there is nothing to approve. " +
-            "Carrier inventory was unavailable and the pipeline halted."
-          }
-          onApprove={onApprove}
-          onReplay={onReplay}
-        />
-      )}
-
-      {phase >= 4 && notification && (
         <section
-          aria-label="Notification previews"
-          className="wf-fade"
+          aria-label="Next step"
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-            gap: 20,
-            alignItems: "start",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 16,
+            flexWrap: "wrap",
+            padding: "16px 18px",
+            borderRadius: "var(--wf-radius-md)",
+            background: "var(--wf-white)",
+            boxShadow: "var(--wf-ring-border)",
           }}
         >
-          <EmailPreview
-            draft={notification}
-            hold={hold}
-            originalTotal={result.originalTotalIdr}
-            finalTotal={decision.finalTotalIdr ?? result.originalTotalIdr}
-            saving={decision.savingIdr}
-            savingPct={decision.savingPct}
-          />
-          <WhatsAppPreview
-            draft={notification}
-            finalTotal={decision.finalTotalIdr ?? result.originalTotalIdr}
-            saving={decision.savingIdr}
-          />
+          <div style={{ minWidth: 0 }}>
+            <div className="wf-eyebrow">Notification</div>
+            <p
+              style={{
+                margin: "6px 0 0",
+                fontSize: 13,
+                lineHeight: 1.6,
+                color: "var(--wf-ink-2)",
+                maxWidth: "62ch",
+              }}
+            >
+              {notification
+                ? "The draft is ready. Read it as the traveler will before approving delivery."
+                : "This cart produced no notification, so there is nothing to approve. " +
+                  "Carrier inventory was unavailable and the pipeline halted."}
+            </p>
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+            <button
+              type="button"
+              onClick={onReplay}
+              className="wf-mono"
+              style={{
+                padding: "11px 16px",
+                fontSize: 12,
+                letterSpacing: "0.06em",
+                textTransform: "uppercase",
+                border: "none",
+                borderRadius: "var(--wf-radius-md)",
+                background: "transparent",
+                boxShadow: "var(--wf-ring-border)",
+                color: "var(--wf-ink-2)",
+                cursor: "pointer",
+              }}
+            >
+              Replay
+            </button>
+            <button
+              type="button"
+              onClick={onReview}
+              disabled={!notification}
+              style={{
+                padding: "13px 24px",
+                fontSize: 13,
+                fontWeight: 500,
+                border: "none",
+                borderRadius: "var(--wf-radius-md)",
+                background: "var(--wf-ink)",
+                color: "var(--wf-paper)",
+                cursor: notification ? "pointer" : "not-allowed",
+                opacity: notification ? 1 : 0.45,
+                transition: "opacity .12s ease",
+              }}
+            >
+              Review notification &rarr;
+            </button>
+          </div>
         </section>
       )}
+
     </div>
   );
 }

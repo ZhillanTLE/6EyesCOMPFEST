@@ -26,7 +26,7 @@ export function ApprovalBar({
   disabled: boolean;
   disabledReason?: string;
   onApprove: () => void;
-  onReplay: () => void;
+  onReplay?: () => void;
 }) {
   const tone =
     receipt?.state === "sent"
@@ -86,6 +86,7 @@ export function ApprovalBar({
       </div>
 
       <div style={{ display: "flex", alignItems: "center", gap: 10, flexShrink: 0 }}>
+        {onReplay && (
         <button
           type="button"
           onClick={onReplay}
@@ -105,6 +106,7 @@ export function ApprovalBar({
         >
           Replay
         </button>
+        )}
         <button
           type="button"
           onClick={onApprove}

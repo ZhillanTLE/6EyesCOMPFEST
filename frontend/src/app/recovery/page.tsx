@@ -1,7 +1,8 @@
 "use client";
 
 /**
- * The recovery console. One route, two views: pick a cart, watch the pipeline.
+ * The recovery console. One route, three views: pick a cart, watch the
+ * pipeline reason over it, read the notification it drafted.
  *
  * State is small on purpose. The endpoint is synchronous, so there is no
  * streaming to coordinate and nothing to reconcile -- one POST returns the
@@ -9,7 +10,7 @@
  * measured.
  */
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BrowseView, PipelineView } from "@/components/windfall";
+import { BrowseView, PipelineView, PreviewsView } from "@/components/windfall";
 import { approveAndSend, fetchQueue, runRecovery } from "@/lib/windfall/api";
 import type { QueueEntry, RecoveryResult, SendReceipt } from "@/lib/windfall/types";
 
@@ -17,6 +18,9 @@ export default function RecoveryConsole() {
   const [queue, setQueue] = useState<QueueEntry[]>([]);
   const [source, setSource] = useState<string>("live");
   const [result, setResult] = useState<RecoveryResult | null>(null);
+  /* Which screen is showing. Derived from `result` for browse-vs-run, and
+     from this flag for the step after the trace completes. */
+  const [reviewing, setReviewing] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<SendReceipt | null>(null);
@@ -68,6 +72,7 @@ export default function RecoveryConsole() {
     // A fresh run has not been approved. Never carry a receipt across carts.
     setReceipt(null);
     setReplayNonce(0);
+    setReviewing(false);
     try {
       setResult(await runRecovery(travelerId, ctrl.signal));
     } catch (e) {
@@ -82,6 +87,7 @@ export default function RecoveryConsole() {
     abort.current?.abort();
     setResult(null);
     setReceipt(null);
+    setReviewing(false);
   }, []);
 
   /**
@@ -181,19 +187,27 @@ export default function RecoveryConsole() {
           </div>
         )}
 
-        {result ? (
-          <PipelineView
+        {result && reviewing && (
+          <PreviewsView
             result={result}
-            onBack={back}
+            onBack={() => setReviewing(false)}
             receipt={receipt}
             sending={sending}
             onApprove={approve}
+          />
+        )}
+
+        {result && !reviewing && (
+          <PipelineView
+            result={result}
+            onBack={back}
+            onReview={() => setReviewing(true)}
             replayNonce={replayNonce}
             onReplay={replay}
           />
-        ) : (
-          <BrowseView queue={queue} busyId={busyId} onSelect={select} />
         )}
+
+        {!result && <BrowseView queue={queue} busyId={busyId} onSelect={select} />}
       </div>
     </div>
   );

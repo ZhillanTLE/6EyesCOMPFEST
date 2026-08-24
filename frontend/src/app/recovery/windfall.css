@@ -56,6 +56,16 @@
   --wf-tier-cold-ink: #5c625c;
 
   /*
+   * Mail-client window buttons on the previews screen. Not semantic colour --
+   * they are chrome quoted from a mail client, the way the design system asks
+   * the preview zone to read as a real message rather than a console panel.
+   * The two-place rationing rule governs signal colour, which this is not.
+   */
+  --wf-chrome-close: #e86b5f;
+  --wf-chrome-min: #e7b34a;
+  --wf-chrome-max: #6fbe6f;
+
+  /*
    * Agent avatar well. The prototype inlined this one hex at the call site;
    * it is a shade of the paper neutral the bundle never promoted to a token.
    */

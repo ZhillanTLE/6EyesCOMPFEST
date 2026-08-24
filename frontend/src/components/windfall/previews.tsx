@@ -111,6 +111,7 @@ export function EmailPreview({
   finalTotal,
   saving,
   savingPct,
+  sent = false,
 }: {
   draft: NotificationDraft;
   hold: HoldStatus;
@@ -118,6 +119,7 @@ export function EmailPreview({
   finalTotal: number;
   saving: number;
   savingPct: number | null;
+  sent?: boolean;
 }) {
   const changed = saving > 0;
   return (
@@ -166,7 +168,7 @@ export function EmailPreview({
               {draft.subject}
             </div>
             <div className="wf-mono" style={{ marginTop: 2, fontSize: 10, color: "var(--wf-ink-3)" }}>
-              Windfall &middot; draft, not yet sent
+              Windfall &middot; {sent ? "delivered" : "draft, not yet sent"}
             </div>
           </div>
         </header>
