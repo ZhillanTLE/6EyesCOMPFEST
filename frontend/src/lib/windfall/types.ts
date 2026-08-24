@@ -172,6 +172,9 @@ export interface QueueEntry {
    * underneath it or the re-price rung would compare today's price to itself.
    */
   cartValueIdr: number;
+  /** Null on cold start, never zero -- there is no average to report. */
+  usualSpendIdr: number | null;
+  avgStars: number | null;
 }
 
 export interface QueueResponse {

@@ -25,7 +25,7 @@ class TestRecoveryApi(unittest.TestCase):
 
     def test_queue_returns_every_cart(self):
         body = self.c.get("/api/recovery/queue").get_json()
-        self.assertEqual(len(body["queue"]), 6)
+        self.assertEqual(len(body["queue"]), 10)
 
     def test_queue_carries_the_provisional_estimate(self):
         """Browse cards show the cheap deterministic estimate -- percentile tier
@@ -52,7 +52,7 @@ class TestRecoveryApi(unittest.TestCase):
     def test_run_returns_the_whole_trace_in_one_response(self):
         """No streaming, no follow-up call: everything the console renders has
         to be in this body."""
-        body = self.c.post("/api/recovery/run", json={"travelerId": "wf-03"}).get_json()
+        body = self.c.post("/api/recovery/run", json={"travelerId": "wf-05"}).get_json()
         for key in ("classification", "gate", "decision", "hold",
                     "notification", "timings", "originalTotalIdr", "source"):
             self.assertIn(key, body)
@@ -69,7 +69,7 @@ class TestRecoveryApi(unittest.TestCase):
         self.assertTrue(attempts[-1]["cleared"])
 
     def test_reminder_still_carries_a_full_notification(self):
-        body = self.c.post("/api/recovery/run", json={"travelerId": "wf-01"}).get_json()
+        body = self.c.post("/api/recovery/run", json={"travelerId": "wf-03"}).get_json()
         self.assertEqual(body["decision"]["outcome"], "reminder")
         self.assertIsNotNone(body["notification"])
         self.assertGreaterEqual(len(body["notification"]["bodyParagraphs"]), 2)

@@ -80,16 +80,26 @@ class FixtureProvider:
         return None
 
 
+# Substitute properties, one per cart that reaches the rung. Each is a real
+# hotel in that cart's own city at the right star rating -- a lateral that
+# proposes a property in the wrong country is not a comparable, it is a bug the
+# copy would happily print.
 _LATERAL_NAMES = {
-    "cart-wf-02": "The Okura Tokyo",
-    "cart-wf-03": "Marina Bay Sands",
-    "cart-wf-04": "Hyatt Place Dubai",
-    "cart-wf-05": "Villa Song Saigon",
+    "cart-wf-01": "Pan Pacific Singapore",
+    "cart-wf-02": "Hotel Britania Art Deco",
+    "cart-wf-04": "Hyatt Place Dubai Wasl District",
+    "cart-wf-05": "The Montague on the Gardens",
+    "cart-wf-07": "Arlo SoHo",
+    "cart-wf-09": "Golden Tulip Addis Ababa",
+    "cart-wf-10": "Outrigger Reef Waikiki Beach",
 }
 _TIER_DOWN_NAMES = {
-    "cart-wf-02": "Hotel Ryumeikan Tokyo",
-    "cart-wf-04": "Premier Inn Dubai",
-    "cart-wf-05": "Alagon Central",
+    "cart-wf-01": "Hotel Boss",
+    "cart-wf-02": "Lisboa Central Park",
+    "cart-wf-04": "Premier Inn Dubai Al Jaddaf",
+    "cart-wf-07": "Pod 51",
+    "cart-wf-09": "Ramada Addis",
+    "cart-wf-10": "Aqua Palms Waikiki",
 }
 
 

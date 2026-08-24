@@ -23,99 +23,53 @@
     "calibrationTarget is a seed-DESIGN goal, not a pipeline input. Nothing reads it",
     "at runtime. It records which path each traveler was constructed to exercise so",
     "that capture can check live prices actually produce it, and fail loudly when",
-    "they do not."
+    "they do not.",
+    "",
+    "PROVENANCE. The ten travelers, their names, routes, carriers, hotels, dates,",
+    "campaign shares, budget gaps, abandonment times and target outcomes are taken",
+    "from the design bundle's seed() table (Windfall.dc.html).",
+    "",
+    "What could NOT be taken verbatim: the bundle's own cart values contradict its",
+    "own tier labels -- its lowest-spending traveler is labelled Comfort while",
+    "higher-spending ones are labelled Value, which no percentile tiering can",
+    "produce. usualSpend is therefore chosen so the bundle's tier AND its budget",
+    "gap both fall out of the real arithmetic: p_0 = usualSpend * (1 + gap), and",
+    "the percentile rank over these ten lands each traveler on the bundle's tier.",
+    "",
+    "PROVENANCE. The ten travelers, their names, routes, carriers, hotels, dates,",
+    "campaign shares, budget gaps, abandonment times and target outcomes are taken",
+    "from the design bundle's seed() table (Windfall.dc.html).",
+    "",
+    "What could NOT be taken verbatim: the bundle's own cart values contradict its",
+    "own tier labels -- its lowest-spending traveler is labelled Comfort while",
+    "higher-spending ones are labelled Value, which no percentile tiering can",
+    "produce. usualSpend is therefore chosen so the bundle's tier AND its budget",
+    "gap both fall out of the real arithmetic: p_0 = usualSpend * (1 + gap), and",
+    "the percentile rank over these ten lands each traveler on the bundle's tier."
   ],
   "travelers": [
     {
       "travelerId": "wf-01",
-      "name": "Prasetyo Wibowo",
-      "bookings": 8,
-      "usualSpend": 62000000,
-      "campaignShare": 0.09,
-      "avgStars": 5.0,
-      "premiumCabinShare": 0.75,
-      "calibrationTarget": "reminder",
-      "calibrationNote": "Premium, low campaign share. Pays full fare. The gate must close on the campaign-share axis even when the cart runs slightly over usual spend.",
+      "name": "Ria Lavenia",
+      "bookings": 3,
+      "usualSpend": 6000000,
+      "campaignShare": 0.46,
+      "avgStars": 3.5,
+      "premiumCabinShare": 0.05,
+      "calibrationTarget": "rebuild",
+      "calibrationNote": "Gate opens on both axes. Re-price and the lateral swap fall short; one star down clears tau.",
       "cart": {
         "cartId": "cart-wf-01",
-        "abandonedHoursAgo": 3,
+        "abandonedHoursAgo": 1,
         "flight": {
-          "carrier": "Emirates",
-          "origin": "CGK",
-          "destination": "LHR",
-          "departDate": "2027-01-18",
-          "returnDate": "2027-01-24",
-          "cabin": "business",
-          "passengers": 2,
-          "valueIdr": 41000000
-        },
-        "hotel": {
-          "name": "The Savoy",
-          "stars": 5,
-          "city": "London",
-          "area": "Covent Garden",
-          "checkIn": "2027-01-18",
-          "checkOut": "2027-01-23",
-          "valueIdr": 25000000
-        }
-      }
-    },
-    {
-      "travelerId": "wf-02",
-      "name": "Ayu Kartika",
-      "bookings": 7,
-      "usualSpend": 58000000,
-      "campaignShare": 0.46,
-      "avgStars": 5.0,
-      "premiumCabinShare": 0.6,
-      "calibrationTarget": "rebuild",
-      "calibrationNote": "Premium, HIGH campaign share -- the contrast against wf-01. Same tier, opposite outcome, purely because campaign share differs. Hotel must be a large enough share of the cart that one star down genuinely clears tau=15%; verify against live prices, never back-fit.",
-      "cart": {
-        "cartId": "cart-wf-02",
-        "abandonedHoursAgo": 9,
-        "flight": {
-          "carrier": "Singapore Airlines",
-          "origin": "CGK",
-          "destination": "HND",
-          "departDate": "2027-02-06",
-          "returnDate": "2027-02-13",
-          "cabin": "economy",
-          "passengers": 2,
-          "valueIdr": 26000000
-        },
-        "hotel": {
-          "name": "Aman Tokyo",
-          "stars": 5,
-          "city": "Tokyo",
-          "area": "Otemachi",
-          "checkIn": "2027-02-06",
-          "checkOut": "2027-02-12",
-          "valueIdr": 45000000
-        }
-      }
-    },
-    {
-      "travelerId": "wf-03",
-      "name": "Bagus Hartono",
-      "bookings": 5,
-      "usualSpend": 26000000,
-      "campaignShare": 0.44,
-      "avgStars": 4.0,
-      "premiumCabinShare": 0.1,
-      "calibrationTarget": "lateral",
-      "calibrationNote": "Comfort tier, tau=10%. A same-star property in the same area must clear on rung 02, so the ladder stops before any downgrade is proposed. This is the outcome the product is least apologetic about.",
-      "cart": {
-        "cartId": "cart-wf-03",
-        "abandonedHoursAgo": 26,
-        "flight": {
-          "carrier": "Garuda Indonesia",
-          "origin": "CGK",
+          "carrier": "ANA",
+          "origin": "HND",
           "destination": "SIN",
           "departDate": "2026-11-08",
           "returnDate": "2026-11-12",
           "cabin": "economy",
           "passengers": 2,
-          "valueIdr": 13000000
+          "valueIdr": 3078000
         },
         "hotel": {
           "name": "Fullerton Bay",
@@ -124,32 +78,100 @@
           "area": "Marina Bay",
           "checkIn": "2026-11-08",
           "checkOut": "2026-11-11",
-          "valueIdr": 18000000
+          "valueIdr": 3762000
+        }
+      }
+    },
+    {
+      "travelerId": "wf-02",
+      "name": "Zhillan Baniaksa",
+      "bookings": 5,
+      "usualSpend": 32000000,
+      "campaignShare": 0.48,
+      "avgStars": 4.0,
+      "premiumCabinShare": 0.35,
+      "calibrationTarget": "rebuild",
+      "calibrationNote": "Gate opens on both axes. Re-price and the lateral swap fall short; one star down clears tau.",
+      "cart": {
+        "cartId": "cart-wf-02",
+        "abandonedHoursAgo": 26,
+        "flight": {
+          "carrier": "TAP Air",
+          "origin": "GRU",
+          "destination": "LIS",
+          "departDate": "2026-12-03",
+          "returnDate": "2026-12-10",
+          "cabin": "premium_economy",
+          "passengers": 2,
+          "valueIdr": 16992000
+        },
+        "hotel": {
+          "name": "Tivoli Avenida",
+          "stars": 4,
+          "city": "Lisbon",
+          "area": "Avenida da Liberdade",
+          "checkIn": "2026-12-03",
+          "checkOut": "2026-12-09",
+          "valueIdr": 20768000
+        }
+      }
+    },
+    {
+      "travelerId": "wf-03",
+      "name": "Nasywa Namira",
+      "bookings": 8,
+      "usualSpend": 62000000,
+      "campaignShare": 0.09,
+      "avgStars": 5.0,
+      "premiumCabinShare": 0.75,
+      "calibrationTarget": "reminder",
+      "calibrationNote": "Low campaign share. The gate must close on that axis even though the cart runs over usual spend.",
+      "cart": {
+        "cartId": "cart-wf-03",
+        "abandonedHoursAgo": 3,
+        "flight": {
+          "carrier": "Emirates",
+          "origin": "DXB",
+          "destination": "LHR",
+          "departDate": "2027-01-18",
+          "returnDate": "2027-01-24",
+          "cabin": "business",
+          "passengers": 2,
+          "valueIdr": 29016000
+        },
+        "hotel": {
+          "name": "The Savoy",
+          "stars": 5,
+          "city": "London",
+          "area": "Covent Garden",
+          "checkIn": "2027-01-18",
+          "checkOut": "2027-01-23",
+          "valueIdr": 35464000
         }
       }
     },
     {
       "travelerId": "wf-04",
-      "name": "Intan Maharani",
-      "bookings": 4,
-      "usualSpend": 9000000,
-      "campaignShare": 0.45,
-      "avgStars": 3.0,
-      "premiumCabinShare": 0.0,
+      "name": "Adriano Goran",
+      "bookings": 1,
+      "usualSpend": 7404959,
+      "campaignShare": null,
+      "avgStars": null,
+      "premiumCabinShare": 0.05,
       "calibrationTarget": "alternative",
-      "calibrationNote": "Value tier, tau=5%. Gate opens, but no rung clears -- thin inventory on the route means even a star down saves little. Falls through to a different trip within the same budget.",
+      "calibrationNote": "Cold start: one booking, so campaignShare is null and never fabricated -- the design bundle prints 45% for this traveler, but a single booking is no history to compute a share from. The ladder still runs on the cart-proxy tier because a rebuild concedes no margin; nothing clears tau, so a different trip is proposed.",
       "cart": {
         "cartId": "cart-wf-04",
-        "abandonedHoursAgo": 52,
+        "abandonedHoursAgo": 9,
         "flight": {
           "carrier": "IndiGo",
-          "origin": "CGK",
+          "origin": "BLR",
           "destination": "DXB",
           "departDate": "2027-02-14",
           "returnDate": "2027-02-17",
           "cabin": "economy",
           "passengers": 1,
-          "valueIdr": 6400000
+          "valueIdr": 4032000
         },
         "hotel": {
           "name": "Rove Downtown",
@@ -158,75 +180,211 @@
           "area": "Downtown",
           "checkIn": "2027-02-14",
           "checkOut": "2027-02-16",
-          "valueIdr": 4800000
+          "valueIdr": 4928000
         }
       }
     },
     {
       "travelerId": "wf-05",
-      "name": "Rizky Firmansyah",
-      "bookings": 1,
-      "usualSpend": 15000000,
-      "campaignShare": null,
-      "avgStars": null,
-      "premiumCabinShare": null,
-      "calibrationTarget": "cold_start",
-      "calibrationNote": "One booking, so campaign share is unmeasurable and MUST stay null -- a fabricated share here would fake the price-sensitivity signal outright. Tier comes from cart signals (paper section 3.2.5). The ladder still runs, because a rebuild concedes no margin.",
+      "name": "Zayyan Ramadzaki",
+      "bookings": 4,
+      "usualSpend": 30000000,
+      "campaignShare": 0.47,
+      "avgStars": 4.0,
+      "premiumCabinShare": 0.35,
+      "calibrationTarget": "lateral",
+      "calibrationNote": "Gate opens on both axes. The same-star swap clears tau, so the ladder stops before any downgrade.",
       "cart": {
         "cartId": "cart-wf-05",
-        "abandonedHoursAgo": 18,
+        "abandonedHoursAgo": 52,
         "flight": {
-          "carrier": "Vietnam Airlines",
-          "origin": "CGK",
-          "destination": "SGN",
+          "carrier": "British Airways",
+          "origin": "ACC",
+          "destination": "LHR",
           "departDate": "2027-03-01",
-          "returnDate": "2027-03-06",
-          "cabin": "economy",
+          "returnDate": "2027-03-07",
+          "cabin": "premium_economy",
           "passengers": 1,
-          "valueIdr": 7500000
+          "valueIdr": 15660000
         },
         "hotel": {
-          "name": "Hotel des Arts Saigon",
+          "name": "The Kensington",
           "stars": 4,
-          "city": "Ho Chi Minh City",
-          "area": "District 3",
+          "city": "London",
+          "area": "Covent Garden",
           "checkIn": "2027-03-01",
-          "checkOut": "2027-03-05",
-          "valueIdr": 11000000
+          "checkOut": "2027-03-06",
+          "valueIdr": 19140000
         }
       }
     },
     {
       "travelerId": "wf-06",
-      "name": "Dewi Anggraini",
+      "name": "Christiano Hosea",
       "bookings": 6,
-      "usualSpend": 21000000,
+      "usualSpend": 26000000,
       "campaignShare": 0.31,
       "avgStars": 4.0,
-      "premiumCabinShare": 0.15,
+      "premiumCabinShare": 0.35,
       "calibrationTarget": "error",
-      "calibrationNote": "Exercises the upstream-failure path. Not in the paper; a pipeline over live carrier inventory will fail sometimes and a demo that cannot show it is dishonest. Needs one sentence added to the paper.",
+      "calibrationNote": "Upstream failure path. The classifier completes; the searcher halts.",
       "cart": {
         "cartId": "cart-wf-06",
-        "abandonedHoursAgo": 2,
+        "abandonedHoursAgo": 5,
         "flight": {
           "carrier": "China Eastern",
-          "origin": "CGK",
-          "destination": "PVG",
+          "origin": "PVG",
+          "destination": "NRT",
           "departDate": "2027-04-09",
           "returnDate": "2027-04-13",
-          "cabin": "economy",
+          "cabin": "premium_economy",
           "passengers": 2,
-          "valueIdr": 14000000
+          "valueIdr": 13104000
         },
         "hotel": {
-          "name": "Les Suites Orient",
+          "name": "Hotel Gracery",
           "stars": 4,
-          "city": "Shanghai",
-          "area": "Bund",
+          "city": "Tokyo",
+          "area": "Shinjuku",
           "checkIn": "2027-04-09",
           "checkOut": "2027-04-12",
-          "valueIdr": 10000000
+          "valueIdr": 16016000
+        }
+      }
+    },
+    {
+      "travelerId": "wf-07",
+      "name": "Micguel Katili",
+      "bookings": 2,
+      "usualSpend": 5000000,
+      "campaignShare": 0.45,
+      "avgStars": 3.5,
+      "premiumCabinShare": 0.05,
+      "calibrationTarget": "rebuild",
+      "calibrationNote": "Gate opens on both axes. Re-price and the lateral swap fall short; one star down clears tau.",
+      "cart": {
+        "cartId": "cart-wf-07",
+        "abandonedHoursAgo": 18,
+        "flight": {
+          "carrier": "ITA Airways",
+          "origin": "FCO",
+          "destination": "JFK",
+          "departDate": "2027-05-05",
+          "returnDate": "2027-05-12",
+          "cabin": "economy",
+          "passengers": 1,
+          "valueIdr": 2632000
+        },
+        "hotel": {
+          "name": "The Standard",
+          "stars": 4,
+          "city": "New York",
+          "area": "Meatpacking",
+          "checkIn": "2027-05-05",
+          "checkOut": "2027-05-11",
+          "valueIdr": 3218000
+        }
+      }
+    },
+    {
+      "travelerId": "wf-08",
+      "name": "Salsabilla Hasan",
+      "bookings": 7,
+      "usualSpend": 56000000,
+      "campaignShare": 0.11,
+      "avgStars": 5.0,
+      "premiumCabinShare": 0.75,
+      "calibrationTarget": "reminder",
+      "calibrationNote": "Low campaign share. The gate must close on that axis even though the cart runs over usual spend.",
+      "cart": {
+        "cartId": "cart-wf-08",
+        "abandonedHoursAgo": 2,
+        "flight": {
+          "carrier": "LATAM",
+          "origin": "SCL",
+          "destination": "MAD",
+          "departDate": "2027-06-20",
+          "returnDate": "2027-06-28",
+          "cabin": "business",
+          "passengers": 2,
+          "valueIdr": 26460000
+        },
+        "hotel": {
+          "name": "Rosewood Villa Magna",
+          "stars": 5,
+          "city": "Madrid",
+          "area": "Salamanca",
+          "checkIn": "2027-06-20",
+          "checkOut": "2027-06-27",
+          "valueIdr": 32340000
+        }
+      }
+    },
+    {
+      "travelerId": "wf-09",
+      "name": "Darius Sagala",
+      "bookings": 3,
+      "usualSpend": 28000000,
+      "campaignShare": 0.43,
+      "avgStars": 4.0,
+      "premiumCabinShare": 0.35,
+      "calibrationTarget": "alternative",
+      "calibrationNote": "Gate opens, no rung clears tau, so a different trip is proposed instead of a discount.",
+      "cart": {
+        "cartId": "cart-wf-09",
+        "abandonedHoursAgo": 73,
+        "flight": {
+          "carrier": "Ethiopian",
+          "origin": "LOS",
+          "destination": "ADD",
+          "departDate": "2027-07-02",
+          "returnDate": "2027-07-08",
+          "cabin": "premium_economy",
+          "passengers": 1,
+          "valueIdr": 14994000
+        },
+        "hotel": {
+          "name": "Skylight Hotel",
+          "stars": 4,
+          "city": "Addis Ababa",
+          "area": "Bole",
+          "checkIn": "2027-07-02",
+          "checkOut": "2027-07-07",
+          "valueIdr": 18326000
+        }
+      }
+    },
+    {
+      "travelerId": "wf-10",
+      "name": "Tania Ju",
+      "bookings": 2,
+      "usualSpend": 7000000,
+      "campaignShare": 0.5,
+      "avgStars": 3.5,
+      "premiumCabinShare": 0.05,
+      "calibrationTarget": "rebuild",
+      "calibrationNote": "Gate opens on both axes. Re-price and the lateral swap fall short; one star down clears tau.",
+      "cart": {
+        "cartId": "cart-wf-10",
+        "abandonedHoursAgo": 34,
+        "flight": {
+          "carrier": "JAL",
+          "origin": "NRT",
+          "destination": "HNL",
+          "departDate": "2027-08-12",
+          "returnDate": "2027-08-19",
+          "cabin": "economy",
+          "passengers": 2,
+          "valueIdr": 3843000
+        },
+        "hotel": {
+          "name": "Sheraton Waikiki",
+          "stars": 4,
+          "city": "Honolulu",
+          "area": "Waikiki",
+          "checkIn": "2027-08-12",
+          "checkOut": "2027-08-18",
+          "valueIdr": 4697000
         }
       }
     }

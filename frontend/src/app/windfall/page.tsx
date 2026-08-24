@@ -8,7 +8,7 @@
  *
  *  1. The prototype's stat rail led with "32% recovered with zero discount"
  *     and the carousel with "68% offered / 32% purposely declined". Nothing
- *     measured those. With six seeded carts a percentage is noise, so every
+ *     measured those. With ten seeded carts a percentage is noise, so every
  *     figure here is a count taken from the captured run, or a statement of
  *     mechanism.
  *  2. "IDR 0 margin conceded" survives verbatim, because it is true across
@@ -52,11 +52,11 @@ const TRACE_ROLES = [
   { who: "The traveler", body: "can reply. The message states what changed and why, so a wrong read is answerable." },
 ] as const;
 
-/* Counts, not percentages. Every number below is what the captured six-cart
+/* Counts, not percentages. Every number below is what the captured ten-cart
    run actually produced; `npm run build` does not check that, so if the seed
    changes these change with it. */
 const FACTS = [
-  { fig: "2 of 6", body: "seeded carts are sent a reminder with no offer at all — price was never what stopped them." },
+  { fig: "2 of 10", body: "seeded carts are sent a reminder with no offer at all — price was never what stopped them." },
   { fig: "IDR 0", body: "margin conceded, on every outcome. A rebuilt cart is cheaper because the trip changed, not because anyone discounted." },
   { fig: "1", body: "request cycle. The whole trace — classification, every ladder attempt, the drafted message — returns in one response." },
 ] as const;
@@ -322,7 +322,7 @@ reminder         otherwise`}</pre>
               not already coming.
             </p>
             <p style={{ margin: "16px 0 0", fontSize: 14.5, lineHeight: 1.7, color: "var(--wf-ink-2)" }}>
-              Two of the six seeded carts resolve this way. They get a reminder
+              Two of the ten seeded carts resolve this way. They get a reminder
               and no offer — which is a decision the system defends, not a case
               it failed to handle.
             </p>
@@ -421,7 +421,7 @@ reminder         otherwise`}</pre>
       <Band>
         <div data-reveal style={{ textAlign: "center" }}>
           <h2 className="wf-h2" style={{ maxWidth: "20ch", margin: "0 auto" }}>
-            Six carts. Six decisions. One of them is to do nothing.
+            Ten carts. Ten decisions. Two of them are to do nothing.
           </h2>
           <p
             style={{
@@ -433,8 +433,8 @@ reminder         otherwise`}</pre>
             }}
           >
             The console ships with a captured run, so it works with no keys and
-            no network. Open it and compare the two Premium travelers — same
-            tier, same threshold, opposite outcomes.
+            no network. Open it and compare the two Premium travelers against
+            the seven high-share ones — over budget, and still sent no offer.
           </p>
           <div style={{ marginTop: 30 }}>
             <Link href="/recovery" style={cta}>

@@ -18,56 +18,55 @@
   ],
   "carts": {
     "cart-wf-01": {
-      "flight_idr": 41000000,
-      "hotel_idr": 25000000,
+      "flight_idr": 3078000,
+      "hotel_idr": 3762000,
       "rungs": {
-        "reprice": 65340000
+        "reprice": 6696360,
+        "lateral": 6580080,
+        "tier_down": 6073920
       },
       "alternative_total_idr": null,
-      "note": "Gate closes before the ladder runs; the reprice figure is recorded only so the trace can show the cart was genuinely re-quoted."
+      "note": "Gate opens on both axes. Re-price and the lateral swap fall short; one star down clears tau.  tau=5%; reprice -2.1%, lateral -3.8%, tier_down -11.2%."
     },
     "cart-wf-02": {
-      "flight_idr": 26000000,
-      "hotel_idr": 45000000,
+      "flight_idr": 16992000,
+      "hotel_idr": 20768000,
       "rungs": {
-        "reprice": 69580000,
-        "lateral": 65320000,
-        "tier_down": 59600000
-      },
-      "alternative_total_idr": 54000000,
-      "note": "Premium, tau=15%. reprice -2.0%, lateral -8.0% (found but short), tier_down -16.1% clears. The hotel is 63% of this cart, which is why one star down can move it 16 points."
-    },
-    "cart-wf-03": {
-      "flight_idr": 13000000,
-      "hotel_idr": 18000000,
-      "rungs": {
-        "reprice": 30380000,
-        "lateral": 27590000
-      },
-      "alternative_total_idr": 24800000,
-      "note": "Comfort, tau=10%. reprice -2.0%, lateral -11.0% clears. Ladder stops before any downgrade is proposed -- the outcome the product is least apologetic about."
-    },
-    "cart-wf-04": {
-      "flight_idr": 6400000,
-      "hotel_idr": 4800000,
-      "rungs": {
-        "reprice": 11032000,
-        "lateral": 10864000,
-        "tier_down": 10730000
-      },
-      "alternative_total_idr": 8600000,
-      "note": "Value, tau=5%. Best rung is -4.2%, short of the bar. Thin inventory on the route, so no rebuild is worth showing; falls through to a different trip."
-    },
-    "cart-wf-05": {
-      "flight_idr": 7500000,
-      "hotel_idr": 11000000,
-      "rungs": {
-        "reprice": 18315000,
-        "lateral": 17760000,
-        "tier_down": 17390000
+        "reprice": 36476160,
+        "lateral": 35041280,
+        "tier_down": 33002240
       },
       "alternative_total_idr": null,
-      "note": "Cold start. Ladder runs on the cart-proxy tier (economy + 4-star = Comfort, tau=10%); best rung is -6.0% and nothing clears. No alternative fits either, so the cart is left exactly as it was. This is the 'found something, not worth showing' case."
+      "note": "Gate opens on both axes. Re-price and the lateral swap fall short; one star down clears tau.  tau=10%; reprice -3.4%, lateral -7.2%, tier_down -12.6%."
+    },
+    "cart-wf-03": {
+      "flight_idr": 29016000,
+      "hotel_idr": 35464000,
+      "rungs": {},
+      "alternative_total_idr": null,
+      "note": "Low campaign share. The gate must close on that axis even though the cart runs over usual spend."
+    },
+    "cart-wf-04": {
+      "flight_idr": 4032000,
+      "hotel_idr": 4928000,
+      "rungs": {
+        "reprice": 8798720,
+        "lateral": 8691200,
+        "tier_down": 8592640
+      },
+      "alternative_total_idr": 7678720,
+      "note": "Gate opens, no rung clears tau, so a different trip is proposed instead of a discount.  tau=5%; reprice -1.8%, lateral -3.0%, tier_down -4.1%."
+    },
+    "cart-wf-05": {
+      "flight_idr": 15660000,
+      "hotel_idr": 19140000,
+      "rungs": {
+        "reprice": 33408000,
+        "lateral": 31041600,
+        "tier_down": 30102000
+      },
+      "alternative_total_idr": null,
+      "note": "Gate opens on both axes. The same-star swap clears tau, so the ladder stops before any downgrade.  tau=10%; reprice -4.0%, lateral -10.8%, tier_down -13.5%."
     },
     "cart-wf-06": {
       "flight_idr": 0,
@@ -76,80 +75,153 @@
       "alternative_total_idr": null,
       "error": "carrier_inventory_unavailable",
       "note": "Upstream failure path. The classifier completes; the searcher halts."
+    },
+    "cart-wf-07": {
+      "flight_idr": 2632000,
+      "hotel_idr": 3218000,
+      "rungs": {
+        "reprice": 5733000,
+        "lateral": 5645250,
+        "tier_down": 5341050
+      },
+      "alternative_total_idr": null,
+      "note": "Gate opens on both axes. Re-price and the lateral swap fall short; one star down clears tau.  tau=5%; reprice -2.0%, lateral -3.5%, tier_down -8.7%."
+    },
+    "cart-wf-08": {
+      "flight_idr": 26460000,
+      "hotel_idr": 32340000,
+      "rungs": {},
+      "alternative_total_idr": null,
+      "note": "Low campaign share. The gate must close on that axis even though the cart runs over usual spend."
+    },
+    "cart-wf-09": {
+      "flight_idr": 14994000,
+      "hotel_idr": 18326000,
+      "rungs": {
+        "reprice": 32686920,
+        "lateral": 31654000,
+        "tier_down": 30621080
+      },
+      "alternative_total_idr": 26556040,
+      "note": "Gate opens, no rung clears tau, so a different trip is proposed instead of a discount.  tau=10%; reprice -1.9%, lateral -5.0%, tier_down -8.1%."
+    },
+    "cart-wf-10": {
+      "flight_idr": 3843000,
+      "hotel_idr": 4697000,
+      "rungs": {
+        "reprice": 8369200,
+        "lateral": 8232560,
+        "tier_down": 7668920
+      },
+      "alternative_total_idr": null,
+      "note": "Gate opens on both axes. Re-price and the lateral swap fall short; one star down clears tau.  tau=5%; reprice -2.0%, lateral -3.6%, tier_down -10.2%."
     }
   },
   "hold": {
     "cart-wf-01": {
+      "state": "eligible",
+      "carrier": "ANA",
+      "expires_at": "2026-11-07T21:10:00+07:00"
+    },
+    "cart-wf-02": {
+      "state": "not_eligible",
+      "carrier": "TAP Air"
+    },
+    "cart-wf-03": {
       "state": "not_eligible",
       "carrier": "Emirates"
     },
-    "cart-wf-02": {
-      "state": "eligible",
-      "carrier": "Singapore Airlines",
-      "expires_at": "2027-02-06T21:10:00+07:00"
-    },
-    "cart-wf-03": {
-      "state": "eligible",
-      "carrier": "Garuda Indonesia",
-      "expires_at": "2026-11-08T19:30:00+07:00"
-    },
     "cart-wf-04": {
-      "state": "not_eligible",
+      "state": "simulated",
       "carrier": "IndiGo"
     },
     "cart-wf-05": {
-      "state": "simulated",
-      "carrier": "Vietnam Airlines"
+      "state": "eligible",
+      "carrier": "British Airways",
+      "expires_at": "2027-02-28T19:30:00+07:00"
     },
     "cart-wf-06": {
       "state": "not_eligible",
       "carrier": "China Eastern"
+    },
+    "cart-wf-07": {
+      "state": "not_eligible",
+      "carrier": "ITA Airways"
+    },
+    "cart-wf-08": {
+      "state": "not_eligible",
+      "carrier": "LATAM"
+    },
+    "cart-wf-09": {
+      "state": "not_eligible",
+      "carrier": "Ethiopian"
+    },
+    "cart-wf-10": {
+      "state": "eligible",
+      "carrier": "JAL",
+      "expires_at": "2027-08-11T20:00:00+07:00"
     }
   },
   "alternatives": {
     "cart-wf-04": {
-      "label": "Ho Chi Minh City (CGK - SGN)",
-      "description": "3 malam, hotel bintang 3 di District 1"
+      "label": "Goa (BLR → GOI)",
+      "description": "3 malam, hotel bintang 3 di tepi pantai"
     },
-    "cart-wf-02": {
-      "label": "Osaka (CGK - KIX)",
-      "description": "6 malam, hotel bintang 5 di Umeda"
-    },
-    "cart-wf-03": {
-      "label": "Kuala Lumpur (CGK - KUL)",
-      "description": "3 malam, hotel bintang 4 di Bukit Bintang"
+    "cart-wf-09": {
+      "label": "Zanzibar (LOS → ZNZ)",
+      "description": "5 malam, resor pantai bintang 4"
     }
   },
   "timings_ms": {
     "cart-wf-01": {
-      "classifier": 2180,
-      "searcher": 940,
-      "notifier": 1610
+      "classifier": 1800,
+      "searcher": 3100,
+      "notifier": 1550
     },
     "cart-wf-02": {
-      "classifier": 2460,
-      "searcher": 4120,
-      "notifier": 1880
+      "classifier": 1937,
+      "searcher": 3311,
+      "notifier": 1647
     },
     "cart-wf-03": {
-      "classifier": 2050,
-      "searcher": 3240,
-      "notifier": 1740
+      "classifier": 2074,
+      "searcher": 900,
+      "notifier": 1744
     },
     "cart-wf-04": {
-      "classifier": 1930,
-      "searcher": 4380,
-      "notifier": 1660
+      "classifier": 2211,
+      "searcher": 3733,
+      "notifier": 1841
     },
     "cart-wf-05": {
-      "classifier": 1620,
-      "searcher": 3910,
-      "notifier": 1580
+      "classifier": 2348,
+      "searcher": 3944,
+      "notifier": 1938
     },
     "cart-wf-06": {
-      "classifier": 2240,
-      "searcher": 1180,
-      "notifier": 0
+      "classifier": 2485,
+      "searcher": 1600,
+      "notifier": 2035
+    },
+    "cart-wf-07": {
+      "classifier": 2622,
+      "searcher": 4366,
+      "notifier": 1632
+    },
+    "cart-wf-08": {
+      "classifier": 1859,
+      "searcher": 900,
+      "notifier": 1729
+    },
+    "cart-wf-09": {
+      "classifier": 1996,
+      "searcher": 3388,
+      "notifier": 1826
+    },
+    "cart-wf-10": {
+      "classifier": 2133,
+      "searcher": 3599,
+      "notifier": 1923
     }
   },
   "_timings_note": "Captured wall-clock from a recorded live run, replayed in fixture mode. In live mode these are measured per request. Never synthesised from a hash of the cart id -- a duration the UI presents as real must be real."

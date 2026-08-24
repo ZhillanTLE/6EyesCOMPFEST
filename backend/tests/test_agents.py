@@ -70,7 +70,7 @@ class TestClassifierAuthority(unittest.TestCase):
 
     def test_provenance_is_reported_not_hidden(self):
         """A template must never be mistaken for inference in the trace."""
-        history, row = repository.get("wf-01")
+        history, row = repository.get("wf-03")
         cart = repository.build_cart(row)
         result = classifier_agent.classify(
             history, cart, "Premium", "history",
@@ -81,7 +81,7 @@ class TestClassifierAuthority(unittest.TestCase):
         """Two lines for an intervention, one for a reminder. Padding the
         reminder would imply deliberation that did not happen."""
         rebuild = pipeline.run("wf-02").classification.reasoning
-        reminder = pipeline.run("wf-01").classification.reasoning
+        reminder = pipeline.run("wf-03").classification.reasoning
         self.assertEqual(len(rebuild), 2)
         self.assertEqual(len(reminder), 1)
 
@@ -102,24 +102,24 @@ class TestSearcherAuthority(unittest.TestCase):
         result = pipeline.run("wf-02")
         winner = [a for a in result.decision.attempts if a.cleared]
         self.assertEqual(len(winner), 1)
-        self.assertGreaterEqual(winner[0].delta, config.TAU["Premium"])
+        self.assertGreaterEqual(winner[0].delta, config.TAU["Comfort"])
 
 
 class TestCuratorBoundary(unittest.TestCase):
     def test_receives_a_decided_outcome_and_cannot_change_it(self):
-        result = pipeline.run("wf-03")
+        result = pipeline.run("wf-05")
         draft = notification_curator.curate(
-            repository.build_cart(repository.get("wf-03")[1]),
+            repository.build_cart(repository.get("wf-05")[1]),
             "Bagus Hartono", result.decision, result.hold, "Comfort")
         self.assertIsNotNone(draft.subject)
         # The draft describes; the outcome is unchanged by describing it.
-        self.assertEqual(pipeline.run("wf-03").decision.outcome, result.decision.outcome)
+        self.assertEqual(pipeline.run("wf-05").decision.outcome, result.decision.outcome)
 
     def test_no_emoji_survives_the_cleaner(self):
         self.assertEqual(notification_curator._clean("Halo \U0001F44B Anda"), "Halo  Anda")
 
     def test_provenance_is_reported(self):
-        result = pipeline.run("wf-01")
+        result = pipeline.run("wf-03")
         self.assertTrue(result.notification.written_by.startswith("deterministic"))
 
 

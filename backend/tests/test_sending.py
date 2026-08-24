@@ -38,7 +38,7 @@ class TestSendingBoundary(unittest.TestCase):
 
     def test_suppressed_is_not_reported_as_sent(self):
         os.environ["SEND_ENABLED"] = "false"
-        body = self.c.post("/api/recovery/send", json={"travelerId": "wf-01"}).get_json()
+        body = self.c.post("/api/recovery/send", json={"travelerId": "wf-05"}).get_json()
         self.assertEqual(body["state"], "suppressed")
         self.assertNotEqual(body["state"], "sent")
 
@@ -46,13 +46,13 @@ class TestSendingBoundary(unittest.TestCase):
         """Seeded travelers have invented addresses; delivering to them bounces."""
         os.environ["SEND_ENABLED"] = "true"
         os.environ["DEMO_RECIPIENT"] = ""
-        r = self.c.post("/api/recovery/send", json={"travelerId": "wf-01"})
+        r = self.c.post("/api/recovery/send", json={"travelerId": "wf-03"})
         self.assertEqual(r.status_code, 502)
         self.assertEqual(r.get_json()["state"], "failed")
 
     def test_whatsapp_is_always_declared_preview_only(self):
         os.environ["SEND_ENABLED"] = "false"
-        body = self.c.post("/api/recovery/send", json={"travelerId": "wf-03"}).get_json()
+        body = self.c.post("/api/recovery/send", json={"travelerId": "wf-05"}).get_json()
         self.assertEqual(body["whatsapp"]["state"], "preview_only")
 
     def test_nothing_to_send_on_the_error_path(self):
@@ -66,7 +66,7 @@ class TestSendingBoundary(unittest.TestCase):
         os.environ["SEND_ENABLED"] = "true"
         os.environ["DEMO_RECIPIENT"] = "demo@example.test"
         os.environ["SMTP_HOST"] = ""
-        body = self.c.post("/api/recovery/send", json={"travelerId": "wf-01"}).get_json()
+        body = self.c.post("/api/recovery/send", json={"travelerId": "wf-05"}).get_json()
         # Fails on transport, not on a fixture guard -- delivery was attempted.
         self.assertEqual(body["state"], "failed")
         self.assertIn("SMTP_HOST", body["detail"])

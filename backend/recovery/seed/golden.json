@@ -4,13 +4,63 @@
     {
       "travelerId": "wf-01",
       "cartId": "cart-wf-01",
-      "name": "Prasetyo Wibowo",
+      "name": "Ria Lavenia",
+      "bookings": 3,
+      "tierEstimate": "Value",
+      "tierEstimateLabel": "Value",
+      "isColdStart": false,
+      "campaignShare": 0.46,
+      "route": "HND → SIN",
+      "carrier": "ANA",
+      "cabin": "economy",
+      "passengers": 2,
+      "departDate": "2026-11-08",
+      "returnDate": "2026-11-12",
+      "hotelName": "Fullerton Bay",
+      "hotelStars": 4,
+      "hotelCity": "Singapore",
+      "checkIn": "2026-11-08",
+      "checkOut": "2026-11-11",
+      "abandonedHoursAgo": 1,
+      "cartValueIdr": 6840000,
+      "usualSpendIdr": 6000000,
+      "avgStars": 3.5
+    },
+    {
+      "travelerId": "wf-02",
+      "cartId": "cart-wf-02",
+      "name": "Zhillan Baniaksa",
+      "bookings": 5,
+      "tierEstimate": "Comfort",
+      "tierEstimateLabel": "Comfort",
+      "isColdStart": false,
+      "campaignShare": 0.48,
+      "route": "GRU → LIS",
+      "carrier": "TAP Air",
+      "cabin": "premium_economy",
+      "passengers": 2,
+      "departDate": "2026-12-03",
+      "returnDate": "2026-12-10",
+      "hotelName": "Tivoli Avenida",
+      "hotelStars": 4,
+      "hotelCity": "Lisbon",
+      "checkIn": "2026-12-03",
+      "checkOut": "2026-12-09",
+      "abandonedHoursAgo": 26,
+      "cartValueIdr": 37760000,
+      "usualSpendIdr": 32000000,
+      "avgStars": 4.0
+    },
+    {
+      "travelerId": "wf-03",
+      "cartId": "cart-wf-03",
+      "name": "Nasywa Namira",
       "bookings": 8,
       "tierEstimate": "Premium",
       "tierEstimateLabel": "Premium",
       "isColdStart": false,
       "campaignShare": 0.09,
-      "route": "CGK → LHR",
+      "route": "DXB → LHR",
       "carrier": "Emirates",
       "cabin": "business",
       "passengers": 2,
@@ -22,64 +72,20 @@
       "checkIn": "2027-01-18",
       "checkOut": "2027-01-23",
       "abandonedHoursAgo": 3,
-      "cartValueIdr": 66000000
-    },
-    {
-      "travelerId": "wf-02",
-      "cartId": "cart-wf-02",
-      "name": "Ayu Kartika",
-      "bookings": 7,
-      "tierEstimate": "Premium",
-      "tierEstimateLabel": "Premium",
-      "isColdStart": false,
-      "campaignShare": 0.46,
-      "route": "CGK → HND",
-      "carrier": "Singapore Airlines",
-      "cabin": "economy",
-      "passengers": 2,
-      "departDate": "2027-02-06",
-      "returnDate": "2027-02-13",
-      "hotelName": "Aman Tokyo",
-      "hotelStars": 5,
-      "hotelCity": "Tokyo",
-      "checkIn": "2027-02-06",
-      "checkOut": "2027-02-12",
-      "abandonedHoursAgo": 9,
-      "cartValueIdr": 71000000
-    },
-    {
-      "travelerId": "wf-03",
-      "cartId": "cart-wf-03",
-      "name": "Bagus Hartono",
-      "bookings": 5,
-      "tierEstimate": "Comfort",
-      "tierEstimateLabel": "Comfort",
-      "isColdStart": false,
-      "campaignShare": 0.44,
-      "route": "CGK → SIN",
-      "carrier": "Garuda Indonesia",
-      "cabin": "economy",
-      "passengers": 2,
-      "departDate": "2026-11-08",
-      "returnDate": "2026-11-12",
-      "hotelName": "Fullerton Bay",
-      "hotelStars": 4,
-      "hotelCity": "Singapore",
-      "checkIn": "2026-11-08",
-      "checkOut": "2026-11-11",
-      "abandonedHoursAgo": 26,
-      "cartValueIdr": 31000000
+      "cartValueIdr": 64480000,
+      "usualSpendIdr": 62000000,
+      "avgStars": 5.0
     },
     {
       "travelerId": "wf-04",
       "cartId": "cart-wf-04",
-      "name": "Intan Maharani",
-      "bookings": 4,
+      "name": "Adriano Goran",
+      "bookings": 1,
       "tierEstimate": "Value",
-      "tierEstimateLabel": "Value",
-      "isColdStart": false,
-      "campaignShare": 0.45,
-      "route": "CGK → DXB",
+      "tierEstimateLabel": "Cold-start",
+      "isColdStart": true,
+      "campaignShare": null,
+      "route": "BLR → DXB",
       "carrier": "IndiGo",
       "cabin": "economy",
       "passengers": 1,
@@ -90,61 +96,426 @@
       "hotelCity": "Dubai",
       "checkIn": "2027-02-14",
       "checkOut": "2027-02-16",
-      "abandonedHoursAgo": 52,
-      "cartValueIdr": 11200000
+      "abandonedHoursAgo": 9,
+      "cartValueIdr": 8960000,
+      "usualSpendIdr": null,
+      "avgStars": null
     },
     {
       "travelerId": "wf-05",
       "cartId": "cart-wf-05",
-      "name": "Rizky Firmansyah",
-      "bookings": 1,
+      "name": "Zayyan Ramadzaki",
+      "bookings": 4,
       "tierEstimate": "Comfort",
-      "tierEstimateLabel": "Cold-start",
-      "isColdStart": true,
-      "campaignShare": null,
-      "route": "CGK → SGN",
-      "carrier": "Vietnam Airlines",
-      "cabin": "economy",
+      "tierEstimateLabel": "Comfort",
+      "isColdStart": false,
+      "campaignShare": 0.47,
+      "route": "ACC → LHR",
+      "carrier": "British Airways",
+      "cabin": "premium_economy",
       "passengers": 1,
       "departDate": "2027-03-01",
-      "returnDate": "2027-03-06",
-      "hotelName": "Hotel des Arts Saigon",
+      "returnDate": "2027-03-07",
+      "hotelName": "The Kensington",
       "hotelStars": 4,
-      "hotelCity": "Ho Chi Minh City",
+      "hotelCity": "London",
       "checkIn": "2027-03-01",
-      "checkOut": "2027-03-05",
-      "abandonedHoursAgo": 18,
-      "cartValueIdr": 18500000
+      "checkOut": "2027-03-06",
+      "abandonedHoursAgo": 52,
+      "cartValueIdr": 34800000,
+      "usualSpendIdr": 30000000,
+      "avgStars": 4.0
     },
     {
       "travelerId": "wf-06",
       "cartId": "cart-wf-06",
-      "name": "Dewi Anggraini",
+      "name": "Christiano Hosea",
       "bookings": 6,
       "tierEstimate": "Comfort",
       "tierEstimateLabel": "Comfort",
       "isColdStart": false,
       "campaignShare": 0.31,
-      "route": "CGK → PVG",
+      "route": "PVG → NRT",
       "carrier": "China Eastern",
-      "cabin": "economy",
+      "cabin": "premium_economy",
       "passengers": 2,
       "departDate": "2027-04-09",
       "returnDate": "2027-04-13",
-      "hotelName": "Les Suites Orient",
+      "hotelName": "Hotel Gracery",
       "hotelStars": 4,
-      "hotelCity": "Shanghai",
+      "hotelCity": "Tokyo",
       "checkIn": "2027-04-09",
       "checkOut": "2027-04-12",
+      "abandonedHoursAgo": 5,
+      "cartValueIdr": 29120000,
+      "usualSpendIdr": 26000000,
+      "avgStars": 4.0
+    },
+    {
+      "travelerId": "wf-07",
+      "cartId": "cart-wf-07",
+      "name": "Micguel Katili",
+      "bookings": 2,
+      "tierEstimate": "Value",
+      "tierEstimateLabel": "Value",
+      "isColdStart": false,
+      "campaignShare": 0.45,
+      "route": "FCO → JFK",
+      "carrier": "ITA Airways",
+      "cabin": "economy",
+      "passengers": 1,
+      "departDate": "2027-05-05",
+      "returnDate": "2027-05-12",
+      "hotelName": "The Standard",
+      "hotelStars": 4,
+      "hotelCity": "New York",
+      "checkIn": "2027-05-05",
+      "checkOut": "2027-05-11",
+      "abandonedHoursAgo": 18,
+      "cartValueIdr": 5850000,
+      "usualSpendIdr": 5000000,
+      "avgStars": 3.5
+    },
+    {
+      "travelerId": "wf-08",
+      "cartId": "cart-wf-08",
+      "name": "Salsabilla Hasan",
+      "bookings": 7,
+      "tierEstimate": "Premium",
+      "tierEstimateLabel": "Premium",
+      "isColdStart": false,
+      "campaignShare": 0.11,
+      "route": "SCL → MAD",
+      "carrier": "LATAM",
+      "cabin": "business",
+      "passengers": 2,
+      "departDate": "2027-06-20",
+      "returnDate": "2027-06-28",
+      "hotelName": "Rosewood Villa Magna",
+      "hotelStars": 5,
+      "hotelCity": "Madrid",
+      "checkIn": "2027-06-20",
+      "checkOut": "2027-06-27",
       "abandonedHoursAgo": 2,
-      "cartValueIdr": 24000000
+      "cartValueIdr": 58800000,
+      "usualSpendIdr": 56000000,
+      "avgStars": 5.0
+    },
+    {
+      "travelerId": "wf-09",
+      "cartId": "cart-wf-09",
+      "name": "Darius Sagala",
+      "bookings": 3,
+      "tierEstimate": "Comfort",
+      "tierEstimateLabel": "Comfort",
+      "isColdStart": false,
+      "campaignShare": 0.43,
+      "route": "LOS → ADD",
+      "carrier": "Ethiopian",
+      "cabin": "premium_economy",
+      "passengers": 1,
+      "departDate": "2027-07-02",
+      "returnDate": "2027-07-08",
+      "hotelName": "Skylight Hotel",
+      "hotelStars": 4,
+      "hotelCity": "Addis Ababa",
+      "checkIn": "2027-07-02",
+      "checkOut": "2027-07-07",
+      "abandonedHoursAgo": 73,
+      "cartValueIdr": 33320000,
+      "usualSpendIdr": 28000000,
+      "avgStars": 4.0
+    },
+    {
+      "travelerId": "wf-10",
+      "cartId": "cart-wf-10",
+      "name": "Tania Ju",
+      "bookings": 2,
+      "tierEstimate": "Value",
+      "tierEstimateLabel": "Value",
+      "isColdStart": false,
+      "campaignShare": 0.5,
+      "route": "NRT → HNL",
+      "carrier": "JAL",
+      "cabin": "economy",
+      "passengers": 2,
+      "departDate": "2027-08-12",
+      "returnDate": "2027-08-19",
+      "hotelName": "Sheraton Waikiki",
+      "hotelStars": 4,
+      "hotelCity": "Honolulu",
+      "checkIn": "2027-08-12",
+      "checkOut": "2027-08-18",
+      "abandonedHoursAgo": 34,
+      "cartValueIdr": 8540000,
+      "usualSpendIdr": 7000000,
+      "avgStars": 3.5
     }
   ],
   "results": {
     "wf-01": {
       "cartId": "cart-wf-01",
       "travelerId": "wf-01",
-      "travelerName": "Prasetyo Wibowo",
+      "travelerName": "Ria Lavenia",
+      "classification": {
+        "tier": "Value",
+        "tierPrior": "Value",
+        "threshold": 0.05,
+        "reasoning": [
+          "Campaign share 46,0% -- price-sensitive",
+          "Cart 14,0% above usual spend"
+        ],
+        "overrideReason": null,
+        "isColdStart": false,
+        "tierSource": "history",
+        "reasonedBy": "deterministic (replaying a captured run)"
+      },
+      "gate": {
+        "opened": true,
+        "campaignShare": 0.46,
+        "budgetGap": 0.14,
+        "priceSensitive": true,
+        "overBudget": true,
+        "reason": "Campaign share 46% is at or above the 25% bar and the cart sits 14% above usual spend. Both signals agree, so a rebuild is worth attempting.",
+        "coldStartException": false
+      },
+      "decision": {
+        "outcome": "rebuild",
+        "clearedRung": "tier_down",
+        "attempts": [
+          {
+            "index": 1,
+            "rung": "reprice",
+            "label": "Same cart, re-priced",
+            "available": true,
+            "totalIdr": 6696360,
+            "delta": 0.021,
+            "cleared": false,
+            "hotel": {
+              "name": "Fullerton Bay",
+              "stars": 4,
+              "city": "Singapore",
+              "area": "Marina Bay",
+              "checkIn": "2026-11-08",
+              "checkOut": "2026-11-11",
+              "priceIdr": 3762000
+            },
+            "note": null
+          },
+          {
+            "index": 2,
+            "rung": "lateral",
+            "label": "Same-star hotel swap, same area and dates",
+            "available": true,
+            "totalIdr": 6580080,
+            "delta": 0.038,
+            "cleared": false,
+            "hotel": {
+              "name": "Pan Pacific Singapore",
+              "stars": 4,
+              "city": "Singapore",
+              "area": "Marina Bay",
+              "checkIn": "2026-11-08",
+              "checkOut": "2026-11-11",
+              "priceIdr": 0
+            },
+            "note": null
+          },
+          {
+            "index": 3,
+            "rung": "tier_down",
+            "label": "Hotel down one star, same area and dates",
+            "available": true,
+            "totalIdr": 6073920,
+            "delta": 0.112,
+            "cleared": true,
+            "hotel": {
+              "name": "Hotel Boss",
+              "stars": 3,
+              "city": "Singapore",
+              "area": "Marina Bay",
+              "checkIn": "2026-11-08",
+              "checkOut": "2026-11-11",
+              "priceIdr": 0
+            },
+            "note": null
+          }
+        ],
+        "finalTotalIdr": 6073920,
+        "savingIdr": 766080,
+        "savingPct": 0.112,
+        "marginConcededIdr": 0,
+        "rationale": "Attempt 3 (hotel down one star, same area and dates) cleared the tier threshold at 11,2%. The flight, dates and area are unchanged."
+      },
+      "hold": {
+        "state": "eligible",
+        "expiresAt": "2026-11-07T21:10:00+07:00",
+        "carrier": "ANA",
+        "note": "Harga penerbangan dijamin maskapai. Hotel tetap dihitung ulang saat pembayaran."
+      },
+      "notification": {
+        "subject": "Perjalanan Singapore Anda, disusun ulang agar pas",
+        "bodyParagraphs": [
+          "Halo Ria, perjalanan Anda ke Singapore masih tersimpan - HND - SIN bersama ANA, dengan rencana menginap di Fullerton Bay (4 bintang) di Marina Bay.",
+          "Kami menyusun ulang satu bagian saja agar totalnya IDR 766.080 lebih ringan: penerbangan, tanggal, dan kawasannya tetap sama, yang berubah hanya penginapannya menjadi Hotel Boss (3 bintang).",
+          "Harga penerbangan dijamin maskapai sampai 2026-11-07T21:10:00+07:00. Tarif hotel masih dihitung ulang saat pembayaran.",
+          "Jika yang semula tetap yang Anda inginkan, versi itu masih utuh dan bisa Anda pilih kembali kapan saja."
+        ],
+        "whatsapp": "Halo Ria, perjalanan Singapore Anda masih tersimpan. Kami menemukan cara menjaganya nyaris sama persis dengan total IDR 766.080 lebih ringan - tanggal dan kawasan tetap, penginapannya berubah ke Hotel Boss (3 bintang).",
+        "ctaLabel": "Lihat perjalanan yang disusun ulang",
+        "channelNote": null,
+        "writtenBy": "deterministic (replaying a captured run)"
+      },
+      "timings": [
+        {
+          "stage": "classifier",
+          "durationMs": 1800
+        },
+        {
+          "stage": "searcher",
+          "durationMs": 3100
+        },
+        {
+          "stage": "notifier",
+          "durationMs": 1550
+        }
+      ],
+      "originalTotalIdr": 6840000,
+      "source": "fixture"
+    },
+    "wf-02": {
+      "cartId": "cart-wf-02",
+      "travelerId": "wf-02",
+      "travelerName": "Zhillan Baniaksa",
+      "classification": {
+        "tier": "Comfort",
+        "tierPrior": "Comfort",
+        "threshold": 0.1,
+        "reasoning": [
+          "Campaign share 48,0% -- price-sensitive",
+          "Cart 18,0% above usual spend"
+        ],
+        "overrideReason": null,
+        "isColdStart": false,
+        "tierSource": "history",
+        "reasonedBy": "deterministic (replaying a captured run)"
+      },
+      "gate": {
+        "opened": true,
+        "campaignShare": 0.48,
+        "budgetGap": 0.18,
+        "priceSensitive": true,
+        "overBudget": true,
+        "reason": "Campaign share 48% is at or above the 25% bar and the cart sits 18% above usual spend. Both signals agree, so a rebuild is worth attempting.",
+        "coldStartException": false
+      },
+      "decision": {
+        "outcome": "rebuild",
+        "clearedRung": "tier_down",
+        "attempts": [
+          {
+            "index": 1,
+            "rung": "reprice",
+            "label": "Same cart, re-priced",
+            "available": true,
+            "totalIdr": 36476160,
+            "delta": 0.034,
+            "cleared": false,
+            "hotel": {
+              "name": "Tivoli Avenida",
+              "stars": 4,
+              "city": "Lisbon",
+              "area": "Avenida da Liberdade",
+              "checkIn": "2026-12-03",
+              "checkOut": "2026-12-09",
+              "priceIdr": 20768000
+            },
+            "note": null
+          },
+          {
+            "index": 2,
+            "rung": "lateral",
+            "label": "Same-star hotel swap, same area and dates",
+            "available": true,
+            "totalIdr": 35041280,
+            "delta": 0.072,
+            "cleared": false,
+            "hotel": {
+              "name": "Hotel Britania Art Deco",
+              "stars": 4,
+              "city": "Lisbon",
+              "area": "Avenida da Liberdade",
+              "checkIn": "2026-12-03",
+              "checkOut": "2026-12-09",
+              "priceIdr": 0
+            },
+            "note": null
+          },
+          {
+            "index": 3,
+            "rung": "tier_down",
+            "label": "Hotel down one star, same area and dates",
+            "available": true,
+            "totalIdr": 33002240,
+            "delta": 0.126,
+            "cleared": true,
+            "hotel": {
+              "name": "Lisboa Central Park",
+              "stars": 3,
+              "city": "Lisbon",
+              "area": "Avenida da Liberdade",
+              "checkIn": "2026-12-03",
+              "checkOut": "2026-12-09",
+              "priceIdr": 0
+            },
+            "note": null
+          }
+        ],
+        "finalTotalIdr": 33002240,
+        "savingIdr": 4757760,
+        "savingPct": 0.126,
+        "marginConcededIdr": 0,
+        "rationale": "Attempt 3 (hotel down one star, same area and dates) cleared the tier threshold at 12,6%. The flight, dates and area are unchanged."
+      },
+      "hold": {
+        "state": "not_eligible",
+        "expiresAt": null,
+        "carrier": "TAP Air",
+        "note": null
+      },
+      "notification": {
+        "subject": "Perjalanan Lisbon Anda, disusun ulang agar pas",
+        "bodyParagraphs": [
+          "Halo Zhillan, perjalanan Anda ke Lisbon masih tersimpan - GRU - LIS bersama TAP Air, dengan rencana menginap di Tivoli Avenida (4 bintang) di Avenida da Liberdade.",
+          "Kami menyusun ulang satu bagian saja agar totalnya IDR 4.757.760 lebih ringan: penerbangan, tanggal, dan kawasannya tetap sama, yang berubah hanya penginapannya menjadi Lisboa Central Park (3 bintang).",
+          "Jika yang semula tetap yang Anda inginkan, versi itu masih utuh dan bisa Anda pilih kembali kapan saja."
+        ],
+        "whatsapp": "Halo Zhillan, perjalanan Lisbon Anda masih tersimpan. Kami menemukan cara menjaganya nyaris sama persis dengan total IDR 4.757.760 lebih ringan - tanggal dan kawasan tetap, penginapannya berubah ke Lisboa Central Park (3 bintang).",
+        "ctaLabel": "Lihat perjalanan yang disusun ulang",
+        "channelNote": null,
+        "writtenBy": "deterministic (replaying a captured run)"
+      },
+      "timings": [
+        {
+          "stage": "classifier",
+          "durationMs": 1937
+        },
+        {
+          "stage": "searcher",
+          "durationMs": 3311
+        },
+        {
+          "stage": "notifier",
+          "durationMs": 1647
+        }
+      ],
+      "originalTotalIdr": 37760000,
+      "source": "fixture"
+    },
+    "wf-03": {
+      "cartId": "cart-wf-03",
+      "travelerId": "wf-03",
+      "travelerName": "Nasywa Namira",
       "classification": {
         "tier": "Premium",
         "tierPrior": "Premium",
@@ -160,21 +531,21 @@
       "gate": {
         "opened": false,
         "campaignShare": 0.09,
-        "budgetGap": 0.06451612903225806,
+        "budgetGap": 0.04,
         "priceSensitive": false,
         "overBudget": true,
-        "reason": "The cart sits 6% above usual spend, but campaign share 9% is below the 25% bar -- this traveler historically pays full price. Price is not the barrier.",
+        "reason": "The cart sits 4% above usual spend, but campaign share 9% is below the 25% bar -- this traveler historically pays full price. Price is not the barrier.",
         "coldStartException": false
       },
       "decision": {
         "outcome": "reminder",
         "clearedRung": null,
         "attempts": [],
-        "finalTotalIdr": 66000000,
+        "finalTotalIdr": 64480000,
         "savingIdr": 0,
         "savingPct": null,
         "marginConcededIdr": 0,
-        "rationale": "The cart sits 6% above usual spend, but campaign share 9% is below the 25% bar -- this traveler historically pays full price. Price is not the barrier."
+        "rationale": "The cart sits 4% above usual spend, but campaign share 9% is below the 25% bar -- this traveler historically pays full price. Price is not the barrier."
       },
       "hold": {
         "state": "not_eligible",
@@ -185,11 +556,11 @@
       "notification": {
         "subject": "Perjalanan London Anda masih tersimpan",
         "bodyParagraphs": [
-          "Halo Prasetyo, perjalanan Anda ke London masih kami simpan - CGK - LHR bersama Emirates, dengan menginap di The Savoy (5 bintang) di Covent Garden.",
+          "Halo Nasywa, perjalanan Anda ke London masih kami simpan - DXB - LHR bersama Emirates, dengan menginap di The Savoy (5 bintang) di Covent Garden.",
           "Semuanya persis seperti yang Anda tinggalkan. Kami tidak mengubah harga maupun detailnya, dan tidak ada penawaran yang perlu Anda kejar. Kapan pun waktunya terasa tepat, pemesanan bisa dilanjutkan dalam beberapa ketukan.",
           "Jika rencana Anda berubah, tidak ada yang perlu dilakukan."
         ],
-        "whatsapp": "Halo Prasetyo, perjalanan Anda ke London masih tersimpan - CGK - LHR bersama Emirates, menginap di The Savoy. Tidak ada yang berubah dan tidak ada yang perlu diklaim; siap kapan pun Anda siap.",
+        "whatsapp": "Halo Nasywa, perjalanan Anda ke London masih tersimpan - DXB - LHR bersama Emirates, menginap di The Savoy. Tidak ada yang berubah dan tidak ada yang perlu diklaim; siap kapan pun Anda siap.",
         "ctaLabel": "Lihat kembali perjalanan Anda",
         "channelNote": "Tidak ada diskon diberikan. Margin mitra utuh.",
         "writtenBy": "deterministic (replaying a captured run)"
@@ -197,66 +568,66 @@
       "timings": [
         {
           "stage": "classifier",
-          "durationMs": 2180
+          "durationMs": 2074
         },
         {
           "stage": "searcher",
-          "durationMs": 940
+          "durationMs": 900
         },
         {
           "stage": "notifier",
-          "durationMs": 1610
+          "durationMs": 1744
         }
       ],
-      "originalTotalIdr": 66000000,
+      "originalTotalIdr": 64480000,
       "source": "fixture"
     },
-    "wf-02": {
-      "cartId": "cart-wf-02",
-      "travelerId": "wf-02",
-      "travelerName": "Ayu Kartika",
+    "wf-04": {
+      "cartId": "cart-wf-04",
+      "travelerId": "wf-04",
+      "travelerName": "Adriano Goran",
       "classification": {
-        "tier": "Premium",
-        "tierPrior": "Premium",
-        "threshold": 0.15,
+        "tier": "Value",
+        "tierPrior": "Value",
+        "threshold": 0.05,
         "reasoning": [
-          "Campaign share 46,0% -- price-sensitive",
-          "Cart 22,4% above usual spend"
+          "No booking history; tier estimated from the cart itself (economy cabin, 3-star stay)",
+          "Campaign share unmeasurable, so the ladder runs on the proxy tier -- a rebuild concedes no margin"
         ],
         "overrideReason": null,
-        "isColdStart": false,
-        "tierSource": "history",
+        "isColdStart": true,
+        "tierSource": "cart_proxy",
         "reasonedBy": "deterministic (replaying a captured run)"
       },
       "gate": {
         "opened": true,
-        "campaignShare": 0.46,
-        "budgetGap": 0.22413793103448276,
-        "priceSensitive": true,
+        "campaignShare": null,
+        "budgetGap": 0.20999994733259159,
+        "priceSensitive": null,
         "overBudget": true,
-        "reason": "Campaign share 46% is at or above the 25% bar and the cart sits 22% above usual spend. Both signals agree, so a rebuild is worth attempting.",
-        "coldStartException": false
+        "reason": "No booking history, so price sensitivity is unmeasurable. The ladder still runs on the cart-derived tier because a rebuild concedes no margin; no discount is available on this path.",
+        "coldStartException": true
       },
       "decision": {
-        "outcome": "rebuild",
-        "clearedRung": "tier_down",
+        "outcome": "alternative",
+        "clearedRung": null,
         "attempts": [
           {
             "index": 1,
             "rung": "reprice",
             "label": "Same cart, re-priced",
             "available": true,
-            "totalIdr": 69580000,
-            "delta": 0.02,
+            "totalIdr": 8798720,
+            "delta": 0.018,
             "cleared": false,
             "hotel": {
-              "name": "Aman Tokyo",
-              "stars": 5,
-              "city": "Tokyo",
-              "area": "Otemachi",
-              "checkIn": "2027-02-06",
-              "checkOut": "2027-02-12",
-              "priceIdr": 45000000
+              "name": "Rove Downtown",
+              "stars": 3,
+              "city": "Dubai",
+              "area": "Downtown",
+              "checkIn": "2027-02-14",
+              "checkOut": "2027-02-16",
+              "priceIdr": 4928000
             },
             "note": null
           },
@@ -265,16 +636,16 @@
             "rung": "lateral",
             "label": "Same-star hotel swap, same area and dates",
             "available": true,
-            "totalIdr": 65320000,
-            "delta": 0.08,
+            "totalIdr": 8691200,
+            "delta": 0.03,
             "cleared": false,
             "hotel": {
-              "name": "The Okura Tokyo",
-              "stars": 5,
-              "city": "Tokyo",
-              "area": "Otemachi",
-              "checkIn": "2027-02-06",
-              "checkOut": "2027-02-12",
+              "name": "Hyatt Place Dubai Wasl District",
+              "stars": 3,
+              "city": "Dubai",
+              "area": "Downtown",
+              "checkIn": "2027-02-14",
+              "checkOut": "2027-02-16",
               "priceIdr": 0
             },
             "note": null
@@ -284,74 +655,73 @@
             "rung": "tier_down",
             "label": "Hotel down one star, same area and dates",
             "available": true,
-            "totalIdr": 59600000,
-            "delta": 0.16056338028169015,
-            "cleared": true,
+            "totalIdr": 8592640,
+            "delta": 0.041,
+            "cleared": false,
             "hotel": {
-              "name": "Hotel Ryumeikan Tokyo",
-              "stars": 4,
-              "city": "Tokyo",
-              "area": "Otemachi",
-              "checkIn": "2027-02-06",
-              "checkOut": "2027-02-12",
+              "name": "Premier Inn Dubai Al Jaddaf",
+              "stars": 2,
+              "city": "Dubai",
+              "area": "Downtown",
+              "checkIn": "2027-02-14",
+              "checkOut": "2027-02-16",
               "priceIdr": 0
             },
             "note": null
           }
         ],
-        "finalTotalIdr": 59600000,
-        "savingIdr": 11400000,
-        "savingPct": 0.16056338028169015,
+        "finalTotalIdr": 7678720,
+        "savingIdr": 1281280,
+        "savingPct": 0.143,
         "marginConcededIdr": 0,
-        "rationale": "Attempt 3 (hotel down one star, same area and dates) cleared the tier threshold at 16,1%. The flight, dates and area are unchanged."
+        "rationale": "No rebuild of the original trip cleared the tier threshold. The best rung saved only 4,1%. Rather than discount below margin, a different trip within the same budget is proposed."
       },
       "hold": {
-        "state": "eligible",
-        "expiresAt": "2027-02-06T21:10:00+07:00",
-        "carrier": "Singapore Airlines",
-        "note": "Harga penerbangan dijamin maskapai. Hotel tetap dihitung ulang saat pembayaran."
+        "state": "simulated",
+        "expiresAt": null,
+        "carrier": "IndiGo",
+        "note": "Simulasi pre-authorization - bukan jaminan maskapai."
       },
       "notification": {
-        "subject": "Perjalanan Tokyo Anda, disusun ulang agar pas",
+        "subject": "Dubai belum pas - tapi Goa (BLR → GOI) mungkin iya",
         "bodyParagraphs": [
-          "Halo Ayu, perjalanan Anda ke Tokyo masih tersimpan - CGK - HND bersama Singapore Airlines, dengan rencana menginap di Aman Tokyo (5 bintang) di Otemachi.",
-          "Kami menyusun ulang satu bagian saja agar totalnya IDR 11.400.000 lebih ringan: penerbangan, tanggal, dan kawasannya tetap sama, yang berubah hanya penginapannya menjadi Hotel Ryumeikan Tokyo (4 bintang).",
-          "Harga penerbangan dijamin maskapai sampai 2027-02-06T21:10:00+07:00. Tarif hotel masih dihitung ulang saat pembayaran.",
-          "Jika yang semula tetap yang Anda inginkan, versi itu masih utuh dan bisa Anda pilih kembali kapan saja."
+          "Halo Adriano, Anda sempat melihat perjalanan ke Dubai - BLR - DXB bersama IndiGo. Kami sudah mencoba menyusunnya ulang, tetapi tidak ada versi yang menurut kami benar-benar sepadan untuk Anda.",
+          "Daripada memaksakannya, ini satu gagasan lain untuk rentang tanggal yang sama: Goa (BLR → GOI), 3 malam, hotel bintang 3 di tepi pantai, dengan total IDR 7.678.720. Ini perjalanan yang berbeda, bukan versi turunan dari yang tadi.",
+          "Masih ingin ke Dubai? Tidak masalah - keranjang Anda yang semula tetap tersimpan."
         ],
-        "whatsapp": "Halo Ayu, perjalanan Tokyo Anda masih tersimpan. Kami menemukan cara menjaganya nyaris sama persis dengan total IDR 11.400.000 lebih ringan - tanggal dan kawasan tetap, penginapannya berubah ke Hotel Ryumeikan Tokyo (4 bintang).",
-        "ctaLabel": "Lihat perjalanan yang disusun ulang",
+        "whatsapp": "Halo Adriano, kami belum menemukan versi perjalanan Dubai yang terasa sepadan untuk Anda. Untuk tanggal yang sama ada Goa (BLR → GOI) - 3 malam, hotel bintang 3 di tepi pantai. Keranjang semula tetap tersimpan.",
+        "ctaLabel": "Lihat perjalanan ke Goa (BLR → GOI)",
         "channelNote": null,
         "writtenBy": "deterministic (replaying a captured run)"
       },
       "timings": [
         {
           "stage": "classifier",
-          "durationMs": 2460
+          "durationMs": 2211
         },
         {
           "stage": "searcher",
-          "durationMs": 4120
+          "durationMs": 3733
         },
         {
           "stage": "notifier",
-          "durationMs": 1880
+          "durationMs": 1841
         }
       ],
-      "originalTotalIdr": 71000000,
+      "originalTotalIdr": 8960000,
       "source": "fixture"
     },
-    "wf-03": {
-      "cartId": "cart-wf-03",
-      "travelerId": "wf-03",
-      "travelerName": "Bagus Hartono",
+    "wf-05": {
+      "cartId": "cart-wf-05",
+      "travelerId": "wf-05",
+      "travelerName": "Zayyan Ramadzaki",
       "classification": {
         "tier": "Comfort",
         "tierPrior": "Comfort",
         "threshold": 0.1,
         "reasoning": [
-          "Campaign share 44,0% -- price-sensitive",
-          "Cart 19,2% above usual spend"
+          "Campaign share 47,0% -- price-sensitive",
+          "Cart 16,0% above usual spend"
         ],
         "overrideReason": null,
         "isColdStart": false,
@@ -360,11 +730,11 @@
       },
       "gate": {
         "opened": true,
-        "campaignShare": 0.44,
-        "budgetGap": 0.19230769230769232,
+        "campaignShare": 0.47,
+        "budgetGap": 0.16,
         "priceSensitive": true,
         "overBudget": true,
-        "reason": "Campaign share 44% is at or above the 25% bar and the cart sits 19% above usual spend. Both signals agree, so a rebuild is worth attempting.",
+        "reason": "Campaign share 47% is at or above the 25% bar and the cart sits 16% above usual spend. Both signals agree, so a rebuild is worth attempting.",
         "coldStartException": false
       },
       "decision": {
@@ -376,17 +746,17 @@
             "rung": "reprice",
             "label": "Same cart, re-priced",
             "available": true,
-            "totalIdr": 30380000,
-            "delta": 0.02,
+            "totalIdr": 33408000,
+            "delta": 0.04,
             "cleared": false,
             "hotel": {
-              "name": "Fullerton Bay",
+              "name": "The Kensington",
               "stars": 4,
-              "city": "Singapore",
-              "area": "Marina Bay",
-              "checkIn": "2026-11-08",
-              "checkOut": "2026-11-11",
-              "priceIdr": 18000000
+              "city": "London",
+              "area": "Covent Garden",
+              "checkIn": "2027-03-01",
+              "checkOut": "2027-03-06",
+              "priceIdr": 19140000
             },
             "note": null
           },
@@ -395,42 +765,42 @@
             "rung": "lateral",
             "label": "Same-star hotel swap, same area and dates",
             "available": true,
-            "totalIdr": 27590000,
-            "delta": 0.11,
+            "totalIdr": 31041600,
+            "delta": 0.108,
             "cleared": true,
             "hotel": {
-              "name": "Marina Bay Sands",
+              "name": "The Montague on the Gardens",
               "stars": 4,
-              "city": "Singapore",
-              "area": "Marina Bay",
-              "checkIn": "2026-11-08",
-              "checkOut": "2026-11-11",
+              "city": "London",
+              "area": "Covent Garden",
+              "checkIn": "2027-03-01",
+              "checkOut": "2027-03-06",
               "priceIdr": 0
             },
             "note": null
           }
         ],
-        "finalTotalIdr": 27590000,
-        "savingIdr": 3410000,
-        "savingPct": 0.11,
+        "finalTotalIdr": 31041600,
+        "savingIdr": 3758400,
+        "savingPct": 0.108,
         "marginConcededIdr": 0,
-        "rationale": "Attempt 2 (same-star hotel swap, same area and dates) cleared the tier threshold at 11,0%. The flight, dates and area are unchanged."
+        "rationale": "Attempt 2 (same-star hotel swap, same area and dates) cleared the tier threshold at 10,8%. The flight, dates and area are unchanged."
       },
       "hold": {
         "state": "eligible",
-        "expiresAt": "2026-11-08T19:30:00+07:00",
-        "carrier": "Garuda Indonesia",
+        "expiresAt": "2027-02-28T19:30:00+07:00",
+        "carrier": "British Airways",
         "note": "Harga penerbangan dijamin maskapai. Hotel tetap dihitung ulang saat pembayaran."
       },
       "notification": {
-        "subject": "Perjalanan Singapore Anda, dengan pilihan menginap yang lebih ringan",
+        "subject": "Perjalanan London Anda, dengan pilihan menginap yang lebih ringan",
         "bodyParagraphs": [
-          "Halo Bagus, perjalanan Anda ke Singapore masih tersimpan - CGK - SIN bersama Garuda Indonesia.",
-          "Kami menemukan pilihan menginap lain di kawasan dan tanggal yang sama, dengan kelas bintang yang sama seperti pilihan Anda: Marina Bay Sands (4 bintang). Totalnya IDR 3.410.000 lebih ringan, dan tidak ada satu pun bagian perjalanan yang diturunkan kelasnya.",
-          "Harga penerbangan dijamin maskapai sampai 2026-11-08T19:30:00+07:00. Tarif hotel masih dihitung ulang saat pembayaran.",
+          "Halo Zayyan, perjalanan Anda ke London masih tersimpan - ACC - LHR bersama British Airways.",
+          "Kami menemukan pilihan menginap lain di kawasan dan tanggal yang sama, dengan kelas bintang yang sama seperti pilihan Anda: The Montague on the Gardens (4 bintang). Totalnya IDR 3.758.400 lebih ringan, dan tidak ada satu pun bagian perjalanan yang diturunkan kelasnya.",
+          "Harga penerbangan dijamin maskapai sampai 2027-02-28T19:30:00+07:00. Tarif hotel masih dihitung ulang saat pembayaran.",
           "Kalau Anda lebih suka pilihan semula, pilihan itu juga masih ada dan tidak kami ubah sama sekali."
         ],
-        "whatsapp": "Halo Bagus, untuk perjalanan Singapore Anda kami menemukan penginapan kelas bintang yang sama di kawasan dan tanggal yang sama, IDR 3.410.000 lebih ringan. Tidak ada yang diturunkan kelasnya.",
+        "whatsapp": "Halo Zayyan, untuk perjalanan London Anda kami menemukan penginapan kelas bintang yang sama di kawasan dan tanggal yang sama, IDR 3.758.400 lebih ringan. Tidak ada yang diturunkan kelasnya.",
         "ctaLabel": "Lihat pilihan yang kami temukan",
         "channelNote": null,
         "writtenBy": "deterministic (replaying a captured run)"
@@ -438,289 +808,31 @@
       "timings": [
         {
           "stage": "classifier",
-          "durationMs": 2050
+          "durationMs": 2348
         },
         {
           "stage": "searcher",
-          "durationMs": 3240
+          "durationMs": 3944
         },
         {
           "stage": "notifier",
-          "durationMs": 1740
+          "durationMs": 1938
         }
       ],
-      "originalTotalIdr": 31000000,
-      "source": "fixture"
-    },
-    "wf-04": {
-      "cartId": "cart-wf-04",
-      "travelerId": "wf-04",
-      "travelerName": "Intan Maharani",
-      "classification": {
-        "tier": "Value",
-        "tierPrior": "Value",
-        "threshold": 0.05,
-        "reasoning": [
-          "Campaign share 45,0% -- price-sensitive",
-          "Cart 24,4% above usual spend"
-        ],
-        "overrideReason": null,
-        "isColdStart": false,
-        "tierSource": "history",
-        "reasonedBy": "deterministic (replaying a captured run)"
-      },
-      "gate": {
-        "opened": true,
-        "campaignShare": 0.45,
-        "budgetGap": 0.24444444444444444,
-        "priceSensitive": true,
-        "overBudget": true,
-        "reason": "Campaign share 45% is at or above the 25% bar and the cart sits 24% above usual spend. Both signals agree, so a rebuild is worth attempting.",
-        "coldStartException": false
-      },
-      "decision": {
-        "outcome": "alternative",
-        "clearedRung": null,
-        "attempts": [
-          {
-            "index": 1,
-            "rung": "reprice",
-            "label": "Same cart, re-priced",
-            "available": true,
-            "totalIdr": 11032000,
-            "delta": 0.015,
-            "cleared": false,
-            "hotel": {
-              "name": "Rove Downtown",
-              "stars": 3,
-              "city": "Dubai",
-              "area": "Downtown",
-              "checkIn": "2027-02-14",
-              "checkOut": "2027-02-16",
-              "priceIdr": 4800000
-            },
-            "note": null
-          },
-          {
-            "index": 2,
-            "rung": "lateral",
-            "label": "Same-star hotel swap, same area and dates",
-            "available": true,
-            "totalIdr": 10864000,
-            "delta": 0.03,
-            "cleared": false,
-            "hotel": {
-              "name": "Hyatt Place Dubai",
-              "stars": 3,
-              "city": "Dubai",
-              "area": "Downtown",
-              "checkIn": "2027-02-14",
-              "checkOut": "2027-02-16",
-              "priceIdr": 0
-            },
-            "note": null
-          },
-          {
-            "index": 3,
-            "rung": "tier_down",
-            "label": "Hotel down one star, same area and dates",
-            "available": true,
-            "totalIdr": 10730000,
-            "delta": 0.04196428571428571,
-            "cleared": false,
-            "hotel": {
-              "name": "Premier Inn Dubai",
-              "stars": 2,
-              "city": "Dubai",
-              "area": "Downtown",
-              "checkIn": "2027-02-14",
-              "checkOut": "2027-02-16",
-              "priceIdr": 0
-            },
-            "note": null
-          }
-        ],
-        "finalTotalIdr": 8600000,
-        "savingIdr": 2600000,
-        "savingPct": 0.23214285714285715,
-        "marginConcededIdr": 0,
-        "rationale": "No rebuild of the original trip cleared the tier threshold. The best rung saved only 4,2%. Rather than discount below margin, a different trip within the same budget is proposed."
-      },
-      "hold": {
-        "state": "not_eligible",
-        "expiresAt": null,
-        "carrier": "IndiGo",
-        "note": null
-      },
-      "notification": {
-        "subject": "Dubai belum pas - tapi Ho Chi Minh City (CGK - SGN) mungkin iya",
-        "bodyParagraphs": [
-          "Halo Intan, Anda sempat melihat perjalanan ke Dubai - CGK - DXB bersama IndiGo. Kami sudah mencoba menyusunnya ulang, tetapi tidak ada versi yang menurut kami benar-benar sepadan untuk Anda.",
-          "Daripada memaksakannya, ini satu gagasan lain untuk rentang tanggal yang sama: Ho Chi Minh City (CGK - SGN), 3 malam, hotel bintang 3 di District 1, dengan total IDR 8.600.000. Ini perjalanan yang berbeda, bukan versi turunan dari yang tadi.",
-          "Masih ingin ke Dubai? Tidak masalah - keranjang Anda yang semula tetap tersimpan."
-        ],
-        "whatsapp": "Halo Intan, kami belum menemukan versi perjalanan Dubai yang terasa sepadan untuk Anda. Untuk tanggal yang sama ada Ho Chi Minh City (CGK - SGN) - 3 malam, hotel bintang 3 di District 1. Keranjang semula tetap tersimpan.",
-        "ctaLabel": "Lihat perjalanan ke Ho Chi Minh City (CGK - SGN)",
-        "channelNote": null,
-        "writtenBy": "deterministic (replaying a captured run)"
-      },
-      "timings": [
-        {
-          "stage": "classifier",
-          "durationMs": 1930
-        },
-        {
-          "stage": "searcher",
-          "durationMs": 4380
-        },
-        {
-          "stage": "notifier",
-          "durationMs": 1660
-        }
-      ],
-      "originalTotalIdr": 11200000,
-      "source": "fixture"
-    },
-    "wf-05": {
-      "cartId": "cart-wf-05",
-      "travelerId": "wf-05",
-      "travelerName": "Rizky Firmansyah",
-      "classification": {
-        "tier": "Comfort",
-        "tierPrior": "Comfort",
-        "threshold": 0.1,
-        "reasoning": [
-          "No booking history; tier estimated from the cart itself (economy cabin, 4-star stay)",
-          "Campaign share unmeasurable, so the ladder runs on the proxy tier -- a rebuild concedes no margin"
-        ],
-        "overrideReason": null,
-        "isColdStart": true,
-        "tierSource": "cart_proxy",
-        "reasonedBy": "deterministic (replaying a captured run)"
-      },
-      "gate": {
-        "opened": true,
-        "campaignShare": null,
-        "budgetGap": 0.23333333333333334,
-        "priceSensitive": null,
-        "overBudget": true,
-        "reason": "No booking history, so price sensitivity is unmeasurable. The ladder still runs on the cart-derived tier because a rebuild concedes no margin; no discount is available on this path.",
-        "coldStartException": true
-      },
-      "decision": {
-        "outcome": "reminder",
-        "clearedRung": null,
-        "attempts": [
-          {
-            "index": 1,
-            "rung": "reprice",
-            "label": "Same cart, re-priced",
-            "available": true,
-            "totalIdr": 18315000,
-            "delta": 0.01,
-            "cleared": false,
-            "hotel": {
-              "name": "Hotel des Arts Saigon",
-              "stars": 4,
-              "city": "Ho Chi Minh City",
-              "area": "District 3",
-              "checkIn": "2027-03-01",
-              "checkOut": "2027-03-05",
-              "priceIdr": 11000000
-            },
-            "note": null
-          },
-          {
-            "index": 2,
-            "rung": "lateral",
-            "label": "Same-star hotel swap, same area and dates",
-            "available": true,
-            "totalIdr": 17760000,
-            "delta": 0.04,
-            "cleared": false,
-            "hotel": {
-              "name": "Villa Song Saigon",
-              "stars": 4,
-              "city": "Ho Chi Minh City",
-              "area": "District 3",
-              "checkIn": "2027-03-01",
-              "checkOut": "2027-03-05",
-              "priceIdr": 0
-            },
-            "note": null
-          },
-          {
-            "index": 3,
-            "rung": "tier_down",
-            "label": "Hotel down one star, same area and dates",
-            "available": true,
-            "totalIdr": 17390000,
-            "delta": 0.06,
-            "cleared": false,
-            "hotel": {
-              "name": "Alagon Central",
-              "stars": 3,
-              "city": "Ho Chi Minh City",
-              "area": "District 3",
-              "checkIn": "2027-03-01",
-              "checkOut": "2027-03-05",
-              "priceIdr": 0
-            },
-            "note": null
-          }
-        ],
-        "finalTotalIdr": 18500000,
-        "savingIdr": 0,
-        "savingPct": null,
-        "marginConcededIdr": 0,
-        "rationale": "The best rung saved only 6,0%, short of the threshold, and no alternative trip fits. The cart is left exactly as it was."
-      },
-      "hold": {
-        "state": "simulated",
-        "expiresAt": null,
-        "carrier": "Vietnam Airlines",
-        "note": "Simulasi pre-authorization - bukan jaminan maskapai."
-      },
-      "notification": {
-        "subject": "Perjalanan Ho Chi Minh City Anda masih tersimpan",
-        "bodyParagraphs": [
-          "Halo Rizky, perjalanan Anda ke Ho Chi Minh City masih kami simpan - CGK - SGN bersama Vietnam Airlines, dengan menginap di Hotel des Arts Saigon (4 bintang) di District 3.",
-          "Semuanya persis seperti yang Anda tinggalkan. Kami tidak mengubah harga maupun detailnya, dan tidak ada penawaran yang perlu Anda kejar. Kapan pun waktunya terasa tepat, pemesanan bisa dilanjutkan dalam beberapa ketukan.",
-          "Jika rencana Anda berubah, tidak ada yang perlu dilakukan."
-        ],
-        "whatsapp": "Halo Rizky, perjalanan Anda ke Ho Chi Minh City masih tersimpan - CGK - SGN bersama Vietnam Airlines, menginap di Hotel des Arts Saigon. Tidak ada yang berubah dan tidak ada yang perlu diklaim; siap kapan pun Anda siap.",
-        "ctaLabel": "Lihat kembali perjalanan Anda",
-        "channelNote": "Tidak ada diskon diberikan. Margin mitra utuh.",
-        "writtenBy": "deterministic (replaying a captured run)"
-      },
-      "timings": [
-        {
-          "stage": "classifier",
-          "durationMs": 1620
-        },
-        {
-          "stage": "searcher",
-          "durationMs": 3910
-        },
-        {
-          "stage": "notifier",
-          "durationMs": 1580
-        }
-      ],
-      "originalTotalIdr": 18500000,
+      "originalTotalIdr": 34800000,
       "source": "fixture"
     },
     "wf-06": {
       "cartId": "cart-wf-06",
       "travelerId": "wf-06",
-      "travelerName": "Dewi Anggraini",
+      "travelerName": "Christiano Hosea",
       "classification": {
         "tier": "Comfort",
         "tierPrior": "Comfort",
         "threshold": 0.1,
         "reasoning": [
           "Campaign share 31,0% -- price-sensitive",
-          "Cart 14,3% above usual spend"
+          "Cart 12,0% above usual spend"
         ],
         "overrideReason": null,
         "isColdStart": false,
@@ -730,10 +842,10 @@
       "gate": {
         "opened": true,
         "campaignShare": 0.31,
-        "budgetGap": 0.14285714285714285,
+        "budgetGap": 0.12,
         "priceSensitive": true,
         "overBudget": true,
-        "reason": "Campaign share 31% is at or above the 25% bar and the cart sits 14% above usual spend. Both signals agree, so a rebuild is worth attempting.",
+        "reason": "Campaign share 31% is at or above the 25% bar and the cart sits 12% above usual spend. Both signals agree, so a rebuild is worth attempting.",
         "coldStartException": false
       },
       "decision": {
@@ -756,14 +868,472 @@
       "timings": [
         {
           "stage": "classifier",
-          "durationMs": 2240
+          "durationMs": 2485
         },
         {
           "stage": "searcher",
-          "durationMs": 1180
+          "durationMs": 1600
         }
       ],
-      "originalTotalIdr": 24000000,
+      "originalTotalIdr": 29120000,
+      "source": "fixture"
+    },
+    "wf-07": {
+      "cartId": "cart-wf-07",
+      "travelerId": "wf-07",
+      "travelerName": "Micguel Katili",
+      "classification": {
+        "tier": "Value",
+        "tierPrior": "Value",
+        "threshold": 0.05,
+        "reasoning": [
+          "Campaign share 45,0% -- price-sensitive",
+          "Cart 17,0% above usual spend"
+        ],
+        "overrideReason": null,
+        "isColdStart": false,
+        "tierSource": "history",
+        "reasonedBy": "deterministic (replaying a captured run)"
+      },
+      "gate": {
+        "opened": true,
+        "campaignShare": 0.45,
+        "budgetGap": 0.17,
+        "priceSensitive": true,
+        "overBudget": true,
+        "reason": "Campaign share 45% is at or above the 25% bar and the cart sits 17% above usual spend. Both signals agree, so a rebuild is worth attempting.",
+        "coldStartException": false
+      },
+      "decision": {
+        "outcome": "rebuild",
+        "clearedRung": "tier_down",
+        "attempts": [
+          {
+            "index": 1,
+            "rung": "reprice",
+            "label": "Same cart, re-priced",
+            "available": true,
+            "totalIdr": 5733000,
+            "delta": 0.02,
+            "cleared": false,
+            "hotel": {
+              "name": "The Standard",
+              "stars": 4,
+              "city": "New York",
+              "area": "Meatpacking",
+              "checkIn": "2027-05-05",
+              "checkOut": "2027-05-11",
+              "priceIdr": 3218000
+            },
+            "note": null
+          },
+          {
+            "index": 2,
+            "rung": "lateral",
+            "label": "Same-star hotel swap, same area and dates",
+            "available": true,
+            "totalIdr": 5645250,
+            "delta": 0.035,
+            "cleared": false,
+            "hotel": {
+              "name": "Arlo SoHo",
+              "stars": 4,
+              "city": "New York",
+              "area": "Meatpacking",
+              "checkIn": "2027-05-05",
+              "checkOut": "2027-05-11",
+              "priceIdr": 0
+            },
+            "note": null
+          },
+          {
+            "index": 3,
+            "rung": "tier_down",
+            "label": "Hotel down one star, same area and dates",
+            "available": true,
+            "totalIdr": 5341050,
+            "delta": 0.087,
+            "cleared": true,
+            "hotel": {
+              "name": "Pod 51",
+              "stars": 3,
+              "city": "New York",
+              "area": "Meatpacking",
+              "checkIn": "2027-05-05",
+              "checkOut": "2027-05-11",
+              "priceIdr": 0
+            },
+            "note": null
+          }
+        ],
+        "finalTotalIdr": 5341050,
+        "savingIdr": 508950,
+        "savingPct": 0.087,
+        "marginConcededIdr": 0,
+        "rationale": "Attempt 3 (hotel down one star, same area and dates) cleared the tier threshold at 8,7%. The flight, dates and area are unchanged."
+      },
+      "hold": {
+        "state": "not_eligible",
+        "expiresAt": null,
+        "carrier": "ITA Airways",
+        "note": null
+      },
+      "notification": {
+        "subject": "Perjalanan New York Anda, disusun ulang agar pas",
+        "bodyParagraphs": [
+          "Halo Micguel, perjalanan Anda ke New York masih tersimpan - FCO - JFK bersama ITA Airways, dengan rencana menginap di The Standard (4 bintang) di Meatpacking.",
+          "Kami menyusun ulang satu bagian saja agar totalnya IDR 508.950 lebih ringan: penerbangan, tanggal, dan kawasannya tetap sama, yang berubah hanya penginapannya menjadi Pod 51 (3 bintang).",
+          "Jika yang semula tetap yang Anda inginkan, versi itu masih utuh dan bisa Anda pilih kembali kapan saja."
+        ],
+        "whatsapp": "Halo Micguel, perjalanan New York Anda masih tersimpan. Kami menemukan cara menjaganya nyaris sama persis dengan total IDR 508.950 lebih ringan - tanggal dan kawasan tetap, penginapannya berubah ke Pod 51 (3 bintang).",
+        "ctaLabel": "Lihat perjalanan yang disusun ulang",
+        "channelNote": null,
+        "writtenBy": "deterministic (replaying a captured run)"
+      },
+      "timings": [
+        {
+          "stage": "classifier",
+          "durationMs": 2622
+        },
+        {
+          "stage": "searcher",
+          "durationMs": 4366
+        },
+        {
+          "stage": "notifier",
+          "durationMs": 1632
+        }
+      ],
+      "originalTotalIdr": 5850000,
+      "source": "fixture"
+    },
+    "wf-08": {
+      "cartId": "cart-wf-08",
+      "travelerId": "wf-08",
+      "travelerName": "Salsabilla Hasan",
+      "classification": {
+        "tier": "Premium",
+        "tierPrior": "Premium",
+        "threshold": 0.15,
+        "reasoning": [
+          "Campaign share 11,0% -- historically pays full price"
+        ],
+        "overrideReason": null,
+        "isColdStart": false,
+        "tierSource": "history",
+        "reasonedBy": "deterministic (replaying a captured run)"
+      },
+      "gate": {
+        "opened": false,
+        "campaignShare": 0.11,
+        "budgetGap": 0.05,
+        "priceSensitive": false,
+        "overBudget": true,
+        "reason": "The cart sits 5% above usual spend, but campaign share 11% is below the 25% bar -- this traveler historically pays full price. Price is not the barrier.",
+        "coldStartException": false
+      },
+      "decision": {
+        "outcome": "reminder",
+        "clearedRung": null,
+        "attempts": [],
+        "finalTotalIdr": 58800000,
+        "savingIdr": 0,
+        "savingPct": null,
+        "marginConcededIdr": 0,
+        "rationale": "The cart sits 5% above usual spend, but campaign share 11% is below the 25% bar -- this traveler historically pays full price. Price is not the barrier."
+      },
+      "hold": {
+        "state": "not_eligible",
+        "expiresAt": null,
+        "carrier": "LATAM",
+        "note": null
+      },
+      "notification": {
+        "subject": "Perjalanan Madrid Anda masih tersimpan",
+        "bodyParagraphs": [
+          "Halo Salsabilla, perjalanan Anda ke Madrid masih kami simpan - SCL - MAD bersama LATAM, dengan menginap di Rosewood Villa Magna (5 bintang) di Salamanca.",
+          "Semuanya persis seperti yang Anda tinggalkan. Kami tidak mengubah harga maupun detailnya, dan tidak ada penawaran yang perlu Anda kejar. Kapan pun waktunya terasa tepat, pemesanan bisa dilanjutkan dalam beberapa ketukan.",
+          "Jika rencana Anda berubah, tidak ada yang perlu dilakukan."
+        ],
+        "whatsapp": "Halo Salsabilla, perjalanan Anda ke Madrid masih tersimpan - SCL - MAD bersama LATAM, menginap di Rosewood Villa Magna. Tidak ada yang berubah dan tidak ada yang perlu diklaim; siap kapan pun Anda siap.",
+        "ctaLabel": "Lihat kembali perjalanan Anda",
+        "channelNote": "Tidak ada diskon diberikan. Margin mitra utuh.",
+        "writtenBy": "deterministic (replaying a captured run)"
+      },
+      "timings": [
+        {
+          "stage": "classifier",
+          "durationMs": 1859
+        },
+        {
+          "stage": "searcher",
+          "durationMs": 900
+        },
+        {
+          "stage": "notifier",
+          "durationMs": 1729
+        }
+      ],
+      "originalTotalIdr": 58800000,
+      "source": "fixture"
+    },
+    "wf-09": {
+      "cartId": "cart-wf-09",
+      "travelerId": "wf-09",
+      "travelerName": "Darius Sagala",
+      "classification": {
+        "tier": "Comfort",
+        "tierPrior": "Comfort",
+        "threshold": 0.1,
+        "reasoning": [
+          "Campaign share 43,0% -- price-sensitive",
+          "Cart 19,0% above usual spend"
+        ],
+        "overrideReason": null,
+        "isColdStart": false,
+        "tierSource": "history",
+        "reasonedBy": "deterministic (replaying a captured run)"
+      },
+      "gate": {
+        "opened": true,
+        "campaignShare": 0.43,
+        "budgetGap": 0.19,
+        "priceSensitive": true,
+        "overBudget": true,
+        "reason": "Campaign share 43% is at or above the 25% bar and the cart sits 19% above usual spend. Both signals agree, so a rebuild is worth attempting.",
+        "coldStartException": false
+      },
+      "decision": {
+        "outcome": "alternative",
+        "clearedRung": null,
+        "attempts": [
+          {
+            "index": 1,
+            "rung": "reprice",
+            "label": "Same cart, re-priced",
+            "available": true,
+            "totalIdr": 32686920,
+            "delta": 0.019,
+            "cleared": false,
+            "hotel": {
+              "name": "Skylight Hotel",
+              "stars": 4,
+              "city": "Addis Ababa",
+              "area": "Bole",
+              "checkIn": "2027-07-02",
+              "checkOut": "2027-07-07",
+              "priceIdr": 18326000
+            },
+            "note": null
+          },
+          {
+            "index": 2,
+            "rung": "lateral",
+            "label": "Same-star hotel swap, same area and dates",
+            "available": true,
+            "totalIdr": 31654000,
+            "delta": 0.05,
+            "cleared": false,
+            "hotel": {
+              "name": "Golden Tulip Addis Ababa",
+              "stars": 4,
+              "city": "Addis Ababa",
+              "area": "Bole",
+              "checkIn": "2027-07-02",
+              "checkOut": "2027-07-07",
+              "priceIdr": 0
+            },
+            "note": null
+          },
+          {
+            "index": 3,
+            "rung": "tier_down",
+            "label": "Hotel down one star, same area and dates",
+            "available": true,
+            "totalIdr": 30621080,
+            "delta": 0.081,
+            "cleared": false,
+            "hotel": {
+              "name": "Ramada Addis",
+              "stars": 3,
+              "city": "Addis Ababa",
+              "area": "Bole",
+              "checkIn": "2027-07-02",
+              "checkOut": "2027-07-07",
+              "priceIdr": 0
+            },
+            "note": null
+          }
+        ],
+        "finalTotalIdr": 26556040,
+        "savingIdr": 6763960,
+        "savingPct": 0.203,
+        "marginConcededIdr": 0,
+        "rationale": "No rebuild of the original trip cleared the tier threshold. The best rung saved only 8,1%. Rather than discount below margin, a different trip within the same budget is proposed."
+      },
+      "hold": {
+        "state": "not_eligible",
+        "expiresAt": null,
+        "carrier": "Ethiopian",
+        "note": null
+      },
+      "notification": {
+        "subject": "Addis Ababa belum pas - tapi Zanzibar (LOS → ZNZ) mungkin iya",
+        "bodyParagraphs": [
+          "Halo Darius, Anda sempat melihat perjalanan ke Addis Ababa - LOS - ADD bersama Ethiopian. Kami sudah mencoba menyusunnya ulang, tetapi tidak ada versi yang menurut kami benar-benar sepadan untuk Anda.",
+          "Daripada memaksakannya, ini satu gagasan lain untuk rentang tanggal yang sama: Zanzibar (LOS → ZNZ), 5 malam, resor pantai bintang 4, dengan total IDR 26.556.040. Ini perjalanan yang berbeda, bukan versi turunan dari yang tadi.",
+          "Masih ingin ke Addis Ababa? Tidak masalah - keranjang Anda yang semula tetap tersimpan."
+        ],
+        "whatsapp": "Halo Darius, kami belum menemukan versi perjalanan Addis Ababa yang terasa sepadan untuk Anda. Untuk tanggal yang sama ada Zanzibar (LOS → ZNZ) - 5 malam, resor pantai bintang 4. Keranjang semula tetap tersimpan.",
+        "ctaLabel": "Lihat perjalanan ke Zanzibar (LOS → ZNZ)",
+        "channelNote": null,
+        "writtenBy": "deterministic (replaying a captured run)"
+      },
+      "timings": [
+        {
+          "stage": "classifier",
+          "durationMs": 1996
+        },
+        {
+          "stage": "searcher",
+          "durationMs": 3388
+        },
+        {
+          "stage": "notifier",
+          "durationMs": 1826
+        }
+      ],
+      "originalTotalIdr": 33320000,
+      "source": "fixture"
+    },
+    "wf-10": {
+      "cartId": "cart-wf-10",
+      "travelerId": "wf-10",
+      "travelerName": "Tania Ju",
+      "classification": {
+        "tier": "Value",
+        "tierPrior": "Value",
+        "threshold": 0.05,
+        "reasoning": [
+          "Campaign share 50,0% -- price-sensitive",
+          "Cart 22,0% above usual spend"
+        ],
+        "overrideReason": null,
+        "isColdStart": false,
+        "tierSource": "history",
+        "reasonedBy": "deterministic (replaying a captured run)"
+      },
+      "gate": {
+        "opened": true,
+        "campaignShare": 0.5,
+        "budgetGap": 0.22,
+        "priceSensitive": true,
+        "overBudget": true,
+        "reason": "Campaign share 50% is at or above the 25% bar and the cart sits 22% above usual spend. Both signals agree, so a rebuild is worth attempting.",
+        "coldStartException": false
+      },
+      "decision": {
+        "outcome": "rebuild",
+        "clearedRung": "tier_down",
+        "attempts": [
+          {
+            "index": 1,
+            "rung": "reprice",
+            "label": "Same cart, re-priced",
+            "available": true,
+            "totalIdr": 8369200,
+            "delta": 0.02,
+            "cleared": false,
+            "hotel": {
+              "name": "Sheraton Waikiki",
+              "stars": 4,
+              "city": "Honolulu",
+              "area": "Waikiki",
+              "checkIn": "2027-08-12",
+              "checkOut": "2027-08-18",
+              "priceIdr": 4697000
+            },
+            "note": null
+          },
+          {
+            "index": 2,
+            "rung": "lateral",
+            "label": "Same-star hotel swap, same area and dates",
+            "available": true,
+            "totalIdr": 8232560,
+            "delta": 0.036,
+            "cleared": false,
+            "hotel": {
+              "name": "Outrigger Reef Waikiki Beach",
+              "stars": 4,
+              "city": "Honolulu",
+              "area": "Waikiki",
+              "checkIn": "2027-08-12",
+              "checkOut": "2027-08-18",
+              "priceIdr": 0
+            },
+            "note": null
+          },
+          {
+            "index": 3,
+            "rung": "tier_down",
+            "label": "Hotel down one star, same area and dates",
+            "available": true,
+            "totalIdr": 7668920,
+            "delta": 0.102,
+            "cleared": true,
+            "hotel": {
+              "name": "Aqua Palms Waikiki",
+              "stars": 3,
+              "city": "Honolulu",
+              "area": "Waikiki",
+              "checkIn": "2027-08-12",
+              "checkOut": "2027-08-18",
+              "priceIdr": 0
+            },
+            "note": null
+          }
+        ],
+        "finalTotalIdr": 7668920,
+        "savingIdr": 871080,
+        "savingPct": 0.102,
+        "marginConcededIdr": 0,
+        "rationale": "Attempt 3 (hotel down one star, same area and dates) cleared the tier threshold at 10,2%. The flight, dates and area are unchanged."
+      },
+      "hold": {
+        "state": "eligible",
+        "expiresAt": "2027-08-11T20:00:00+07:00",
+        "carrier": "JAL",
+        "note": "Harga penerbangan dijamin maskapai. Hotel tetap dihitung ulang saat pembayaran."
+      },
+      "notification": {
+        "subject": "Perjalanan Honolulu Anda, disusun ulang agar pas",
+        "bodyParagraphs": [
+          "Halo Tania, perjalanan Anda ke Honolulu masih tersimpan - NRT - HNL bersama JAL, dengan rencana menginap di Sheraton Waikiki (4 bintang) di Waikiki.",
+          "Kami menyusun ulang satu bagian saja agar totalnya IDR 871.080 lebih ringan: penerbangan, tanggal, dan kawasannya tetap sama, yang berubah hanya penginapannya menjadi Aqua Palms Waikiki (3 bintang).",
+          "Harga penerbangan dijamin maskapai sampai 2027-08-11T20:00:00+07:00. Tarif hotel masih dihitung ulang saat pembayaran.",
+          "Jika yang semula tetap yang Anda inginkan, versi itu masih utuh dan bisa Anda pilih kembali kapan saja."
+        ],
+        "whatsapp": "Halo Tania, perjalanan Honolulu Anda masih tersimpan. Kami menemukan cara menjaganya nyaris sama persis dengan total IDR 871.080 lebih ringan - tanggal dan kawasan tetap, penginapannya berubah ke Aqua Palms Waikiki (3 bintang).",
+        "ctaLabel": "Lihat perjalanan yang disusun ulang",
+        "channelNote": null,
+        "writtenBy": "deterministic (replaying a captured run)"
+      },
+      "timings": [
+        {
+          "stage": "classifier",
+          "durationMs": 2133
+        },
+        {
+          "stage": "searcher",
+          "durationMs": 3599
+        },
+        {
+          "stage": "notifier",
+          "durationMs": 1923
+        }
+      ],
+      "originalTotalIdr": 8540000,
       "source": "fixture"
     }
   }

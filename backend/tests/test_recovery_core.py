@@ -252,10 +252,13 @@ class TestSeed(unittest.TestCase):
         with open(SEED_PATH, encoding="utf-8") as fh:
             self.seed = json.load(fh)
 
-    def test_six_travelers_one_per_path(self):
+    def test_every_decision_path_is_covered_by_the_seed(self):
+        """The seed is the design bundle's ten travelers. Several share an
+        outcome, so what matters is coverage of the paths, not one cart each."""
         targets = [t["calibrationTarget"] for t in self.seed["travelers"]]
-        self.assertEqual(len(targets), 6)
-        self.assertEqual(len(set(targets)), 6)
+        self.assertEqual(len(targets), 10)
+        self.assertEqual(set(targets),
+                         {"rebuild", "lateral", "reminder", "alternative", "error"})
 
     def test_cold_start_campaign_share_is_null_not_fabricated(self):
         """A traveler with no history cannot have a measured discount share.

@@ -52,7 +52,7 @@ class TestReadTravelerHistory(unittest.TestCase):
         """Null must survive the tool boundary. Estimating it here would fake
         the price-sensitivity signal at exactly the point a future live data
         source would be swapped in."""
-        row = mcp_tools.call_tool("read_traveler_history", traveler_id="wf-05")
+        row = mcp_tools.call_tool("read_traveler_history", traveler_id="wf-04")
         self.assertTrue(row["isColdStart"])
         self.assertIsNone(row["campaignShare"])
 
@@ -64,7 +64,7 @@ class TestReadTravelerHistory(unittest.TestCase):
 class TestCheckHoldEligibility(unittest.TestCase):
     def test_eligible_carrier_yields_a_real_expiry(self):
         row = mcp_tools.call_tool("check_hold_eligibility",
-                                  cart_id="cart-wf-02", carrier="Singapore Airlines")
+                                  cart_id="cart-wf-01", carrier="ANA")
         self.assertEqual(row["state"], "eligible")
         self.assertTrue(row["expiresAt"])
         self.assertTrue(row["mayRenderDeadline"])
@@ -72,7 +72,7 @@ class TestCheckHoldEligibility(unittest.TestCase):
     def test_ineligible_carrier_yields_no_deadline_at_all(self):
         """No fake countdowns. Not a shorter one, not a softened one -- none."""
         row = mcp_tools.call_tool("check_hold_eligibility",
-                                  cart_id="cart-wf-01", carrier="Emirates")
+                                  cart_id="cart-wf-03", carrier="Emirates")
         self.assertEqual(row["state"], "not_eligible")
         self.assertIsNone(row["expiresAt"])
         self.assertFalse(row["mayRenderDeadline"])
@@ -81,7 +81,7 @@ class TestCheckHoldEligibility(unittest.TestCase):
         """The hotel has no equivalent primitive and re-prices at conversion.
         Callers must be able to say so rather than implying a frozen cart."""
         row = mcp_tools.call_tool("check_hold_eligibility",
-                                  cart_id="cart-wf-03", carrier="Garuda Indonesia")
+                                  cart_id="cart-wf-05", carrier="British Airways")
         self.assertEqual(row["scope"], "flight_only")
 
 
@@ -123,12 +123,12 @@ class TestContractHoldsAcrossTheProcessBoundary(unittest.TestCase):
     def test_cold_start_null_survives_the_boundary(self):
         """Null is the easiest thing for a serialisation layer to quietly turn
         into 0, which would fabricate the price-sensitivity signal."""
-        a, b = self._both_paths("read_traveler_history", traveler_id="wf-05")
+        a, b = self._both_paths("read_traveler_history", traveler_id="wf-04")
         self.assertIsNone(a["campaignShare"])
         self.assertIsNone(b["campaignShare"])
 
     def test_hold_eligibility_agrees(self):
         a, b = self._both_paths("check_hold_eligibility",
-                                cart_id="cart-wf-02", carrier="Singapore Airlines")
+                                cart_id="cart-wf-01", carrier="ANA")
         self.assertEqual(a, b)
         self.assertEqual(a["state"], "eligible")

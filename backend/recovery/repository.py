@@ -148,5 +148,11 @@ def queue() -> List[Dict]:
             "checkOut": h["checkOut"],
             "abandonedHoursAgo": c["abandonedHoursAgo"],
             "cartValueIdr": cart_value(row),
+            # Browse-card signals. Read-only history, already loaded above --
+            # null on cold start rather than zero, for the same reason
+            # campaignShare is: a traveler with no history has no average, and
+            # a fabricated one would read as a real measurement.
+            "usualSpendIdr": None if cold else history.usual_spend,
+            "avgStars": None if cold else row.get("avgStars"),
         })
     return out

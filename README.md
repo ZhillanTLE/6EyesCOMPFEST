@@ -61,20 +61,27 @@ to them would bounce. The intended traveler is recorded in an
 
 ## What you are looking at
 
-Six abandoned carts, each constructed to exercise one decision path.
+Ten abandoned carts, taken from the design bundle's own seed table. Between
+them they exercise every decision path.
 
 | Traveler | Tier | Campaign share | Outcome |
 |---|---|---|---|
-| Prasetyo Wibowo | Premium | 9% | **reminder** — no discount |
-| Ayu Kartika | Premium | 46% | **rebuild** — hotel down one star |
-| Bagus Hartono | Comfort | 44% | **lateral** — same-star swap |
-| Intan Maharani | Value | 45% | **alternative** — different trip |
-| Rizky Firmansyah | cold start | — | **reminder** — nothing worth showing |
-| Dewi Anggraini | Comfort | 31% | **error** — carrier inventory down |
+| Ria Lavenia | Value | 46% | **rebuild** — hotel down one star |
+| Zhillan Baniaksa | Comfort | 48% | **rebuild** — hotel down one star |
+| Nasywa Namira | Premium | 9% | **reminder** — no discount |
+| Adriano Goran | cold start | — | **alternative** — different trip |
+| Zayyan Ramadzaki | Comfort | 47% | **lateral** — same-star swap |
+| Christiano Hosea | Comfort | 31% | **error** — carrier inventory down |
+| Micguel Katili | Value | 45% | **rebuild** — hotel down one star |
+| Salsabilla Hasan | Premium | 11% | **reminder** — no discount |
+| Darius Sagala | Comfort | 43% | **alternative** — different trip |
+| Tania Ju | Value | 50% | **rebuild** — hotel down one star |
 
-**Compare the first two.** Same tier, same threshold, opposite outcomes —
-purely because one waits for promotions and the other does not. That contrast
-is the product.
+**Compare the two Premium travelers with the seven high-share ones.** Nasywa
+Namira and Salsabilla Hasan sit at 9% and 11%: their carts run over their usual
+spend, and they are still sent nothing but a reminder, because price is not what
+stopped them. Every traveler at or above 25% gets the ladder. One axis is never
+enough on its own — that is the product.
 
 Every card shows a *provisional* tier estimate, labelled "Likely:". It is a
 deterministic percentile lookup, not the Classifier's verdict, and the two can
@@ -144,7 +151,7 @@ Flask, so there is no CORS and no backend hostname in the client bundle.
 | `GET` | `/api/recovery/health` | mode and cart count |
 
 Running the pipeline never sends anything. Delivery needs its own explicit
-approval click — clicking through six travelers to read their traces must not
+approval click — clicking through ten travelers to read their traces must not
 put six emails in anyone's inbox.
 
 ---
@@ -163,7 +170,7 @@ cd frontend && npm install && npm run dev
 ### Checks
 
 ```bash
-python -m unittest discover -s backend/tests -t .   # 83 tests, stdlib only
+python -m unittest discover -s backend/tests -t .   # 117 tests, stdlib only
 python scripts/scope_check.py                       # competition scope gate
 cd frontend && npm run build
 ```
