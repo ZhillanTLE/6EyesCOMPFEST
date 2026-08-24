@@ -19,7 +19,7 @@ import logging
 
 from flask import Blueprint, jsonify, request
 
-from backend.recovery import pipeline, providers, repository, sender
+from backend.recovery import llm, pipeline, providers, repository, sender
 
 logger = logging.getLogger(__name__)
 
@@ -60,6 +60,11 @@ def run():
 
     try:
         result = pipeline.run(traveler_id)
+    except llm.LiveInferenceUnavailable as exc:
+        # 503, not 500: the service is correctly refusing to run rather than
+        # failing unexpectedly, and the message says exactly how to fix it.
+        logger.error("[recovery] %s", exc)
+        return jsonify({"error": str(exc), "reason": "live_inference_unconfigured"}), 503
     except KeyError:
         return jsonify({"error": "Unknown traveler: {}".format(traveler_id)}), 404
     except Exception as exc:  # pragma: no cover - surfaced, never swallowed
@@ -94,6 +99,9 @@ def send():
 
     try:
         result = pipeline.run(traveler_id)
+    except llm.LiveInferenceUnavailable as exc:
+        logger.error("[recovery] %s", exc)
+        return jsonify({"error": str(exc), "reason": "live_inference_unconfigured"}), 503
     except KeyError:
         return jsonify({"error": "Unknown traveler: {}".format(traveler_id)}), 404
 
@@ -123,9 +131,15 @@ def send():
 
 @bp.get("/health")
 def health():
+    # The container healthcheck only needs 200/!200, but a human curling this
+    # should be able to see that a live deployment has no key before clicking
+    # a cart and getting a 503.
+    configured = not (llm.live_mode() and not llm.has_key())
     return jsonify({
         "status": "healthy",
         "service": "windfall-recovery",
         "mode": "fixture" if providers.use_fixtures() else "live",
+        "inference": llm.why_unavailable(),
+        "inferenceConfigured": configured,
         "carts": len(repository.all_travelers()),
     }), 200

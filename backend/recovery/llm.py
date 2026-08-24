@@ -6,11 +6,24 @@ JSON or None, and None is always survivable: each caller has a deterministic
 fallback, so a missing key, an exhausted quota or a malformed response degrades
 the demo's prose rather than breaking the pipeline.
 
-The three ways a call does not happen, all deliberate:
+Two ways a call does not happen, both deliberate and both declared:
 
   MOCK_LLM=true          plumbing work that does not need inference
   WINDFALL_FIXTURES=1    replaying a captured run; fixtures replace inference
-  no GEMINI_API_KEY      a clean clone still produces a working demo
+
+A third way is NOT allowed. Live mode -- no fixtures, no mock -- with no
+GEMINI_API_KEY is a misconfiguration, not a mode. It raises
+LiveInferenceUnavailable at the start of the run rather than quietly
+producing template prose that reads exactly like model output in a
+screenshot. "The demo still works without a key" is precisely the
+reassurance that would let an unconfigured judging machine present canned
+text as inference, so it is refused loudly instead.
+
+Within a configured live run, a single failed call (quota, transport,
+malformed JSON) still degrades to the deterministic draft, because losing
+one stage's prose is better than losing the trace. That degradation is
+never silent: the stage carries `reasonedBy` / `writtenBy` of
+"deterministic (...)" and the console renders a FALLBACK badge beside it.
 
 Prompts are module-level constants and the temperature is zero. The penyisihan
 rules require static parameters at demonstration time, so nothing here tunes,
@@ -38,14 +51,44 @@ def mocked() -> bool:
     return os.environ.get("MOCK_LLM", "").strip().lower() in ("1", "true", "yes")
 
 
-def available() -> bool:
-    """Whether a real inference call should be attempted at all."""
+class LiveInferenceUnavailable(RuntimeError):
+    """Live mode was requested but no GEMINI_API_KEY is configured."""
+
+
+def has_key() -> bool:
+    return bool(os.environ.get("GEMINI_API_KEY", "").strip())
+
+
+def live_mode() -> bool:
+    """True when the run is meant to reach a real model: no mock, no fixtures."""
     if mocked():
         return False
     from . import providers
-    if providers.use_fixtures():
+    return not providers.use_fixtures()
+
+
+def require_configured() -> None:
+    """
+    Fail a live run that cannot actually reach the model.
+
+    Called once at the top of pipeline.run, so the failure arrives before any
+    stage has produced prose, and the caller gets one clear message instead of
+    a trace whose reasoning is templates wearing the model's label.
+    """
+    if live_mode() and not has_key():
+        raise LiveInferenceUnavailable(
+            "Live inference is enabled but GEMINI_API_KEY is not set, so the "
+            "Classifier and Notification Curator cannot run. Set GEMINI_API_KEY "
+            "in backend/.env to use the live path, or set WINDFALL_FIXTURES=1 to "
+            "replay the captured run, or MOCK_LLM=true for plumbing work. "
+            "Refusing to substitute template text for model output.")
+
+
+def available() -> bool:
+    """Whether a real inference call should be attempted at all."""
+    if not live_mode():
         return False
-    return bool(os.environ.get("GEMINI_API_KEY", "").strip())
+    return has_key()
 
 
 def why_unavailable() -> str:
@@ -55,7 +98,10 @@ def why_unavailable() -> str:
     from . import providers
     if providers.use_fixtures():
         return "replaying a captured run"
-    if not os.environ.get("GEMINI_API_KEY", "").strip():
+    if not has_key():
+        # Unreachable through pipeline.run, which refuses this case up front.
+        # Kept so a direct caller still gets an honest label rather than a
+        # blank one.
         return "no GEMINI_API_KEY configured"
     return "available"
 

@@ -35,13 +35,51 @@ class TestInferenceGating(unittest.TestCase):
         self.assertFalse(llm.available())
         self.assertEqual(llm.why_unavailable(), "MOCK_LLM=true")
 
-    def test_missing_key_is_survivable_not_fatal(self):
-        """A clean clone with no credentials must still produce a working demo."""
+    def test_live_mode_without_a_key_is_refused_not_faked(self):
+        """
+        The case this project must never get wrong.
+
+        A live run with no key previously degraded to template prose, which
+        renders identically to model output in a screenshot. It now refuses,
+        so nobody can demonstrate "the AI" on an unconfigured machine.
+        """
         os.environ["WINDFALL_FIXTURES"] = "0"
         os.environ["MOCK_LLM"] = "false"
         os.environ["GEMINI_API_KEY"] = ""
-        self.assertFalse(llm.available())
-        self.assertIsNone(llm.complete_json("system", {"a": 1}))
+        self.assertTrue(llm.live_mode())
+        self.assertFalse(llm.has_key())
+        with self.assertRaises(llm.LiveInferenceUnavailable) as caught:
+            llm.require_configured()
+        message = str(caught.exception)
+        self.assertIn("GEMINI_API_KEY", message)
+        self.assertIn("WINDFALL_FIXTURES=1", message)
+
+    def test_the_pipeline_itself_refuses_an_unconfigured_live_run(self):
+        """The guard has to sit on the entry point, not just in the adapter."""
+        os.environ["WINDFALL_FIXTURES"] = "0"
+        os.environ["MOCK_LLM"] = "false"
+        os.environ["GEMINI_API_KEY"] = ""
+        with self.assertRaises(llm.LiveInferenceUnavailable):
+            pipeline.run("wf-01")
+
+    def test_declared_modes_are_still_allowed_to_run(self):
+        """Refusing the unconfigured case must not break the two real modes."""
+        os.environ["WINDFALL_FIXTURES"] = "1"
+        os.environ["MOCK_LLM"] = "false"
+        os.environ["GEMINI_API_KEY"] = ""
+        llm.require_configured()  # fixtures: declared, allowed
+
+        os.environ["WINDFALL_FIXTURES"] = "0"
+        os.environ["MOCK_LLM"] = "true"
+        llm.require_configured()  # mock: declared, allowed
+
+    def test_a_configured_live_run_is_allowed(self):
+        os.environ["WINDFALL_FIXTURES"] = "0"
+        os.environ["MOCK_LLM"] = "false"
+        os.environ["GEMINI_API_KEY"] = "a-key"
+        llm.require_configured()
+        self.assertTrue(llm.available())
+        self.assertEqual(llm.why_unavailable(), "available")
 
 
 class TestClassifierAuthority(unittest.TestCase):
@@ -153,10 +191,16 @@ class TestFixtureAndLiveActuallyDiffer(unittest.TestCase):
         self.assertEqual(result.source, "fixture")
         self.assertEqual(result.decision.outcome, "rebuild")
 
-    def test_live_mode_without_credentials_fails_rather_than_replaying(self):
+    def test_live_mode_without_travel_credentials_fails_rather_than_replaying(self):
         """With no keys the honest result is an upstream failure. Falling back
-        to fixtures here would make live mode indistinguishable from replay."""
+        to fixtures here would make live mode indistinguishable from replay.
+
+        A Gemini key is set because this test is about the PRICE providers:
+        without one the run is refused earlier, by the inference guard, and
+        this assertion would never be reached.
+        """
         os.environ["WINDFALL_FIXTURES"] = "0"
+        os.environ["GEMINI_API_KEY"] = "set-so-the-inference-guard-passes"
         os.environ["DUFFEL_API_KEY"] = ""
         os.environ["RAPIDAPI_KEY"] = ""
         result = pipeline.run("wf-02")

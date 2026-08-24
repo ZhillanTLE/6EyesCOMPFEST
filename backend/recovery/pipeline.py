@@ -17,7 +17,7 @@ import time
 from dataclasses import replace
 from typing import Callable, List, Optional, Tuple
 
-from . import (classifier_agent, gate, hold_manager, ladder, mcp_tools,
+from . import (classifier_agent, gate, hold_manager, ladder, llm, mcp_tools,
                notification_curator, outcomes, providers, repository,
                searcher_agent, tiers)
 from .schemas import (
@@ -64,6 +64,13 @@ def _live_flight_price(row: dict) -> int:
 
 
 def run(traveler_id: str) -> RecoveryResult:
+    # Refuse an unconfigured live run before any stage produces prose. A live
+    # run with no GEMINI_API_KEY would otherwise return a complete-looking
+    # trace whose reasoning is deterministic templates -- indistinguishable
+    # from model output at a glance, which is exactly the claim this project
+    # must not make by accident.
+    llm.require_configured()
+
     history, row = repository.get(traveler_id)
     cart_id = row["cart"]["cartId"]
     fixture_mode = providers.use_fixtures()
