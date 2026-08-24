@@ -9,6 +9,7 @@
  * whole trace, and the pipeline view replays it at the speed the server
  * measured.
  */
+import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BrowseView, PipelineView, PreviewsView } from "@/components/windfall";
 import { approveAndSend, fetchQueue, runRecovery } from "@/lib/windfall/api";
@@ -123,9 +124,14 @@ export default function RecoveryConsole() {
             borderBottom: "var(--wf-border-hair)",
           }}
         >
-          <span className="wf-serif" style={{ fontSize: 25, lineHeight: 1, color: "var(--wf-ink)" }}>
+          {/* The lockup links to the landing page, as the handoff specifies. */}
+          <Link
+            href="/windfall"
+            className="wf-serif"
+            style={{ fontSize: 25, lineHeight: 1, color: "var(--wf-ink)", textDecoration: "none" }}
+          >
             Windfall
-          </span>
+          </Link>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             {/* Fixture mode is stated plainly and never buried. "Cached for
                 reliability" must not quietly become "faked". */}

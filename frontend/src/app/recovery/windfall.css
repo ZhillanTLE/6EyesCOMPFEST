@@ -158,3 +158,60 @@
   .wf-h1 { font-size: 30px !important; }
   .wf-grid-2 { grid-template-columns: 1fr !important; }
 }
+
+/*
+ * Landing page. The console is a tool and the landing page is an argument, so
+ * they share tokens and type but not layout: full-bleed alternating bands,
+ * separated by hairlines, rather than one centred column on paper.
+ */
+.wf-band { background: var(--wf-paper); border-bottom: var(--wf-border-hair); }
+.wf-band-alt { background: var(--wf-white); border-bottom: var(--wf-border-hair); }
+.wf-band-ink { background: var(--wf-ink); color: var(--wf-paper); }
+
+.wf-band-inner { max-width: 1040px; margin: 0 auto; padding: 88px 22px; }
+
+.wf-display {
+  font-family: var(--wf-font-mono);
+  font-weight: 700;
+  font-size: 60px;
+  line-height: 1.08;
+  letter-spacing: -0.035em;
+  margin: 0;
+}
+
+.wf-h2 {
+  font-family: var(--wf-font-mono);
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 1.14;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+
+/* Reveal on scroll. Elements start displaced and settle once observed. The
+   no-JS and reduced-motion paths below both land on the visible state, so the
+   page never depends on the observer to be readable. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(13px);
+  transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+[data-reveal].wf-shown { opacity: 1; transform: none; }
+
+@keyframes wf-drift {
+  0%, 100% { transform: translateX(-1.2%); }
+  50% { transform: translateX(1.2%); }
+}
+.wf-drift { animation: wf-drift 14s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] { opacity: 1; transform: none; transition: none; }
+  .wf-drift { animation: none; }
+}
+
+@media (max-width: 900px) {
+  .wf-display { font-size: 38px; }
+  .wf-h2 { font-size: 30px; }
+  .wf-band-inner { padding: 56px 22px; }
+  .wf-cols { grid-template-columns: 1fr !important; }
+}
