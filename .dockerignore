@@ -1,0 +1,55 @@
+# Build-context excludes for BOTH images.
+#
+# Docker resolves .dockerignore relative to the BUILD CONTEXT ROOT, and both
+# compose services build with `context: .` (they each need to COPY from a
+# sibling directory). So this file is the only one Docker reads: earlier
+# copies at backend/.dockerignore and frontend/.dockerignore sat outside the
+# context root and were silently dead, which meant node_modules, .next,
+# __pycache__, the whole .git history and any backend/.env were all being
+# shipped into the build context.
+#
+# Two of those are not merely slow:
+#   - backend/.env would be baked into the image layer, publishing secrets.
+#   - frontend/node_modules would land on top of the clean `npm ci` tree via
+#     `COPY frontend ./`, overwriting Linux binaries with the host's (here,
+#     Windows) and breaking `npm run build` inside the image.
+
+# ── VCS and tooling ──────────────────────────────────────────────────────────
+.git
+.gitignore
+.github
+.claude
+.vscode
+.idea
+
+# ── Secrets. Never in an image layer. ────────────────────────────────────────
+**/.env
+**/.env.*
+!**/.env.example
+
+# ── Python ───────────────────────────────────────────────────────────────────
+**/__pycache__
+**/*.py[cod]
+**/.venv
+**/venv
+**/.pytest_cache
+**/.mypy_cache
+backend/duffel_hold_probe_result.json
+
+# ── Node / Next ──────────────────────────────────────────────────────────────
+**/node_modules
+frontend/.next
+frontend/out
+frontend/tsconfig.tsbuildinfo
+**/npm-debug.log*
+
+# ── Docs, design sources and other build-irrelevant weight ───────────────────
+docs
+*.pdf
+*.md
+!README.md
+design
+Windfall*.html
+windfall-design-component-review
+Windfall Design Comp Review
+**/screenshots

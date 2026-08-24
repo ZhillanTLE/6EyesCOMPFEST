@@ -1,6 +1,0 @@
-__pycache__/
-*.py[cod]
-.env
-.venv/
-venv/
-duffel_hold_probe_result.json
