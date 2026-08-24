@@ -12,6 +12,7 @@
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BrowseView, PipelineView, PreviewsView } from "@/components/windfall";
+import { WaveFooter } from "@/components/windfall/WaveFooter";
 import { approveAndSend, fetchQueue, runRecovery } from "@/lib/windfall/api";
 import type { QueueEntry, RecoveryResult, SendReceipt } from "@/lib/windfall/types";
 
@@ -27,7 +28,8 @@ export default function RecoveryConsole() {
   const [receipt, setReceipt] = useState<SendReceipt | null>(null);
   const [sending, setSending] = useState(false);
   const [replayNonce, setReplayNonce] = useState(0);
-  const [theme, setTheme] = useState<"light" | "dark">("light");
+  /* The reference console defaults dark; a saved preference wins. */
+  const [theme, setTheme] = useState<"light" | "dark">("dark");
   const abort = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -48,20 +50,17 @@ export default function RecoveryConsole() {
       const saved = localStorage.getItem("wf-theme");
       if (saved === "dark" || saved === "light") setTheme(saved);
     } catch {
-      /* storage unavailable; the light default is fine */
+      /* storage unavailable; the dark default is fine */
     }
   }, []);
 
-  const toggleTheme = useCallback(() => {
-    setTheme((t) => {
-      const next = t === "dark" ? "light" : "dark";
-      try {
-        localStorage.setItem("wf-theme", next);
-      } catch {
-        /* non-fatal */
-      }
-      return next;
-    });
+  const pickTheme = useCallback((next: "light" | "dark") => {
+    setTheme(next);
+    try {
+      localStorage.setItem("wf-theme", next);
+    } catch {
+      /* non-fatal */
+    }
   }, []);
 
   const select = useCallback(async (travelerId: string) => {
@@ -110,29 +109,90 @@ export default function RecoveryConsole() {
 
   const replay = useCallback(() => setReplayNonce((n) => n + 1), []);
 
+  /* Which stepper dot is lit: browse → pipeline → previews. */
+  const step = result ? (reviewing ? 3 : 2) : 1;
+
   return (
     <div data-wf-theme={theme} className="wf-root">
-      <div style={{ maxWidth: 1040, margin: "0 auto", padding: "32px 22px 96px" }}>
-        <nav
+      {/* The reference console's fixed bar: lockup → stepper → theme control. */}
+      <nav className="wf-console-nav">
+        <div
           style={{
             display: "flex",
             alignItems: "center",
             justifyContent: "space-between",
-            gap: 16,
-            paddingBottom: 20,
-            marginBottom: 28,
-            borderBottom: "var(--wf-border-hair)",
+            gap: 20,
+            maxWidth: 1040,
+            margin: "0 auto",
+            padding: "12px 22px",
+            boxSizing: "border-box",
           }}
         >
           {/* The lockup links to the landing page, as the handoff specifies. */}
           <Link
             href="/windfall"
-            className="wf-serif"
-            style={{ fontSize: 25, lineHeight: 1, color: "var(--wf-ink)", textDecoration: "none" }}
+            style={{ display: "flex", alignItems: "center", gap: 11, flex: "0 0 auto", textDecoration: "none" }}
           >
-            Windfall
+            <span
+              aria-hidden
+              style={{
+                display: "block",
+                width: 28,
+                height: 28,
+                backgroundImage: `url(/windfall/brand/windfall-mark-${theme === "dark" ? "paper" : "ink"}.svg)`,
+                backgroundSize: "contain",
+                backgroundRepeat: "no-repeat",
+              }}
+            />
+            <span className="wf-serif" style={{ fontSize: 25, lineHeight: 1, color: "var(--wf-ink)" }}>
+              Windfall
+            </span>
           </Link>
-          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+
+          <div className="wf-steps" style={{ display: "flex", alignItems: "center", justifyContent: "center", flex: "1 1 auto", minWidth: 0 }}>
+            {(
+              [
+                [1, "Carts"],
+                [2, "Pipeline"],
+                [3, "Previews"],
+              ] as const
+            ).map(([n, label]) => (
+              <div key={n} style={{ display: "flex", alignItems: "center", minWidth: 0 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+                  <span
+                    className="wf-mono"
+                    style={{
+                      width: 26,
+                      height: 26,
+                      flex: "0 0 auto",
+                      borderRadius: "50%",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontWeight: 700,
+                      fontSize: 12,
+                      background: n === step ? "var(--wf-ink)" : "var(--wf-surface)",
+                      color: n === step ? "var(--wf-paper)" : "var(--wf-ink-3)",
+                      boxShadow: n === step ? "none" : "var(--wf-ring-border)",
+                    }}
+                  >
+                    {n}
+                  </span>
+                  <span
+                    className="wf-eyebrow"
+                    style={{ color: n === step ? "var(--wf-ink)" : "var(--wf-ink-3)", whiteSpace: "nowrap" }}
+                  >
+                    {label}
+                  </span>
+                </div>
+                {n < 3 && (
+                  <span aria-hidden style={{ width: 34, height: 1, flex: "0 0 auto", margin: "0 12px", background: "var(--wf-rule)" }} />
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: "flex", alignItems: "center", gap: 12, flex: "0 0 auto" }}>
             {/* Fixture mode is stated plainly and never buried. "Cached for
                 reliability" must not quietly become "faked". */}
             {source === "fixture" && (
@@ -152,28 +212,48 @@ export default function RecoveryConsole() {
                 Replaying capture
               </span>
             )}
-            <button
-              type="button"
-              onClick={toggleTheme}
-              aria-label="Toggle theme"
-              className="wf-mono"
+            <div
+              role="group"
+              aria-label="Colour theme"
               style={{
-                padding: "6px 11px",
-                fontSize: 10,
-                letterSpacing: "0.09em",
-                textTransform: "uppercase",
-                border: "none",
-                borderRadius: 3,
+                display: "flex",
+                alignItems: "center",
+                padding: 3,
+                borderRadius: "var(--wf-radius-sm)",
                 background: "var(--wf-white)",
                 boxShadow: "var(--wf-ring-rule)",
-                color: "var(--wf-ink-2)",
-                cursor: "pointer",
               }}
             >
-              {theme === "dark" ? "Light" : "Dark"}
-            </button>
+              {(["dark", "light"] as const).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => pickTheme(t)}
+                  aria-pressed={theme === t}
+                  className="wf-mono"
+                  style={{
+                    height: 26,
+                    padding: "0 11px",
+                    border: "none",
+                    borderRadius: 3,
+                    background: theme === t ? "var(--wf-ink)" : "transparent",
+                    color: theme === t ? "var(--wf-paper)" : "var(--wf-ink-3)",
+                    fontSize: 10,
+                    letterSpacing: "0.09em",
+                    textTransform: "uppercase",
+                    cursor: "pointer",
+                    transition: "background .15s ease, color .15s ease",
+                  }}
+                >
+                  {t === "dark" ? "Dark" : "Light"}
+                </button>
+              ))}
+            </div>
           </div>
-        </nav>
+        </div>
+      </nav>
+
+      <div style={{ maxWidth: 1040, margin: "0 auto", padding: "28px 22px 96px" }}>
 
         {error && (
           <div
@@ -215,6 +295,7 @@ export default function RecoveryConsole() {
 
         {!result && <BrowseView queue={queue} busyId={busyId} onSelect={select} />}
       </div>
+      <WaveFooter variant="console" />
     </div>
   );
 }

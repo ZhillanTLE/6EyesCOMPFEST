@@ -22,23 +22,23 @@ export function BrowseView({
 }) {
   return (
     <div className="wf-fade" style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-      <header>
+      <header style={{ textAlign: "center" }}>
         <h1
-          className="wf-mono"
+          className="wf-mono wf-h1"
           style={{
             margin: 0,
-            fontSize: 40,
+            fontSize: 44,
             fontWeight: 700,
-            letterSpacing: "-0.02em",
+            letterSpacing: "-0.01em",
             lineHeight: 1.08,
             color: "var(--wf-ink)",
           }}
         >
-          Abandoned carts
+          Abandoned Carts
         </h1>
         <p
           style={{
-            margin: "14px 0 0",
+            margin: "14px auto 0",
             maxWidth: "56ch",
             fontSize: 15,
             lineHeight: 1.65,
@@ -56,9 +56,10 @@ export function BrowseView({
       <div
         role="group"
         aria-label="Abandoned carts awaiting a decision"
+        className="wf-grid-2"
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fill, minmax(340px, 1fr))",
+          gridTemplateColumns: "1fr 1fr",
           gap: 20,
         }}
       >

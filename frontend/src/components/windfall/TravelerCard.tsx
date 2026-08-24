@@ -138,6 +138,43 @@ export function TravelerCard({
         </div>
       </div>
 
+      {/* Signals strip, per the reference: the history the Classifier will
+          reason over, visible before it runs. Cold start shows what is
+          actually known — nothing — rather than fabricated numbers. */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-end",
+          justifyContent: "space-between",
+          gap: 16,
+          padding: "9px 19px 8px",
+          borderTop: "var(--wf-border-hair)",
+          borderBottom: "var(--wf-border-hair)",
+          marginBottom: 14,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "flex-end", gap: 22, minWidth: 0 }}>
+          {(entry.isColdStart
+            ? [
+                { v: "New", k: "no history" },
+                { v: "from cart", k: "stars (proxy)" },
+              ]
+            : [
+                { v: `${entry.bookings}×`, k: "bookings" },
+                { v: idr(entry.usualSpendIdr), k: "usual spend" },
+                { v: entry.avgStars === null ? "—" : `★${entry.avgStars.toLocaleString("id-ID")}`, k: "avg hotel" },
+              ]
+          ).map((sg) => (
+            <div key={sg.k} style={{ display: "flex", flexDirection: "column", gap: 3, minWidth: 0 }}>
+              <span className="wf-mono" style={{ fontSize: 14, fontWeight: 500, color: "var(--wf-ink)", whiteSpace: "nowrap" }}>
+                {sg.v}
+              </span>
+              <span style={{ fontSize: 11.5, color: "var(--wf-ink-3)", whiteSpace: "nowrap" }}>{sg.k}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
       {/* Cart contents sit in a dashed box, per the design system. */}
       <div style={{ padding: "0 19px" }}>
         <div
@@ -151,7 +188,9 @@ export function TravelerCard({
           }}
         >
           <div className="wf-mono" style={{ fontSize: 13, color: "var(--wf-ink)" }}>
-            {entry.route} <span style={{ color: "var(--wf-ink-2)" }}>{entry.carrier}</span>
+            {/* A booked return renders as ⇄, as the reference draws it. */}
+            {entry.returnDate ? entry.route.replace("→", "⇄") : entry.route}{" "}
+            <span style={{ color: "var(--wf-ink-2)" }}>{entry.carrier}</span>
           </div>
           <div style={{ fontSize: 12.5, color: "var(--wf-ink-2)" }}>
             {entry.hotelName}{" "}

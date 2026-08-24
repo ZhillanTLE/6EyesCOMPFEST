@@ -172,10 +172,13 @@
   .wf-skeleton, .wf-fade, .wf-spin { animation: none; }
 }
 
-/* The prototype was fixed at 1160px; the console has one breakpoint. */
+/* The prototype was fixed at 1160px; the console collapses its two-column
+   grids where the reference does. */
+@media (max-width: 1040px) {
+  .wf-grid-2 { grid-template-columns: 1fr !important; }
+}
 @media (max-width: 720px) {
   .wf-h1 { font-size: 30px !important; }
-  .wf-grid-2 { grid-template-columns: 1fr !important; }
 }
 
 /*
@@ -247,6 +250,19 @@
   50% { transform: translateY(-2px); box-shadow: 0 0 0 6px rgba(20, 22, 26, 0); }
 }
 .wf-ring-pulse { animation: wf-ring 2.6s ease-in-out infinite; }
+
+/* Console nav: the reference's fixed bar, rendered sticky so no spacer div is
+   needed. The stepper hides on narrow screens, as the reference does. */
+.wf-console-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: var(--wf-paper);
+  border-bottom: 1px solid var(--wf-rule);
+}
+@media (max-width: 860px) {
+  .wf-steps { display: none !important; }
+}
 
 /* Landing nav: translucent paper with a blur, per the reference. The rgba is
    the paper token at 93% and lives here under the colour-literal rule. */
