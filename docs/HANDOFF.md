@@ -18,6 +18,22 @@ loose ends under *Not done*.
 The console is now the handoff's three-view flow — **browse → pipeline →
 previews** — and there is a landing page at `/windfall`.
 
+**Design-alignment pass (Aug 2026, see `docs/design-plan.md`):** both pages
+were rebuilt/reworked to the two-page reference bundle. The landing carries
+the reference's hero, decision marquee, captured-run pipeline demo,
+product/market/approver bands and the shared wave footer; the console gained
+the stepper header, the dark default theme, the segmented theme control, the
+card signals strip and the same footer. Forbidden features (batch/fleet,
+sort/filter/pagination, BrowserFrame, traveler override) stay excluded.
+
+**The pixels have now been looked at.** Both routes were driven in a headless
+browser against Flask fixtures: browse → pipeline (rebuild wf-01 and reminder
+wf-03, equal weight) → previews, with screenshots reviewed and zero console
+errors. That pass caught a real bug: the `--wf-font-*` tokens rebind at
+`:root`, but next/font's variables lived on a layout wrapper div, so every
+font token computed to guaranteed-invalid and BOTH routes had always rendered
+in Arial. Fixed by hoisting `fontVars` onto `<html>` in the root layout.
+
 ```
 b5d686c  feat: send the approved notification on explicit approval
 cf8f549  feat: pipeline screen with real per-stage timing
