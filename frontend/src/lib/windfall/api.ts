@@ -21,21 +21,52 @@ async function json<T>(res: Response): Promise<T> {
   return (await res.json()) as T;
 }
 
+/**
+ * Wrapper aman untuk menangani network/connection error vs API error.
+ */
+async function safeFetch<T>(input: RequestInfo | URL, init?: RequestInit): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(input, init);
+  } catch (error: any) {
+    // Terjadi jika jaringan benar-benar terputus total
+    throw new Error("Koneksi ke backend terputus. Pastikan server Flask atau Docker sudah menyala.");
+  }
+
+  // Jika Next.js mengembalikan error karena proxy gagal menyambung ke backend (biasanya status 500/502/504 dari proxy)
+  if (!res.ok) {
+    if (res.status === 500 || res.status === 502 || res.status === 504) {
+      throw new Error("Koneksi ke backend terputus. Pastikan server Flask atau Docker sudah menyala.");
+    }
+    let detail = res.statusText;
+    try {
+      const body = (await res.json()) as { error?: string };
+      if (body?.error) detail = body.error;
+    } catch {
+      /* no json body */
+    }
+    throw new Error(detail);
+  }
+
+  return (await res.json()) as T;
+}
+
 export async function fetchQueue(signal?: AbortSignal): Promise<QueueResponse> {
-  return json<QueueResponse>(await fetch("/api/recovery/queue", { signal }));
+  return safeFetch<QueueResponse>("/api/recovery/queue", { signal });
 }
 
 export async function runRecovery(
   travelerId: string,
   signal?: AbortSignal,
 ): Promise<RecoveryResult> {
-  return json<RecoveryResult>(
-    await fetch("/api/recovery/run", {
+  return safeFetch<RecoveryResult>(
+    "/api/recovery/run",
+    {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ travelerId }),
       signal,
-    }),
+    },
   );
 }
 
@@ -49,12 +80,13 @@ export async function approveAndSend(
   travelerId: string,
   signal?: AbortSignal,
 ): Promise<SendReceipt> {
-  return json<SendReceipt>(
-    await fetch("/api/recovery/send", {
+  return safeFetch<SendReceipt>(
+    "/api/recovery/send",
+    {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ travelerId }),
       signal,
-    }),
+    },
   );
 }
