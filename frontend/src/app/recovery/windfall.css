@@ -75,6 +75,25 @@
   --wf-cta: #2c5ce0;
   --wf-cta-ink: #ffffff;
   --wf-approve: #5f7d4e;
+
+  /*
+   * Landing accents, quoted from the reference design (category 3: the bundle
+   * never promoted them to tokens). The warm band, the footer waves and the
+   * footer type are deliberately theme-invariant -- in the reference the
+   * footer keeps its light paper ground even under the dark console theme,
+   * so these are defined once on :root and never overridden.
+   */
+  --wf-warm: #f1efe9;
+  --wf-warm-2: #e9e6de;
+  --wf-warm-rule: #dad6ce;
+  --wf-wave-1: #e6e2d9;
+  --wf-wave-2: #dcd7cb;
+  --wf-wave-3: rgba(95, 125, 78, 0.18);
+  --wf-tide-gold: rgba(214, 169, 78, 0.16);
+  --wf-footer-ink: #14161a;
+  --wf-footer-body: #4a5058;
+  --wf-footer-mute: #878e98;
+  --wf-footer-paper: #fbfaf8;
 }
 
 /*
@@ -204,9 +223,55 @@
 }
 .wf-drift { animation: wf-drift 14s ease-in-out infinite; }
 
+/* Decision marquee. The track holds the ten cards twice; sliding half its
+   own width and looping reads as a seamless belt. Hover pauses it so a card
+   can actually be read. */
+@keyframes wf-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+.wf-mq-track { display: flex; gap: 12px; width: max-content; animation: wf-marquee 46s linear infinite; }
+.wf-mq:hover .wf-mq-track { animation-play-state: paused; }
+.wf-mq-card { transition: transform 0.22s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.22s ease; }
+.wf-mq-card:hover { transform: translateY(-3px); box-shadow: var(--wf-ring-ink); }
+
+/* Footer waves and the slow gradient tide behind the footer columns. */
+@keyframes wf-wave { from { transform: translateX(0); } to { transform: translateX(-1200px); } }
+.wf-wave { animation: wf-wave var(--wf-wave-dur, 46s) linear infinite var(--wf-wave-delay, 0s); }
+@keyframes wf-tide {
+  from { background-position: 0% 50%, 100% 50%; }
+  to { background-position: 100% 50%, 0% 40%; }
+}
+.wf-tide { animation: wf-tide 22s ease-in-out infinite alternate; }
+
+/* The pulsing circular arrow on the footer's two big links. */
+@keyframes wf-ring {
+  0%, 100% { transform: translateY(0); box-shadow: 0 0 0 0 rgba(20, 22, 26, 0.18); }
+  50% { transform: translateY(-2px); box-shadow: 0 0 0 6px rgba(20, 22, 26, 0); }
+}
+.wf-ring-pulse { animation: wf-ring 2.6s ease-in-out infinite; }
+
+/* Landing nav: translucent paper with a blur, per the reference. The rgba is
+   the paper token at 93% and lives here under the colour-literal rule. */
+.wf-landing-nav {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background: rgba(251, 250, 248, 0.93);
+  backdrop-filter: saturate(1.2) blur(8px);
+  border-bottom: 1px solid var(--wf-rule);
+}
+
+/* Hover affordances the reference expressed as style-hover attributes. */
+.wf-btn-ink { transition: transform 0.18s ease, opacity 0.18s ease; }
+.wf-btn-ink:hover { opacity: 0.9; transform: translateY(-1px); }
+.wf-btn-outline { transition: transform 0.18s ease, border-color 0.18s ease; }
+.wf-btn-outline:hover { border-color: var(--wf-ink) !important; transform: translateY(-1px); }
+.wf-lift { transition: transform 0.22s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.22s ease; }
+.wf-lift:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(20, 22, 26, 0.07); }
+.wf-row-hover { transition: background 0.2s ease, padding-left 0.2s ease; }
+.wf-row-hover:hover { background: var(--wf-white); padding-left: 20px; }
+
 @media (prefers-reduced-motion: reduce) {
   [data-reveal] { opacity: 1; transform: none; transition: none; }
-  .wf-drift { animation: none; }
+  .wf-drift, .wf-mq-track, .wf-wave, .wf-tide, .wf-ring-pulse { animation: none; }
 }
 
 @media (max-width: 900px) {
