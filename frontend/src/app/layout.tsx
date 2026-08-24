@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { fontVars } from "@/lib/windfall/fonts";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -23,9 +24,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
+    /*
+     * The Windfall font variables must live on <html>, not on a wrapper div:
+     * windfall.css and the vendored design-system tokens rebind
+     * --wf-font-* / --wf-text-* at :root, and a custom property that
+     * references var(--font-plex-mono) is substituted AT :root. With the
+     * variables only on a descendant, every font token computed to
+     * guaranteed-invalid and the whole console silently rendered in Arial.
+     */
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${fontVars} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">{children}</body>
     </html>
