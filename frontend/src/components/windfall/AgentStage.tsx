@@ -9,6 +9,7 @@
  * The duration shown is measured, never synthesised.
  */
 import type { ReactNode } from "react";
+import { AgentAvatar, type AvatarAgent, type AvatarState } from "./AgentAvatar";
 import { ModelTag } from "./primitives";
 
 export type StageStatus = "waiting" | "running" | "done" | "halted";
@@ -30,6 +31,7 @@ export function AgentStage({
   reasons = [],
   last = false,
   children,
+  avatar,
 }: {
   title: string;
   model?: string;
@@ -38,6 +40,7 @@ export function AgentStage({
   reasons?: string[];
   last?: boolean;
   children?: ReactNode;
+  avatar?: { agent: AvatarAgent; state: AvatarState };
 }) {
   const dot: Record<StageStatus, React.CSSProperties> = {
     done: { background: "var(--wf-ink)", boxShadow: "inset 0 0 0 2px var(--wf-ink)" },
@@ -53,23 +56,29 @@ export function AgentStage({
       aria-label={`${title}: ${STATUS_WORD[status]}${duration ? `, ${duration}` : ""}`}
       style={{
         position: "relative",
-        paddingLeft: 20,
+        /* The avatar well is wider than the dot it replaces and overhangs the
+           rail on both sides, so the body has to start clear of it. */
+        paddingLeft: avatar ? 36 : 20,
         paddingBottom: last ? 0 : 26,
         borderLeft: last ? "2px solid transparent" : "2px solid var(--wf-rule)",
       }}
     >
-      <span
-        aria-hidden
-        style={{
-          position: "absolute",
-          left: -7,
-          top: 4,
-          width: 12,
-          height: 12,
-          borderRadius: 6,
-          ...dot[status],
-        }}
-      />
+      {avatar ? (
+        <AgentAvatar agent={avatar.agent} state={avatar.state} />
+      ) : (
+        <span
+          aria-hidden
+          style={{
+            position: "absolute",
+            left: -7,
+            top: 4,
+            width: 12,
+            height: 12,
+            borderRadius: 6,
+            ...dot[status],
+          }}
+        />
+      )}
       <div style={{ display: "flex", alignItems: "center", gap: 9, flexWrap: "wrap" }}>
         <span style={{ fontSize: 13, fontWeight: 500, lineHeight: 1.6, color: titleColor }}>
           {title}

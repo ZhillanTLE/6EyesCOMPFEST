@@ -7,6 +7,8 @@
  */
 export { Button, ModelTag, PreviewTag, StatusPill, TierBadge, Skeleton } from "./primitives";
 export { AgentStage } from "./AgentStage";
+export { AgentAvatar, avatarState } from "./AgentAvatar";
+export type { AvatarAgent, AvatarState } from "./AgentAvatar";
 export type { StageStatus } from "./AgentStage";
 export { FareLedger } from "./FareLedger";
 export { OutcomeCard, OutcomeNote } from "./OutcomeCard";

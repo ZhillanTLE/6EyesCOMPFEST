@@ -55,6 +55,12 @@
   --wf-tier-cold-bg: #eef0ec;
   --wf-tier-cold-ink: #5c625c;
 
+  /*
+   * Agent avatar well. The prototype inlined this one hex at the call site;
+   * it is a shade of the paper neutral the bundle never promoted to a token.
+   */
+  --wf-avatar-bg: #f2f1ee;
+
   /* Actions. The prototype hard-coded these at each call site. */
   --wf-cta: #2c5ce0;
   --wf-cta-ink: #ffffff;
@@ -94,6 +100,7 @@
   --wf-tier-premium-ink: #bc9aec;
   --wf-tier-cold-bg: #1d211f;
   --wf-tier-cold-ink: #9ca69c;
+  --wf-avatar-bg: #1d2126;
   --wf-shadow-card: 0 1px 2px 0 rgba(0, 0, 0, 0.45);
   --wf-shadow-bubble: 0 1px 1px 0 rgba(0, 0, 0, 0.5);
 }

@@ -14,6 +14,7 @@ import { plainPct, seconds } from "@/lib/windfall/format";
 import { stageStatus, useReplay } from "@/lib/windfall/replay";
 import { ApprovalBar } from "./ApprovalBar";
 import { AgentStage } from "./AgentStage";
+import { avatarState } from "./AgentAvatar";
 import { FareLedger } from "./FareLedger";
 import { OutcomeCard, OutcomeNote } from "./OutcomeCard";
 import { HoldPanel } from "./HoldPanel";
@@ -129,6 +130,7 @@ export function PipelineView({
         <AgentStage
           title="Classifier Agent"
           model={classification.reasonedBy.startsWith("gemini") ? "gemini" : "fallback"}
+          avatar={{ agent: "classifier", state: avatarState(phase, 0, halted) }}
           status={stageStatus(phase, "classifier")}
           duration={phase >= 2 ? seconds(stageMs(result, "classifier")) : undefined}
           reasons={phase >= 2 ? classification.reasoning : []}
@@ -159,6 +161,7 @@ export function PipelineView({
         <AgentStage
           title="Searcher Agent"
           model="gemini + mcp"
+          avatar={{ agent: "searcher", state: avatarState(phase, 1, halted) }}
           status={stageStatus(phase, "searcher", halted)}
           duration={phase >= 3 && !halted ? seconds(stageMs(result, "searcher")) : undefined}
         >
@@ -241,6 +244,7 @@ export function PipelineView({
               ? "gemini"
               : "fallback"
           }
+          avatar={{ agent: "notifier", state: avatarState(phase, 2, halted) }}
           status={halted ? "waiting" : stageStatus(phase, "notifier")}
           duration={phase >= 4 && !halted ? seconds(stageMs(result, "notifier")) : undefined}
           reasons={
