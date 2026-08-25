@@ -11,7 +11,7 @@
  */
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BrowseView, PipelineView, PreviewsView } from "@/components/windfall";
+import { BrowseView, PipelineLoading, PipelineView, PreviewsView } from "@/components/windfall";
 import { WaveFooter } from "@/components/windfall/WaveFooter";
 import { approveAndSend, fetchQueue, runRecovery } from "@/lib/windfall/api";
 import type { QueueEntry, RecoveryResult, SendReceipt } from "@/lib/windfall/types";
@@ -26,6 +26,8 @@ export default function RecoveryConsole() {
      from this flag for the step after the trace completes. */
   const [reviewing, setReviewing] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  /* Who the loading screen names while the synchronous run is in flight. */
+  const [busyName, setBusyName] = useState<string>("");
   const [error, setError] = useState<string | null>(null);
   const [receipt, setReceipt] = useState<SendReceipt | null>(null);
   const [sending, setSending] = useState(false);
@@ -69,11 +71,17 @@ export default function RecoveryConsole() {
     }
   }, []);
 
-  const select = useCallback(async (travelerId: string) => {
+  const select = useCallback(async (travelerId: string, travelerName: string) => {
     abort.current?.abort();
     const ctrl = new AbortController();
     abort.current = ctrl;
+    // Transition to the pipeline screen IMMEDIATELY. The run is synchronous
+    // and can take from seconds to over a minute with real inference, and
+    // CLAUDE.md is explicit that selecting a card transitions -- the pending
+    // state belongs on the pipeline screen, not on a busy card in the list.
     setBusyId(travelerId);
+    setBusyName(travelerName);
+    setResult(null);
     setError(null);
     // A fresh run has not been approved. Never carry a receipt across carts.
     setReceipt(null);
@@ -91,6 +99,7 @@ export default function RecoveryConsole() {
 
   const back = useCallback(() => {
     abort.current?.abort();
+    setBusyId(null);
     setResult(null);
     setReceipt(null);
     setReviewing(false);
@@ -116,7 +125,7 @@ export default function RecoveryConsole() {
   const replay = useCallback(() => setReplayNonce((n) => n + 1), []);
 
   /* Which stepper dot is lit: browse → pipeline → previews. */
-  const step = result ? (reviewing ? 3 : 2) : 1;
+  const step = result ? (reviewing ? 3 : 2) : busyId ? 2 : 1;
 
   return (
     <div data-wf-theme={theme} className="wf-root">
@@ -301,7 +310,9 @@ export default function RecoveryConsole() {
           />
         )}
 
-        {!result && <BrowseView queue={queue} busyId={busyId} onSelect={select} />}
+        {!result && busyId && <PipelineLoading travelerName={busyName} onBack={back} />}
+
+        {!result && !busyId && <BrowseView queue={queue} onSelect={select} />}
       </div>
       <WaveFooter variant="console" />
     </div>

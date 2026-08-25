@@ -29,24 +29,21 @@ const TIER_TINT: Record<string, { bg: string; ink: string }> = {
 
 export function TravelerCard({
   entry,
-  busy = false,
   onSelect,
 }: {
   entry: QueueEntry;
-  busy?: boolean;
-  onSelect: (travelerId: string) => void;
+  onSelect: (travelerId: string, travelerName: string) => void;
 }) {
   const tint = TIER_TINT[entry.tierEstimateLabel] ?? TIER_TINT["Cold-start"];
-  const activate = () => {
-    if (!busy) onSelect(entry.travelerId);
-  };
+  /* No busy state here: activating navigates to the pipeline screen at once,
+     and that screen owns the pending rendering. */
+  const activate = () => onSelect(entry.travelerId, entry.name);
 
   return (
     <article
       role="button"
       tabIndex={0}
       aria-label={`Analyse the abandoned cart for ${entry.name}`}
-      aria-busy={busy}
       onClick={activate}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -61,9 +58,8 @@ export function TravelerCard({
         boxShadow: "var(--wf-ring-rule)",
         overflow: "hidden",
         boxSizing: "border-box",
-        cursor: busy ? "wait" : "pointer",
-        opacity: busy ? 0.6 : 1,
-        transition: "box-shadow .12s ease, opacity .12s ease",
+        cursor: "pointer",
+        transition: "box-shadow .12s ease",
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.boxShadow = "var(--wf-ring-ink)";
@@ -231,7 +227,7 @@ export function TravelerCard({
             color: "var(--wf-paper)",
           }}
         >
-          {busy ? "Running…" : "Analisis"}
+          Analisis
         </span>
       </div>
     </article>

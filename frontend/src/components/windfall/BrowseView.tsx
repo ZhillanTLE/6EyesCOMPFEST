@@ -13,12 +13,12 @@ import { TravelerCard } from "./TravelerCard";
 
 export function BrowseView({
   queue,
-  busyId,
   onSelect,
 }: {
   queue: QueueEntry[];
-  busyId: string | null;
-  onSelect: (travelerId: string) => void;
+  /* Fires the run AND the transition: the pending state lives on the
+     pipeline screen, never as a busy card in this list. */
+  onSelect: (travelerId: string, travelerName: string) => void;
 }) {
   return (
     <div className="wf-fade" style={{ display: "flex", flexDirection: "column", gap: 22 }}>
@@ -64,12 +64,7 @@ export function BrowseView({
         }}
       >
         {queue.map((entry) => (
-          <TravelerCard
-            key={entry.travelerId}
-            entry={entry}
-            busy={busyId === entry.travelerId}
-            onSelect={onSelect}
-          />
+          <TravelerCard key={entry.travelerId} entry={entry} onSelect={onSelect} />
         ))}
       </div>
     </div>

@@ -15,6 +15,7 @@ export { OutcomeCard, OutcomeNote } from "./OutcomeCard";
 export { PricePanel, EmailPreview, WhatsAppPreview } from "./previews";
 export { TravelerCard } from "./TravelerCard";
 export { BrowseView } from "./BrowseView";
+export { PipelineLoading } from "./PipelineLoading";
 export { PipelineView } from "./PipelineView";
 export { PreviewsView } from "./PreviewsView";
 export { ApprovalBar } from "./ApprovalBar";
