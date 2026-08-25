@@ -27,6 +27,37 @@ and no cards. That is the whole explanation for the missing-seed-data report
 from last session — the data was never broken, the backend process had been
 stopped.
 
+### Docker: STEP 8 IS DONE — `docker compose up --build` verified (Aug 2026)
+
+Docker Desktop 4.88.0 was installed (Docker 29.7.2, Compose v5.4.0) and the
+stack was built and run from clean. Everything below was observed, not
+inferred:
+
+- Both images build: `python:3.12-slim` and `node:22-alpine` pull, `npm ci`
+  and the Next build complete in-image.
+- `Container backend Healthy` appears BEFORE the frontend starts, so
+  `depends_on: condition: service_healthy` sequences correctly and both
+  HEALTHCHECKs pass. `docker compose ps` shows both `(healthy)`.
+- On the published port 3000: `/` 200, `/recovery` 200, the agent SVG 200,
+  and `/api/recovery/queue` 200 — that last one proves container DNS resolves
+  `backend` and the baked `http://backend:8000` rewrite works.
+- Live inference works inside the container: `POST /api/recovery/run` for
+  wf-01 returns `reasonedBy` and `writtenBy` of `gemini`, outcome `rebuild`,
+  `marginConcededIdr` 0. The key reaches the container through `env_file` at
+  runtime.
+- The container log carries the full `[pipeline]` / `[classifier]` narration,
+  so `docker compose up` (attached) is itself a demo-ready terminal.
+- No secret is baked in: `/app/backend/.env` does not exist inside the image,
+  while the seed JSON does. The root `.dockerignore` is doing its job.
+- Sizes: backend 472MB, frontend 283MB.
+
+Reboot note: Windows reported a pending reboot after the install, but the
+daemon started anyway and the whole stack ran. A reboot may still be wanted
+before judging day.
+
+Previous entry, kept because the by-hand simulation is what caught the
+Compose-version problem before Docker existed here:
+
 ### Docker: image CONTENTS verified by simulation (Aug 2026)
 
 Docker still cannot be installed on this machine -- `wsl --status` reports WSL
