@@ -22,6 +22,19 @@ deliberately sending no discount to travelers whom price was never blocking.
 docker compose up --build
 ```
 
+Needs **Docker Compose v2.24 or newer** (`docker compose version`). The backend
+service declares its env file with the long form:
+
+```yaml
+env_file:
+  - path: ./backend/.env
+    required: false
+```
+
+`required:` arrived in v2.24. It is what lets a clean clone start with no
+`backend/.env` at all; on an older Compose the same block is a parse error.
+Docker Desktop 4.27+ ships a new enough Compose.
+
 Then open **http://localhost:3000** for the landing page that explains the
 decision logic, or **http://localhost:3000/recovery** for the console.
 

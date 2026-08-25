@@ -27,6 +27,38 @@ and no cards. That is the whole explanation for the missing-seed-data report
 from last session — the data was never broken, the backend process had been
 stopped.
 
+### Docker: image CONTENTS verified by simulation (Aug 2026)
+
+Docker still cannot be installed on this machine -- `wsl --status` reports WSL
+absent, `wsl --install` needs Administrator, and the shell is not elevated.
+Firmware virtualization IS on, so it will work once installed.
+
+Rather than leave the whole step unverified, both images were assembled and
+run BY HAND, replicating each Dockerfile line against the real tree:
+
+- `pip install --no-cache-dir -r backend/requirements.txt` into a clean venv
+  resolves completely -- the backend image's riskiest build step.
+- The backend runs under the compose environment and its HEALTHCHECK command,
+  run verbatim, exits 0. So `depends_on: service_healthy` has something to
+  pass on.
+- `npm run build` with `WINDFALL_API_ORIGIN=http://backend:8000` emits
+  `.next/standalone/server.js` and bakes `http://backend:8000/api/recovery/:path*`
+  into `routes-manifest.json`, confirming the value must stay a BUILD ARG.
+- `public/` and `.next/static` are genuinely absent from standalone, so the
+  Dockerfile's manual COPY of each is load-bearing, not defensive.
+- The assembled runtime layout serves `/` 200, `/recovery` 200, the agent and
+  brand SVGs 200, and its CSS chunks 200; the frontend HEALTHCHECK command,
+  run verbatim, exits 0. `/api/recovery/queue` times out there, which is the
+  correct result: `backend` resolves only inside the compose network.
+
+**Compose v2.24+ is required** and README now says so: the backend's
+`env_file: [{path, required: false}]` long form is what lets a clean clone
+start with no `backend/.env`, and older Compose cannot parse it.
+
+Still unprovable without Docker: that `python:3.12-slim` and `node:22-alpine`
+pull, that the layer cache behaves, that container DNS resolves `backend`, and
+that `depends_on` sequences correctly.
+
 ### The one thing left that cannot be done from here
 
 **Step 8 — `docker compose up` has still never run.** Docker is not installed
