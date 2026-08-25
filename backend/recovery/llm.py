@@ -42,9 +42,22 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-MODEL = "gemini-flash-latest"
+# Which model, resolved once at import and never changed during a run, so the
+# static-parameter rule holds. Overridable because model availability is per
+# key, not universal: "gemini-flash-latest" returned 429 on the demo key while
+# other aliases had quota, and several 2.5 names now 404 with "no longer
+# available to new users". Run `python -m backend.tools.gemini_probe` to see
+# what a given key can actually call.
+MODEL = os.environ.get("GEMINI_MODEL", "").strip() or "gemini-flash-lite-latest"
 TEMPERATURE = 0.0
-MAX_OUTPUT_TOKENS = 900
+# Generous because the current Gemini models are REASONING models: they spend
+# an internal thinking budget before emitting anything, and that budget counts
+# against this ceiling. At 900 a classifier call spent ~860 tokens thinking,
+# emitted 33, and hit MAX_TOKENS mid-sentence -- which surfaced as
+# "unparseable response" and a silent fall back to templates. The visible JSON
+# these agents produce is a few hundred tokens at most; the headroom is for
+# the thinking, not the answer.
+MAX_OUTPUT_TOKENS = 8192
 
 
 def mocked() -> bool:
