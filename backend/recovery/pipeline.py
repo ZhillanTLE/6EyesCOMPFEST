@@ -20,6 +20,8 @@ from typing import Callable, List, Optional, Tuple
 from . import (classifier_agent, gate, hold_manager, ladder, llm, mcp_tools,
                notification_curator, outcomes, providers, repository,
                searcher_agent, tiers)
+import logging
+
 from .schemas import (
     Classification, HoldState, HoldStatus, RecoveryResult, StageTiming,
 )
@@ -38,6 +40,9 @@ class _Clock:
         measured = int((time.perf_counter() - start) * 1000)
         self.timings.append(StageTiming(name, self.captured.get(name, measured)))
         return result
+
+
+logger = logging.getLogger(__name__)
 
 
 def _live_flight_price(row: dict) -> int:
@@ -72,6 +77,12 @@ def run(traveler_id: str) -> RecoveryResult:
     llm.require_configured()
 
     history, row = repository.get(traveler_id)
+    # Narrated at INFO so a demo can put the terminal on screen beside the
+    # console. Console output only -- nothing is persisted.
+    logger.info("[pipeline] === %s (%s) ===", history.name, traveler_id)
+    logger.info("[pipeline] prices=%s inference=%s",
+                "replayed capture" if providers.use_fixtures() else "live providers",
+                "gemini" if llm.available() else llm.why_unavailable())
     cart_id = row["cart"]["cartId"]
     fixture_mode = providers.use_fixtures()
     captured = providers.fixtures().get("timings_ms", {}).get(cart_id) if fixture_mode else None
@@ -179,6 +190,16 @@ def run(traveler_id: str) -> RecoveryResult:
             for a in attempts)
 
     decision = outcomes.decide(gate_result, original_total, attempts, alternative_total)
+    logger.info("[pipeline] gate %s (share=%s gap=%s) -> tier %s, threshold %s",
+                "OPENED" if gate_result and gate_result.opened else "CLOSED",
+                getattr(gate_result, "campaign_share", None),
+                getattr(gate_result, "budget_gap", None),
+                classification.tier, threshold)
+    for a in decision.attempts:
+        logger.info("[pipeline]   rung %s %-42s delta=%s %s",
+                    a.index, a.label, a.delta, "CLEARED" if a.cleared else "below threshold")
+    logger.info("[pipeline] OUTCOME = %s | saving %s | margin conceded %s",
+                decision.outcome, decision.saving_idr, decision.margin_conceded_idr)
 
     # Hold eligibility, read-only. There is no create_hold anywhere in this
     # package: placing a hold is a real write against airline inventory.

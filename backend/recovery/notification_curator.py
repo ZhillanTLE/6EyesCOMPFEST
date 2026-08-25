@@ -97,7 +97,7 @@ def curate(cart, traveler_name: str, decision: Decision, hold: HoldStatus,
                         if decision.outcome == Outcome.ALTERNATIVE else None),
     }
 
-    result = llm.complete_json(SYSTEM, payload)
+    result = llm.complete_json(SYSTEM, payload, label="notifier")
     if not result:
         return NotificationDraft(
             subject=fallback.subject, body_paragraphs=fallback.body_paragraphs,

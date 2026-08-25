@@ -149,7 +149,7 @@ def classify(history, cart, tier_prior: str, tier_source: str,
         "gateOpened": None if gate_result is None else gate_result.opened,
     }
 
-    result = llm.complete_json(SYSTEM, payload)
+    result = llm.complete_json(SYSTEM, payload, label="classifier")
 
     if result:
         proposed = str(result.get("tier", "")).strip()

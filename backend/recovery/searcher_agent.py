@@ -93,7 +93,7 @@ def assess(cart, tier: str, threshold: float,
         } for a in priced],
     }
 
-    result = llm.complete_json(SYSTEM, payload)
+    result = llm.complete_json(SYSTEM, payload, label="searcher")
     if not result:
         return {}
 

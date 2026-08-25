@@ -38,6 +38,7 @@ import json
 import logging
 import os
 import re
+import time
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -58,6 +59,9 @@ TEMPERATURE = 0.0
 # these agents produce is a few hundred tokens at most; the headroom is for
 # the thinking, not the answer.
 MAX_OUTPUT_TOKENS = 8192
+
+# Seconds to wait before the single retry. Free-tier limits are per-minute.
+RETRY_BACKOFF_SECONDS = 3.0
 
 
 def mocked() -> bool:
@@ -153,11 +157,17 @@ def _extract_json(raw: str) -> Optional[dict]:
         return None
 
 
-def complete_json(system: str, payload: dict) -> Optional[dict]:
+def complete_json(system: str, payload: dict, label: str = "llm") -> Optional[dict]:
     """
     One structured-output call. Returns parsed JSON, or None on any failure.
 
     Callers must treat None as normal, not exceptional.
+
+    `label` names the calling stage in the log. The call is narrated at INFO --
+    model, wall clock, token usage -- so a demo can show the terminal and let
+    someone watch inference happen rather than take the console's word for it.
+    This is console output only: nothing is written to disk, so it stays
+    observability rather than the automated data logging the scope rule bans.
     """
     if not available():
         return None
@@ -177,13 +187,36 @@ def complete_json(system: str, payload: dict) -> Optional[dict]:
 
         for attempt in (1, 2):
             try:
+                logger.info("[%s] calling %s (attempt %s)", label, MODEL, attempt)
+                started = time.monotonic()
                 response = model.generate_content(prompt, generation_config=config)
+                elapsed = time.monotonic() - started
                 parsed = _extract_json(getattr(response, "text", "") or "")
                 if parsed is not None:
+                    usage = getattr(response, "usage_metadata", None)
+                    logger.info(
+                        "[%s] %s replied in %.2fs (%s prompt + %s output = %s tokens)",
+                        label, MODEL, elapsed,
+                        getattr(usage, "prompt_token_count", "?"),
+                        getattr(usage, "candidates_token_count", "?"),
+                        getattr(usage, "total_token_count", "?"))
+                    for key, value in parsed.items():
+                        preview = str(value)
+                        if len(preview) > 160:
+                            preview = preview[:157] + "..."
+                        logger.info("[%s]   %s = %s", label, key, preview)
                     return parsed
                 logger.warning("[llm] unparseable response on attempt %s", attempt)
             except Exception as exc:
-                logger.warning("[llm] call failed on attempt %s: %s", attempt, exc)
+                # One short backoff before the retry. Free-tier quota is
+                # per-minute, so a rate-limited call retried immediately is
+                # certain to fail again; a couple of seconds is often enough.
+                # Synchronous and bounded -- two attempts, then the caller's
+                # deterministic fallback. Never a queue.
+                brief = str(exc).strip().splitlines()[0][:120]
+                logger.warning("[llm] %s attempt %s failed: %s", label, attempt, brief)
+                if attempt == 1:
+                    time.sleep(RETRY_BACKOFF_SECONDS)
         return None
     except Exception as exc:
         logger.warning("[llm] setup failed: %s", exc)
