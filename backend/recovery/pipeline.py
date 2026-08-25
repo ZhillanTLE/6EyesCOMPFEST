@@ -136,6 +136,9 @@ def run(traveler_id: str) -> RecoveryResult:
     tier, tier_source, gate_result = clock.stage("classifier", _classify)
 
     if error is not None:
+        logger.info("[pipeline] stage 1/3 Classifier (deterministic tier only)")
+        logger.info("[pipeline] stages 2/3 and 3/3 SKIPPED: %s", error)
+        logger.info("[pipeline] OUTCOME = error | nothing drafted, nothing sent")
         # The classifier completed; the searcher cannot run. Reported plainly
         # rather than dressed up as a decision the pipeline did not make.
         clock.timings.append(StageTiming("searcher", (captured or {}).get("searcher", 0)))
@@ -168,12 +171,15 @@ def run(traveler_id: str) -> RecoveryResult:
 
     # The Classifier may move the tier one step off the percentile prior with a
     # stated reason; the prior is recorded either way so the move is arguable.
+    logger.info("[pipeline] stage 1/3 Classifier")
     classification = classifier_agent.classify(
         history, cart, tier_prior=tier, tier_source=tier_source,
         gate_result=gate_result, reference_spend=repository.reference_spend())
     threshold = classification.threshold
 
     # ── Stage 2: Searcher ───────────────────────────────────────────────────
+    logger.info("[pipeline] stage 2/3 Searcher")
+
     def _search():
         if not gate_result.opened:
             return ()
@@ -207,6 +213,8 @@ def run(traveler_id: str) -> RecoveryResult:
 
     # ── Stage 3: Notification Curator ───────────────────────────────────────
     alt = (providers.fixtures().get("alternatives") or {}).get(cart_id) or {}
+
+    logger.info("[pipeline] stage 3/3 Notification Curator")
 
     def _draft():
         return notification_curator.curate(

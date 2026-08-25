@@ -69,6 +69,11 @@ def assess(cart, tier: str, threshold: float,
     """
     priced = [a for a in attempts if a.available]
     if not priced:
+        # Not a failure. The gate closed, so the ladder never ran and there is
+        # nothing to judge comparability on. Said out loud because silence here
+        # looks like a missing agent.
+        logger.info("[searcher] no call: the gate closed, so no ladder "
+                    "attempt exists to assess")
         return {}
 
     payload = {

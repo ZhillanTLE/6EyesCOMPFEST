@@ -43,6 +43,32 @@ load_dotenv(override=False)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
+class _DropHealthPolls(logging.Filter):
+    """
+    Keep the container HEALTHCHECK out of the log.
+
+    Docker polls /api/recovery/health every 10 seconds. That poll is what makes
+    `depends_on: service_healthy` work, so it must keep running -- but printing
+    every one of them scrolls the pipeline's reasoning off screen during a demo.
+    The check still happens; only its access-log line is dropped. A failing
+    check still surfaces, because Docker reports the container unhealthy and
+    the handler's own errors log normally.
+    """
+
+    def filter(self, record: logging.LogRecord) -> bool:
+        return "/api/recovery/health" not in record.getMessage()
+
+
+logging.getLogger("werkzeug").addFilter(_DropHealthPolls())
+
+# The Firestore and Redis fallback notices belong to the older plan-trip app.
+# The recovery pipeline touches neither -- it reads a local seed file and holds
+# no state -- so on a Windfall demo they read as broken setup rather than as
+# the informational lines they are. Errors from either still print.
+for _legacy in ("backend.firebase_state", "backend.redis_cache"):
+    logging.getLogger(_legacy).setLevel(logging.ERROR)
+
 # ---------------------------------------------------------------------------
 # Flask + CORS
 # ---------------------------------------------------------------------------
