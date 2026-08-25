@@ -117,17 +117,47 @@ class TestInferenceGating(unittest.TestCase):
 
 
 class TestClassifierAuthority(unittest.TestCase):
-    """The agent reasons a tier; it does not get to replace the calibration."""
+    """The agent writes the evidence; it does not touch the calibration."""
 
-    def test_one_step_moves_are_allowed(self):
-        self.assertTrue(classifier_agent._one_step_apart("Value", "Comfort"))
-        self.assertTrue(classifier_agent._one_step_apart("Comfort", "Premium"))
-        self.assertTrue(classifier_agent._one_step_apart("Premium", "Premium"))
+    def test_the_tier_is_always_the_percentile_prior(self):
+        """
+        The model may not move the tier, in either direction.
 
-    def test_two_step_jumps_are_not(self):
-        """A model able to jump Value to Premium could quietly replace the
-        percentile calibration with its own judgement."""
-        self.assertFalse(classifier_agent._one_step_apart("Value", "Premium"))
+        It used to be allowed one step with a stated reason, and it used the
+        budget gap and campaign share to justify moves -- the two GATE axes,
+        neither of which measures habitual spend. Since the tier sets the
+        threshold a rung is judged against, that could flip an outcome on
+        reasoning that should never have applied.
+        """
+        for prior in ("Value", "Comfort", "Premium"):
+            with self.subTest(prior=prior):
+                history, row = repository.get("wf-02")
+                cart = repository.build_cart(row)
+                result = classifier_agent.classify(
+                    history, cart, tier_prior=prior, tier_source="history",
+                    gate_result=gate.evaluate(history, cart.total_idr),
+                    reference_spend=repository.reference_spend())
+                self.assertEqual(result.tier, prior)
+                self.assertEqual(result.tier_prior, prior)
+                self.assertIsNone(result.override_reason)
+
+    def test_a_volunteered_tier_is_discarded(self):
+        """Prompts drift. If a model answers with a tier anyway, it is ignored."""
+        history, row = repository.get("wf-02")
+        cart = repository.build_cart(row)
+        original = classifier_agent.llm.complete_json
+        classifier_agent.llm.complete_json = lambda *a, **k: {
+            "tier": "Premium", "reasoning": ["Line one.", "Line two."]}
+        try:
+            result = classifier_agent.classify(
+                history, cart, tier_prior="Value", tier_source="history",
+                gate_result=gate.evaluate(history, cart.total_idr),
+                reference_spend=repository.reference_spend())
+        finally:
+            classifier_agent.llm.complete_json = original
+        self.assertEqual(result.tier, "Value")       # the prior, not Premium
+        self.assertIsNone(result.override_reason)
+        self.assertEqual(len(result.reasoning), 2)   # its prose is still used
 
     def test_falls_back_to_the_prior_when_inference_is_unavailable(self):
         history, row = repository.get("wf-02")

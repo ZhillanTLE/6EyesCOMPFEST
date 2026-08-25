@@ -8,20 +8,24 @@ percentile cannot -- spend trajectory, campaign share, the cart in front of it.
 
 WHAT THE AGENT MAY AND MAY NOT DO.
 
-  May: confirm or move the tier ONE step off the deterministic percentile
-       prior, with a stated reason; write the evidence lines.
-  May not: choose an outcome, compute a saving, or decide whether the gate
-       opens. Those are arithmetic and they live in gate.py and ladder.py,
-       where they are reproducible and testable.
+  May: write the evidence lines behind the classification.
+  May not: change the tier, choose an outcome, compute a saving, or decide
+       whether the gate opens. Those are arithmetic and they live in tiers.py,
+       gate.py and ladder.py, where they are reproducible and testable.
 
-Both tiers are recorded -- `tier_prior` and `tier` -- so a move is visible and
-arguable. Without that split, "reasoning rather than table lookup" is an
-unfalsifiable claim.
+THE TIER IS NOT THE MODEL'S TO MOVE. An earlier revision let it shift the tier
+one step off the percentile prior with a stated reason. In practice it used the
+wrong evidence to do so -- justifying a move with the budget gap and the
+campaign share, which are the two GATE axes, not measures of how a traveler
+habitually spends. That double-counts one signal into two decisions.
 
-A one-step cap is not timidity. The percentile prior is calibrated against the
-seed distribution; a model that could jump Value to Premium could quietly
-replace the calibration with its own judgement, and the frozen-parameter rule
-exists precisely to stop that.
+It also had teeth: moving Value to Comfort raises the threshold from 5% to 10%,
+so a rung that would have cleared no longer does. The outcome could flip on
+reasoning that should never have applied. The tier is now the percentile result
+and nothing else, so the threshold a cart is judged against is reproducible
+from the seed alone.
+
+`tier_prior` and `tier` are still both recorded; they are now always equal.
 """
 from __future__ import annotations
 
@@ -37,18 +41,19 @@ logger = logging.getLogger(__name__)
 SYSTEM = """You are the Classifier stage of Windfall, an abandoned-cart recovery
 pipeline for an Indonesian online travel agency.
 
-You are given one traveler's booking history, the cart they abandoned, and a
-deterministic tier prior computed from where their average spend falls in the
-population distribution.
+You are given one traveler's booking history, the cart they abandoned, and the
+tier computed from where their average spend falls in the population
+distribution.
 
-Your job:
-1. Decide the spending tier: Value, Comfort, or Premium.
-2. Write short evidence lines citing the actual numbers you were given.
+Your job is to write short evidence lines citing the actual numbers you were
+given. You do NOT choose the tier: it is already decided, deterministically,
+and is shown to you only as context for your evidence.
 
 Rules you must follow:
-- You may keep the prior, or move it exactly ONE step (Value<->Comfort,
-  Comfort<->Premium). You may never skip a step. If you move it, say why in
-  terms of a signal the percentile alone cannot see.
+- Never propose, change, or argue with the tier. Treat it as settled fact.
+- The tier describes how this traveler HABITUALLY spends. It is not about this
+  cart. Never justify it using the budget gap or the campaign share -- those
+  are separate signals that a later stage weighs on their own.
 - Evidence lines are for an analyst, in English, and must cite real figures
   from the input. Never invent a number.
 - Line count matters. Two lines when both the price-sensitivity signal and the
@@ -59,7 +64,7 @@ Rules you must follow:
 - You do not choose what happens to the cart. Another stage decides that.
 
 Respond with strict JSON:
-{"tier": "Value|Comfort|Premium", "reasoning": ["...", "..."], "overrideReason": null}
+{"reasoning": ["...", "..."]}
 """
 
 
@@ -152,22 +157,18 @@ def classify(history, cart, tier_prior: str, tier_source: str,
     result = llm.complete_json(SYSTEM, payload, label="classifier")
 
     if result:
-        proposed = str(result.get("tier", "")).strip()
         lines = [str(x).strip() for x in (result.get("reasoning") or []) if str(x).strip()]
-        if proposed in config.TAU and lines:
-            if _one_step_apart(tier_prior, proposed):
-                tier = proposed
-                if proposed != tier_prior:
-                    override = (str(result.get("overrideReason") or "").strip()
-                                or "Agent moved the tier one step off the percentile prior.")
-            else:
-                # More than one step. Keep the prior and record the refusal
-                # rather than silently accepting or silently discarding it.
-                logger.warning("[classifier] rejected %s -> %s (more than one step)",
-                               tier_prior, proposed)
-                override = ("Agent proposed {} but that is more than one step from "
-                            "the {} prior; the prior stands.".format(proposed, tier_prior))
+        if lines:
             reasoning = lines[:3]
+            # The tier is the percentile result, full stop. If a model still
+            # volunteers one -- prompts drift, and this one used to ask for it
+            # -- the value is discarded rather than applied, and the discard is
+            # logged so the refusal is visible instead of silent.
+            volunteered = str(result.get("tier", "")).strip()
+            if volunteered and volunteered != tier_prior:
+                logger.warning(
+                    "[classifier] ignored a volunteered tier %s; the percentile "
+                    "prior %s stands", volunteered, tier_prior)
         else:
             result = None
 

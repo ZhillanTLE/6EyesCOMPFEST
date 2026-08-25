@@ -157,6 +157,23 @@ showing" must remain a reachable outcome or restraint stops being real.
 **Never name the no-discount outcome `hold`.** It collides with Hold Order, the
 airline price-freeze. Use `reminder`.
 
+### The Classifier may not move the tier
+
+The tier is the deterministic percentile result and nothing else. An earlier
+revision let the Classifier shift it one step off the prior with a stated
+reason; that permission is **withdrawn**.
+
+It justified moves with the budget gap and the campaign share — the two *gate*
+axes, neither of which measures how a traveler habitually spends — so one
+signal was counted into two separate decisions. And the move had consequences:
+Value to Comfort lifts the threshold from 5% to 10%, so a rung that would have
+cleared no longer does, flipping an outcome on reasoning that should not have
+applied.
+
+The agent still writes the evidence lines. If a model volunteers a tier anyway,
+the value is discarded and the discard is logged. `tierPrior` and `tier` are
+both still reported and are now always equal.
+
 ### Cold start
 
 `campaignShare` is **null** (never fabricated) when there's no history. The
