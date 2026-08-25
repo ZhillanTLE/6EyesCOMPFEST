@@ -19,8 +19,13 @@ deliberately sending no discount to travelers whom price was never blocking.
 ## Quick start
 
 ```bash
+git clone https://github.com/ZhillanTLE/6EyesCOMPFEST.git
+cd 6EyesCOMPFEST
 docker compose up --build
 ```
+
+The first build takes a few minutes. It is finished when the log shows the
+backend listening on `:8000` and Next.js ready on `:3000`.
 
 Needs **Docker Compose v2.24 or newer** (`docker compose version`). The backend
 service declares its env file with the long form:
@@ -44,16 +49,43 @@ console labels replay mode visibly in the header.
 
 To stop: `Ctrl-C`, then `docker compose down`.
 
-### Running against live APIs
+### Three ways to run it
+
+Prices and reasoning are **separate axes**, so they can be turned on
+independently. That matters here: replaying prices needs no account at all,
+while live prices need a Duffel signup and a paid RapidAPI subscription.
+
+| Mode | Env | Keys needed | What is real |
+|---|---|---|---|
+| **Replay** (default) | `WINDFALL_FIXTURES=1` | none | nothing — captured prices, captured reasoning. Fully offline. |
+| **Live agents** | `WINDFALL_FIXTURES=1` + `WINDFALL_LIVE_INFERENCE=1` | `GEMINI_API_KEY` | **the three agents actually call Gemini**; prices still replay |
+| **Fully live** | `WINDFALL_FIXTURES=0` | `GEMINI_API_KEY` + `DUFFEL_API_KEY` + `RAPIDAPI_KEY` | prices re-queried from Duffel and RapidAPI, agents call Gemini |
+
+**Live agents is the interesting middle setting.** One free Gemini key is
+enough to watch real inference run over the seeded carts, with no travel-API
+credentials at all:
 
 ```bash
-cp backend/.env.example backend/.env     # then fill in the keys you have
+cp backend/.env.example backend/.env     # then set GEMINI_API_KEY
+WINDFALL_LIVE_INFERENCE=1 docker compose up --build
+```
+
+Fully live calls Duffel for flights and RapidAPI for hotels. Prices — and
+therefore outcomes — will differ from the captured run, which is the point:
+the paper promises bookable prices rather than a simulation.
+
+```bash
 WINDFALL_FIXTURES=0 docker compose up --build
 ```
 
-Live mode calls Duffel for flights and RapidAPI for hotels. Prices — and
-therefore outcomes — will differ from the captured run, which is the point:
-the paper promises bookable prices rather than a simulation.
+> **If a run returns HTTP 503, this is why.** Any mode that enables live
+> reasoning refuses to start without `GEMINI_API_KEY`, rather than filling the
+> trace with deterministic templates that look exactly like model output in a
+> screenshot. The error message names the three ways out. It is a refusal, not
+> a crash.
+
+Whichever mode is active, the console header says so — the run is labelled
+with where its prices came from and where its reasoning came from, separately.
 
 ### Enabling email
 
@@ -168,24 +200,44 @@ put six emails in anyone's inbox.
 
 ---
 
-## Development without Docker
+## Running without Docker
+
+Needs **Python 3.11+** and **Node 20+** (developed on Python 3.13 and Node 24).
+Run both commands from the repository root, in two shells.
 
 ```bash
-# backend
+# shell 1 — backend on :8000
 pip install -r backend/requirements.txt
 WINDFALL_FIXTURES=1 AUTH_DISABLED=true PORT=8000 python -m backend.app
 
-# frontend, in another shell
+# shell 2 — frontend on :3000
 cd frontend && npm install && npm run dev
+```
+
+On **Windows PowerShell** the env-var prefix above is a syntax error. Set them
+first instead:
+
+```powershell
+# shell 1 — backend on :8000
+pip install -r backend/requirements.txt
+$env:WINDFALL_FIXTURES = "1"; $env:AUTH_DISABLED = "true"; $env:PORT = "8000"
+python -m backend.app
+
+# shell 2 — frontend on :3000
+cd frontend; npm install; npm run dev
 ```
 
 ### Checks
 
 ```bash
-python -m unittest discover -s backend/tests -t .   # 117 tests, stdlib only
+python -m unittest discover -s backend/tests -t .   # 123 tests, stdlib only
 python scripts/scope_check.py                       # competition scope gate
 cd frontend && npm run build
 ```
+
+The test suite needs no keys, no network and no running server; it neutralises
+`backend/.env` so a real `GEMINI_API_KEY` on the machine cannot turn a unit
+test into a billed API call.
 
 `scope_check.py` is a real pre-commit gate, not documentation: it fails the
 build on a background thread, a write path in a runtime module, a second
